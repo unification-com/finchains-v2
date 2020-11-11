@@ -1,0 +1,6 @@
+@media (min-width: 525px) {
+    .dataTable {
+        overflow-x: hidden;
+        overflow-y: hidden;
+    }
+}

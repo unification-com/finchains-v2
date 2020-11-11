@@ -1,0 +1,71 @@
+.powered_by {
+    position: absolute;
+    bottom: 0px;
+    padding-bottom: 10px;
+}
+
+@media screen and (max-width: 991px) {
+    .toggle_button {
+        position: absolute;
+        top: 60px;
+        left: 5px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        width: 1.5rem;
+        height: 1.5rem;
+        background: transparent;
+        border: none;
+        outline:none;
+        cursor: pointer;
+        padding: 0;
+        z-index: 1033;
+    }
+
+    .toggle_button:focus {
+        outline: none;
+        border: none;
+    }
+
+    .toggle_button div {
+        width: 1.2rem;
+        height: 0.25rem;
+        background: white;
+        border-radius: 10px;
+        transition: all 0.3s linear;
+        position: relative;
+        transform-origin: 1px;
+    }
+
+    .close_button div:first-child {
+        background: black;
+        transform: rotate(45deg);
+    }
+
+    .close_button div:nth-child(2) {
+        display: none;
+    }
+
+    .close_button div:nth-child(3) {
+        background: black;
+        transform: rotate(-45deg);
+    }
+
+    .hide_button {
+        display: none;
+    }
+
+    .sidebar_open {
+        -webkit-transform: translate3d(260px, 0, 0);
+        -moz-transform: translate3d(260px, 0, 0);
+        -o-transform: translate3d(260px, 0, 0);
+        -ms-transform: translate3d(260px, 0, 0);
+        transform: translate3d(260px, 0, 0);
+    }
+}
+
+@media (min-width: 991px) {
+    .toggle_button {
+        display: none;
+    }
+}
