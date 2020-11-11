@@ -34,20 +34,20 @@ const getOrAddDiscrepancy = async (
 }
 
 const processDiscrepancy = async (event) => {
-  const height = event.blockNumber
-  const txHash = event.transactionHash
-  const pairName = event.returnValues.pair
-  const oracle1 = event.returnValues.oracle1
-  const price1 = event.returnValues.price1
-  const timestamp1 = event.returnValues.timestamp1
-  const exchange1 = event.returnValues.exchange1
-  const oracle2 = event.returnValues.oracle2
-  const price2 = event.returnValues.price2
-  const timestamp2 = event.returnValues.timestamp2
-  const exchange2 = event.returnValues.exchange2
-  const threshold = event.returnValues.threshold
-
   try {
+    const height = event.blockNumber
+    const txHash = event.transactionHash
+    const pairName = event.returnValues.pair
+    const oracle1 = event.returnValues.oracle1
+    const price1 = event.returnValues.price1
+    const timestamp1 = event.returnValues.timestamp1
+    const exchange1 = event.returnValues.exchange1
+    const oracle2 = event.returnValues.oracle2
+    const price2 = event.returnValues.price2
+    const timestamp2 = event.returnValues.timestamp2
+    const exchange2 = event.returnValues.exchange2
+    const threshold = event.returnValues.threshold
+
     const [pair, pairCreated] = await getOrAddPair(pairName)
     if (pairCreated) {
       console.log("added new pair", pairName, pair.id)
@@ -98,6 +98,7 @@ const processDiscrepancy = async (event) => {
     }
   } catch (err) {
     console.error(err)
+    console.error(event)
   }
 }
 

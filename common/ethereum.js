@@ -89,10 +89,10 @@ const watchEvent = async (eventName, fromBlock = 0, cb = function () {}) => {
       console.log("newBlockHeaders connected", subscriptionId)
     })
     .on("data", function newBlockHeadersRecieved(blockHeader) {
-      cb(blockHeader, null)
+      console.log("got block", blockHeader.number)
     })
     .on("error", function newBlockHeadersError(error) {
-      cb(null, error)
+      console.error(error)
     })
 
   watchContract.events[eventName]({
