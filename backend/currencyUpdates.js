@@ -18,16 +18,16 @@ const getOrAddCurrencyUpdate = async (exchangeOracleId, pairId, txHash, price, p
 }
 
 const processCurrencyUpdate = async (event) => {
-  const height = event.blockNumber
-  const txHash = event.transactionHash
-  const oracleAddress = event.returnValues.from
-  const pairName = event.returnValues.pair
-  const price = event.returnValues.price
-  const priceRaw = event.returnValues.priceRaw
-  const timestamp = event.returnValues.timestamp
-  const exchange = event.returnValues.exchange
-
   try {
+    const height = event.blockNumber
+    const txHash = event.transactionHash
+    const oracleAddress = event.returnValues.from
+    const pairName = event.returnValues.pair
+    const price = event.returnValues.price
+    const priceRaw = event.returnValues.priceRaw
+    const timestamp = event.returnValues.timestamp
+    const exchange = event.returnValues.exchange
+
     const [pair, pairCreated] = await getOrAddPair(pairName)
     if (pairCreated) {
       console.log("added new pair", pairName, pair.id)
@@ -57,6 +57,7 @@ const processCurrencyUpdate = async (event) => {
     }
   } catch (err) {
     console.error(err)
+    console.error(event)
   }
 }
 

@@ -135,7 +135,7 @@ contract CryptoExchanges {
         }
     }
 
-    function compareCurrencies(string memory _pair, bytes32 pairHash, address _o1) public {
+    function compareCurrencies(string memory _pair, bytes32 pairHash, address _o1) private isAuthorized() {
         for (uint i = 0; i < numSources; i++) {
             if (errorMargins(pairHash, _o1, oracleArr[i])) {
                 emit Discrepancy(

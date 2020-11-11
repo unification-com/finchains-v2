@@ -1,3 +1,8 @@
+require("dotenv").config()
+const HDWalletProvider = require("@truffle/hdwallet-provider")
+
+const { CONTRACT_DEPLOY_PKEY, WEB3_PROVIDER_HTTP } = process.env
+
 module.exports = {
   networks: {
     development: {
@@ -9,12 +14,9 @@ module.exports = {
       networkId: "*",
     },
     finchains: {
-      protocol: "http",
-      host: "35.194.35.234",
-      port: 8545,
-      gas: 5000000,
-      gasPrice: 5e9,
-      networkId: "867",
+      provider: () => new HDWalletProvider([CONTRACT_DEPLOY_PKEY], WEB3_PROVIDER_HTTP, 0, 1),
+      networkId: 867,
+      gasPrice: 10e9,
     },
   },
 }
