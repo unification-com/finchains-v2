@@ -32,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
       exchangeOracle2Id: DataTypes.INTEGER,
       price1: DataTypes.STRING,
       price2: DataTypes.STRING,
-      diff: DataTypes.BIGINT,
+      diff: DataTypes.STRING,
       timestamp1: DataTypes.INTEGER,
       timestamp2: DataTypes.INTEGER,
       txHash: DataTypes.STRING,
