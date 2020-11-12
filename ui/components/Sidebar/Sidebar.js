@@ -18,7 +18,6 @@ export default class Sidebar extends React.Component {
 
   toggleSidebar() {
     this.setState({ sidebarOpened: !this.state.sidebarOpened })
-    console.log(this.state.sidebarOpened)
   }
 
   render() {
@@ -28,7 +27,15 @@ export default class Sidebar extends React.Component {
     const opennedClass = sidebarOpened ? "sidebar_open" : "sidebar_closed"
     const whichButton = sidebarOpened ? styles.close_button : ""
 
-    const logoImg = null
+    const logoImg = (
+      <Link href={"/"}>
+        <a>
+          <div className="logo-img">
+            <img src="/img/finchains_logo3.png" alt="Finchains" />
+          </div>
+        </a>
+      </Link>
+    )
 
     const logoText = null
 
