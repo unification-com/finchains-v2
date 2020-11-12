@@ -7,11 +7,12 @@ const basename = path.basename(__filename)
 
 const db = {}
 
-const { DB_HOST, DB_NAME, DB_USER, DB_PASS } = process.env
+const { DB_HOST, DB_NAME, DB_USER, DB_PASS, LOGGING } = process.env
 
 const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASS, {
   host: DB_HOST,
   dialect: "postgres",
+  logging: parseInt(LOGGING, 10) === 1 ? console.log : false,
 })
 
 fs.readdirSync(__dirname)
