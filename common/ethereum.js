@@ -43,6 +43,20 @@ const setThreshold = async (pair, threshold) => {
     })
 }
 
+const getLastSubmitTime = async (pair, oracleAddress) => {
+  const web3 = new Web3(WEB3_PROVIDER_HTTP)
+  const contract = new web3.eth.Contract(JSON.parse(CONTRACT_ABI), CONTRACT_ADDRESS)
+  return new Promise((resolve, reject) => {
+    contract.methods.getLastSubmitTimeByAddress(pair, oracleAddress).call(function (error, result) {
+      if (!error) {
+        resolve(result)
+      } else {
+        reject(error)
+      }
+    })
+  })
+}
+
 const submitPrice = async (pair, priceInt, priceRaw, timestamp) => {
   const provider = new HDWalletProvider(WALLET_PKEY, WEB3_PROVIDER_HTTP)
   const web3 = new Web3(provider)
@@ -139,6 +153,7 @@ const getPastEvents = async (fromBlock, toBlock, eventName, cb = function () {})
 module.exports = {
   addOracle,
   getBlockNumber,
+  getLastSubmitTime,
   getPastEvents,
   setThreshold,
   submitPrice,

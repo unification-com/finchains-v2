@@ -20,8 +20,7 @@ export default class PairSelect extends React.Component {
     }
   }
 
-  async fetchTargets() {
-    const { currentBase } = this.state
+  async fetchTargets(currentBase) {
     const targetsApiUrl = `/api/pairs/${currentBase}`
     const targets = ["Select..."]
     const targetsDataRes = await fetch(targetsApiUrl)
@@ -35,10 +34,10 @@ export default class PairSelect extends React.Component {
     this.setState({ targets, currentTarget: targets[0] })
   }
 
-  handleBaseChange(event) {
+  async handleBaseChange(event) {
     const currentBase = event.target.value
-    this.setState({ currentBase, currentTarget: ["Loading..."] })
-    this.fetchTargets()
+    this.setState({ currentBase, targets: ["Loading..."] })
+    await this.fetchTargets(currentBase)
   }
 
   handleTargetChange(event) {

@@ -8,6 +8,8 @@ const exchangeLookup = (exchange) => {
       return "Huobi Global"
     case "kucoin":
       return "KuCoin"
+    case "crypto_com":
+      return "Crypto.com"
     default:
       return exchange.charAt(0).toUpperCase() + exchange.slice(1)
   }
