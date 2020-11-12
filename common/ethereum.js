@@ -20,10 +20,10 @@ const addOracle = async (exchange, oracleAddress) => {
     .addExchange(oracleAddress, exchange)
     .send({ from: WALLET_ADDRESS })
     .on("transactionHash", function (txHash) {
-      console.log("Tx sent", txHash)
+      console.log(new Date(), "Tx sent", txHash)
     })
     .on("error", function (err) {
-      console.log("Failed", err)
+      console.log(new Date(), "Failed", err)
     })
 }
 
@@ -36,10 +36,10 @@ const setThreshold = async (pair, threshold) => {
     .setThreshold(pair, threshold)
     .send({ from: WALLET_ADDRESS })
     .on("transactionHash", function (txHash) {
-      console.log("Tx sent", txHash)
+      console.log(new Date(), "Tx sent", txHash)
     })
     .on("error", function (err) {
-      console.log("Failed", err)
+      console.log(new Date(), "Failed", err)
     })
 }
 
@@ -48,26 +48,28 @@ const submitPrice = async (pair, priceInt, priceRaw, timestamp) => {
   const web3 = new Web3(provider)
   const contract = new web3.eth.Contract(JSON.parse(CONTRACT_ABI), CONTRACT_ADDRESS)
 
-  console.log("submit", pair, priceRaw, priceInt, "at", timestamp)
-  await contract.methods
-    .updateCurrency(pair, priceInt, priceRaw, timestamp)
-    .send({ from: WALLET_ADDRESS })
-    .on("transactionHash", function (txHash) {
-      console.log("Tx sent", txHash)
-    })
-    .on("error", function (err) {
-      console.log("Failed", err)
-    })
+  // wrap in Promise and return
+  return new Promise((resolve, reject) => {
+    contract.methods
+      .updateCurrency(pair, priceInt, priceRaw, timestamp)
+      .send({ from: WALLET_ADDRESS })
+      .on("transactionHash", function (txHash) {
+        resolve(txHash)
+      })
+      .on("error", function (err) {
+        reject(err)
+      })
+  })
 }
 
 const watchBlocks = async (cb = function () {}) => {
   const web3Ws = new Web3(WEB3_PROVIDER_WS)
 
-  console.log("running watcher")
+  console.log(new Date(), "running watcher")
   web3Ws.eth
     .subscribe("newBlockHeaders")
     .on("connected", function newBlockHeadersConnected(subscriptionId) {
-      console.log("newBlockHeaders connected", subscriptionId)
+      console.log(new Date(), "newBlockHeaders connected", subscriptionId)
     })
     .on("data", function newBlockHeadersRecieved(blockHeader) {
       cb(blockHeader, null)
@@ -78,20 +80,28 @@ const watchBlocks = async (cb = function () {}) => {
 }
 
 const watchEvent = async (eventName, fromBlock = 0, cb = function () {}) => {
-  const web3Ws = new Web3(WEB3_PROVIDER_WS)
+  const web3Ws = new Web3(
+    new Web3.providers.WebsocketProvider(WEB3_PROVIDER_WS, {
+      clientOptions: {
+        maxReceivedFrameSize: 100000000,
+        maxReceivedMessageSize: 100000000,
+      },
+    }),
+  )
   const watchContract = await new web3Ws.eth.Contract(JSON.parse(CONTRACT_ABI), CONTRACT_ADDRESS)
 
   // keep ws connection alive
-  console.log("running watcher")
+  console.log(new Date(), "running watcher")
   web3Ws.eth
     .subscribe("newBlockHeaders")
     .on("connected", function newBlockHeadersConnected(subscriptionId) {
-      console.log("newBlockHeaders connected", subscriptionId)
+      console.log(new Date(), "newBlockHeaders connected", subscriptionId)
     })
     .on("data", function newBlockHeadersRecieved(blockHeader) {
-      console.log("got block", blockHeader.number)
+      console.log(new Date(), "got block", blockHeader.number)
     })
     .on("error", function newBlockHeadersError(error) {
+      console.error(new Date(), "ERROR:")
       console.error(error)
     })
 
@@ -102,21 +112,18 @@ const watchEvent = async (eventName, fromBlock = 0, cb = function () {}) => {
       cb(event, null)
     })
     .on("error", function onCurrencyUpdateError(error) {
-      console.error("onCurrencyUpdateError error", error)
       cb(null, error)
     })
 }
 
 const getBlockNumber = async () => {
-  const provider = new HDWalletProvider(WALLET_PKEY, WEB3_PROVIDER_HTTP)
-  const web3 = new Web3(provider)
+  const web3 = new Web3(WEB3_PROVIDER_HTTP)
   return web3.eth.getBlockNumber()
 }
 
 const getPastEvents = async (fromBlock, toBlock, eventName, cb = function () {}) => {
-  const provider = new HDWalletProvider(WALLET_PKEY, WEB3_PROVIDER_HTTP)
-  const web3 = new Web3(provider)
-  const contract = new web3.eth.Contract(JSON.parse(CONTRACT_ABI), CONTRACT_ADDRESS)
+  const web3 = new Web3(WEB3_PROVIDER_HTTP)
+  const contract = await new web3.eth.Contract(JSON.parse(CONTRACT_ABI), CONTRACT_ADDRESS)
   await contract.getPastEvents(
     eventName,
     {
