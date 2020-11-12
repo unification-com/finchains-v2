@@ -104,35 +104,31 @@ contract CryptoExchanges {
     public isAuthorized() {
 
         bytes32 pairHash = keccak256(abi.encodePacked(_pair));
-        bool setUpdate = false;
-        if (!currencies[pairHash][msg.sender].isSet) {
-            setUpdate = true;
-        } else {
-            if (currencies[pairHash][msg.sender].timestamp != _timestamp) {
-                setUpdate = true;
-            }
+
+        if (currencies[pairHash][msg.sender].isSet) {
+            require(_timestamp > currencies[pairHash][msg.sender].timestamp,
+                "Must submit newer timestamp");
         }
 
-        if (setUpdate) {
-            currencies[pairHash][msg.sender] = Currency({price : _price, priceRaw : _priceRaw, timestamp : _timestamp, isSet : true});
+        currencies[pairHash][msg.sender] = Currency({price : _price, priceRaw : _priceRaw, timestamp : _timestamp, isSet : true});
 
-            if (!pairThresholds[pairHash].isSet) {
-                pairThresholds[pairHash].value = baseThreshold;
-                pairThresholds[pairHash].isSet = true;
-            }
-
-            emit CurrencyUpdate(
-                msg.sender,
-                _pair,
-                pairHash,
-                _price,
-                _priceRaw,
-                _timestamp,
-                exchanges[msg.sender]
-            );
-
-            compareCurrencies(_pair, pairHash, msg.sender);
+        if (!pairThresholds[pairHash].isSet) {
+            pairThresholds[pairHash].value = baseThreshold;
+            pairThresholds[pairHash].isSet = true;
         }
+
+        emit CurrencyUpdate(
+            msg.sender,
+            _pair,
+            pairHash,
+            _price,
+            _priceRaw,
+            _timestamp,
+            exchanges[msg.sender]
+        );
+
+        compareCurrencies(_pair, pairHash, msg.sender);
+
     }
 
     function compareCurrencies(string memory _pair, bytes32 pairHash, address _o1) private isAuthorized() {
@@ -249,6 +245,14 @@ contract CryptoExchanges {
         bytes32 pairHash = keccak256(abi.encodePacked(_pair));
         if (currencies[pairHash][_oracle].isSet) {
             return currencies[pairHash][_oracle].price;
+        }
+        return 0;
+    }
+
+    function getLastSubmitTimeByAddress(string memory _pair, address _oracle) public view returns (uint) {
+        bytes32 pairHash = keccak256(abi.encodePacked(_pair));
+        if (currencies[pairHash][_oracle].isSet) {
+            return currencies[pairHash][_oracle].timestamp;
         }
         return 0;
     }
