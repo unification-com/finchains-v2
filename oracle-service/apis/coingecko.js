@@ -8,7 +8,7 @@ const baseUrl = "https://api.coingecko.com/api/v3/exchanges"
 const getExchangePrices = (exchange, bases) => {
   return new Promise((resolve, reject) => {
     const URL = `${baseUrl}/${exchange}/tickers?coin_ids=${bases}`
-    console.log(URL)
+    console.log(new Date(), "get", URL)
     fetch(URL)
       .then((r) => r.json())
       .then((data) => {
