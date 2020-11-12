@@ -50,15 +50,15 @@ const processDiscrepancy = async (event) => {
 
     const [pair, pairCreated] = await getOrAddPair(pairName)
     if (pairCreated) {
-      console.log("added new pair", pairName, pair.id)
+      console.log(new Date(), "added new pair", pairName, pair.id)
     }
     const [eo1, eoCreated1] = await getOrAddExchangeOracle(oracle1, exchange1)
     if (eoCreated1) {
-      console.log("added new exchange oracle", exchange1, oracle1, eo1.id)
+      console.log(new Date(), "added new exchange oracle", exchange1, oracle1, eo1.id)
     }
     const [eo2, eoCreated2] = await getOrAddExchangeOracle(oracle2, exchange2)
     if (eoCreated2) {
-      console.log("added new exchange oracle", exchange2, oracle2, eo2.id)
+      console.log(new Date(), "added new exchange oracle", exchange2, oracle2, eo2.id)
     }
 
     const p1Bn = new BN(price1)
@@ -76,11 +76,11 @@ const processDiscrepancy = async (event) => {
       price2,
       timestamp2,
       threshold,
-      diff,
+      diff.toString(),
     )
 
     if (dCreated) {
-      console.log("inserted discrepancy", d.id)
+      console.log(new Date(), "inserted discrepancy", d.id)
     }
 
     const [l, lCreated] = await LastGethBlock.findOrCreate({
@@ -97,6 +97,7 @@ const processDiscrepancy = async (event) => {
       await l.update({ height })
     }
   } catch (err) {
+    console.error(new Date(), "ERROR:")
     console.error(err)
     console.error(event)
   }

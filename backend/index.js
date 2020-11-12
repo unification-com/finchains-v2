@@ -35,22 +35,24 @@ const run = async () => {
     case "wrkchain":
       watchBlocks(function processBlock(data, err) {
         if (err) {
+          console.error(new Date(), "ERROR:")
           console.error(err)
         }
         if (data) {
-          console.log(data)
+          console.log(new Date(), data)
           // submit WRKChain hashes
         }
       })
       break
     case "watch-event":
-      console.log("watching", eventToGet)
+      console.log(new Date(), "watching", eventToGet)
       fromBlockRes = await LastGethBlock.findOne({ where: { event: eventToGet } })
       if (fromBlockRes) {
         fromBlock = parseInt(fromBlockRes.height, 10)
       }
       watchEvent(eventToGet, fromBlock, async function processEvent(data, err) {
         if (err) {
+          console.error(new Date(), "ERROR:")
           console.error(err)
         }
         if (data) {
@@ -101,6 +103,7 @@ const run = async () => {
 
       getPastEvents(fromBlock, toBlock, eventToGet, async function processEvent(events, err) {
         if (err) {
+          console.error(new Date(), "ERROR:")
           console.error(err)
         }
         if (events) {
@@ -118,17 +121,17 @@ const run = async () => {
             }
           }
           await Promise.all(addTasks)
-          console.log("lastGethBlock", lastGethBlock)
-          console.log("eventToGet", eventToGet)
-          console.log("fromBlock", fromBlock)
-          console.log("blocksToProcess", blocksToProcess)
-          console.log("toBlock", toBlock)
+          console.log(new Date(), "lastGethBlock", lastGethBlock)
+          console.log(new Date(), "eventToGet", eventToGet)
+          console.log(new Date(), "fromBlock", fromBlock)
+          console.log(new Date(), "blocksToProcess", blocksToProcess)
+          console.log(new Date(), "toBlock", toBlock)
           process.exit(0)
         }
       })
       break
     default:
-      console.log("nothing to do")
+      console.log(new Date(), "nothing to do")
       break
   }
 }
