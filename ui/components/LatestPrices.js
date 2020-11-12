@@ -37,5 +37,5 @@ export default function LatestPrices({ latestPrices }) {
 }
 
 LatestPrices.propTypes = {
-  latestPrices: PropTypes.object,
+  latestPrices: PropTypes.array,
 }
