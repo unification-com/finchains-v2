@@ -42,7 +42,7 @@ module.exports = {
           type: Sequelize.STRING,
         },
         diff: {
-          type: Sequelize.BIGINT,
+          type: Sequelize.STRING,
         },
         timestamp1: {
           type: Sequelize.INTEGER,

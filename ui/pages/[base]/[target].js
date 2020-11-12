@@ -157,7 +157,7 @@ export default function Home({
 Home.propTypes = {
   currencyData: PropTypes.object,
   discrepancyData: PropTypes.object,
-  latestPrices: PropTypes.object,
+  latestPrices: PropTypes.array,
   currentPair: PropTypes.string,
   currentBase: PropTypes.string,
   currentTarget: PropTypes.string,

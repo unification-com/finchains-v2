@@ -30,16 +30,16 @@ const processCurrencyUpdate = async (event) => {
 
     const [pair, pairCreated] = await getOrAddPair(pairName)
     if (pairCreated) {
-      console.log("added new pair", pairName, pair.id)
+      console.log(new Date(), "added new pair", pairName, pair.id)
     }
     const [eo, eoCreated] = await getOrAddExchangeOracle(oracleAddress, exchange)
     if (eoCreated) {
-      console.log("added new exchange oracle", exchange, oracleAddress, eo.id)
+      console.log(new Date(), "added new exchange oracle", exchange, oracleAddress, eo.id)
     }
     const [cu, cuCreated] = await getOrAddCurrencyUpdate(eo.id, pair.id, txHash, price, priceRaw, timestamp)
 
     if (cuCreated) {
-      console.log("inserted currencly update", cu.id)
+      console.log(new Date(), "inserted currency update", cu.id)
     }
 
     const [l, lCreated] = await LastGethBlock.findOrCreate({
@@ -56,6 +56,7 @@ const processCurrencyUpdate = async (event) => {
       await l.update({ height })
     }
   } catch (err) {
+    console.error(new Date(), "ERROR:")
     console.error(err)
     console.error(event)
   }
