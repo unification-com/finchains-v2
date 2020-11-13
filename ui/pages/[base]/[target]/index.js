@@ -4,12 +4,12 @@ import Row from "react-bootstrap/Row"
 import Col from "react-bootstrap/Col"
 import fetch from "isomorphic-unfetch"
 import PropTypes from "prop-types"
-import PriceChart from "../../components/PriceChart"
-import Layout from "../../layouts/layout"
-import CurrencyUpdateTable from "../../components/CurrencyUpdateTable"
-import DiscrepancyTable from "../../components/DiscrepancyTable";
-import LatestPrices from "../../components/LatestPrices"
-import PairSelect from "../../components/PairSelect"
+import PriceChart from "../../../components/PriceChart"
+import Layout from "../../../layouts/layout"
+import CurrencyUpdateTable from "../../../components/CurrencyUpdateTable"
+import DiscrepancyTable from "../../../components/DiscrepancyTable"
+import LatestPrices from "../../../components/LatestPrices"
+import PairSelect from "../../../components/PairSelect"
 
 export async function getServerSideProps({ query }) {
   const { base, target } = query

@@ -1,7 +1,7 @@
 import React from "react"
-import Layout from "../../layouts/layout"
+import Layout from "../../../layouts/layout"
 
-export default function Oracles() {
+export default function Exchange() {
   return (
     <Layout>
       <div className="content">
