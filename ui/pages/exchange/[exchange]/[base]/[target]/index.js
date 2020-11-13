@@ -8,7 +8,8 @@ import PriceChart from "../../../../../components/PriceChart"
 import Layout from "../../../../../layouts/layout"
 import CurrencyUpdateTable from "../../../../../components/CurrencyUpdateTable"
 import PairSelect from "../../../../../components/PairSelect"
-import PaginationWrapper from "../../../../../components/PaginationWrapper";
+import PaginationWrapper from "../../../../../components/PaginationWrapper"
+import ExchangeSelect from "../../../../../components/ExchangeSelect"
 import { exchangeLookup } from "../../../../../utils/exchange"
 
 export async function getServerSideProps({ query }) {
@@ -16,6 +17,13 @@ export async function getServerSideProps({ query }) {
 
   const currentBase = base
   const currentTarget = target
+
+  let exchanges = []
+  const exchangesApiUrl = `http://localhost:3000/api/exchange`
+  const exchangesDataRes = await fetch(exchangesApiUrl)
+  if (exchangesDataRes.ok && exchangesDataRes.status === 200) {
+    exchanges = await exchangesDataRes.json()
+  }
 
   let bases = []
   const basesApiUrl = `http://localhost:3000/api/exchange/${exchange}/bases`
@@ -61,6 +69,7 @@ export async function getServerSideProps({ query }) {
       bases,
       targets,
       exchange,
+      exchanges,
     },
   }
 }
@@ -74,6 +83,7 @@ export default function Exchange({
   bases,
   targets,
   exchange,
+  exchanges,
 }) {
   return (
     <Layout>
@@ -88,6 +98,8 @@ export default function Exchange({
                       <h3>
                         {exchangeLookup(exchange)}: {currentPair} - Chart
                       </h3>
+                      <ExchangeSelect url={"/exchange/"} exchanges={exchanges} currentExchange={exchange} />
+                      <br />
                       <PairSelect
                         bases={bases}
                         targets={targets}
@@ -146,4 +158,5 @@ Exchange.propTypes = {
   bases: PropTypes.array,
   targets: PropTypes.array,
   exchange: PropTypes.string,
+  exchanges: PropTypes.array,
 }

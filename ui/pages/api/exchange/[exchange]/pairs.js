@@ -27,17 +27,22 @@ handler.get(async (req, res) => {
     raw: true,
   })
     .then((data) => {
-      const dataReturn = {}
+      const dataReturn = []
+      const pairs = {}
       for (let i = 0; i < data.length; i += 1) {
         const base = data[i]["Pair.base"]
         const target = data[i]["Pair.target"]
-        if (!dataReturn[base]) {
-          dataReturn[base] = {
+        if (!pairs[base]) {
+          pairs[base] = {
             base,
             targets: [],
           }
         }
-        dataReturn[base].targets.push(target)
+        pairs[base].targets.push(target)
+      }
+      for (const dateKey of Object.keys(pairs)) {
+        const pair = pairs[dateKey]
+        dataReturn.push(pair)
       }
       res.json(dataReturn)
     })
