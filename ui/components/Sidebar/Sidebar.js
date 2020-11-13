@@ -3,7 +3,7 @@ import Link from "next/link"
 import Nav from "react-bootstrap/Nav"
 import NavLink from "react-bootstrap/NavLink"
 
-import { PieChart, Compass, Bezier2, HourglassSplit } from "react-bootstrap-icons"
+import { LayoutSidebarInset, ClockHistory, Link45deg, Building } from "react-bootstrap-icons"
 import PropTypes from "prop-types"
 import styles from "./Sidebar.module.css"
 
@@ -59,28 +59,28 @@ export default class Sidebar extends React.Component {
               <li key="sidebar-link-1">
                 <NavLink to="/" href="/" className="nav-link">
                   <h4>
-                    <PieChart /> Dashboard
+                    <LayoutSidebarInset /> Dashboard
                   </h4>
                 </NavLink>
               </li>
               <li key="sidebar-link-2">
-                <NavLink to="/oracle/default" href="/oracle/default" className="nav-link">
+                <NavLink to="/exchange/default" href="/exchange/default" className="nav-link">
                   <h4>
-                    <Compass /> Oracles
+                    <Building /> Exchanges
                   </h4>
                 </NavLink>
               </li>
               <li key="sidebar-link-3">
                 <NavLink to="/history/BTC/USD" href="/history/BTC/USD" className="nav-link">
                   <h4>
-                    <HourglassSplit /> Pair History
+                    <ClockHistory /> Pair History
                   </h4>
                 </NavLink>
               </li>
               <li key="sidebar-link-4">
                 <NavLink to="/wrkchain" href="/wrkchain" className="nav-link">
                   <h4>
-                    <Bezier2 /> WRKChain
+                    <Link45deg /> WRKChain
                   </h4>
                 </NavLink>
               </li>
@@ -91,6 +91,11 @@ export default class Sidebar extends React.Component {
                     title={"Powered by Unification"}
                     alt={"Powered by Unification"}
                   />
+                </NavLink>
+                <NavLink href="https://github.com/unification-com/finchains-v2" target="_blank">
+                  <h4>
+                    <img src="/img/GitHub-Mark-Light-120px-plus.png" alt="GitHub" width="15" /> Github
+                  </h4>
                 </NavLink>
               </li>
             </Nav>
