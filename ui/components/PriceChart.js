@@ -30,6 +30,7 @@ export default class PriceChart extends React.Component {
       tsNow,
       tsFrom: tsNow,
       tsFromOut: "Week",
+      colours: {},
     }
   }
 
@@ -72,7 +73,7 @@ export default class PriceChart extends React.Component {
         tsFromOut = "Week"
         break
     }
-    this.setState({ tsFrom, tsFromOut })
+    await this.setState({ tsFrom, tsFromOut })
   }
 
   formatDate(timestamp) {
@@ -87,7 +88,7 @@ export default class PriceChart extends React.Component {
 
   generateMultiChart() {
     const { priceData, base, target, legend } = this.props
-    const { tsFrom, tsNow } = this.state
+    const { tsFrom, tsNow, colours } = this.state
 
     const labels = [] // array of labels
     const dataSets = [] // array of final objects
@@ -153,13 +154,11 @@ export default class PriceChart extends React.Component {
           data.push(price)
         }
 
-        const colour = randomColor({ format: "rgba", luminosity: "bright", hue: "blue", alpha: 0.9 })
-
         const exchangeData = {
           label: exchangeLookup(exchange),
           data,
-          backgroundColor: colour.replace("0.9", "0.2"),
-          borderColor: colour,
+          backgroundColor: colours[exchange].backgroundColor,
+          borderColor: colours[exchange].borderColor,
           fill: true,
         }
         dataSets.push(exchangeData)
@@ -180,10 +179,26 @@ export default class PriceChart extends React.Component {
   async setChart() {
     const { chartData, chartOptions } = this.generateMultiChart()
 
-    this.setState({ chartData, chartOptions, dataLoaded: true })
+    await this.setState({ chartData, chartOptions, dataLoaded: true })
   }
 
   async componentDidMount() {
+    const { priceData } = this.props
+    const colours = {}
+    if (priceData) {
+      // calculate exchanges and labels first
+      for (let i = 0; i < priceData.length; i += 1) {
+        const exchange = priceData[i]["ExchangeOracle.exchange"]
+        if (!colours[exchange]) {
+          const colour = randomColor({ format: "rgba", luminosity: "bright", hue: "blue", alpha: 0.9 })
+          colours[exchange] = {
+            backgroundColor: colour.replace("0.9", "0.2"),
+            borderColor: colour,
+          }
+        }
+      }
+    }
+    await this.setState({ colours })
     await this.setTimestampFrom("1week")
     await this.setChart()
   }
@@ -199,7 +214,9 @@ export default class PriceChart extends React.Component {
     if (dataLoaded) {
       return (
         <>
-          <h4 className="float-left">Last {tsFromOut}: {this.formatDate(tsFrom)} - {this.formatDate(tsNow)}</h4>
+          <h4 className="float-left">
+            Last {tsFromOut}: {this.formatDate(tsFrom)} - {this.formatDate(tsNow)}
+          </h4>
           <ButtonGroup className="btn-group-toggle float-right" data-toggle="buttons">
             <Button
               tag="label"
