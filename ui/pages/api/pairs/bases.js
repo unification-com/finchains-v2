@@ -12,7 +12,7 @@ handler.get(async (req, res) => {
       for (let i = 0; i < data.length; i += 1) {
         dataResults.push(data[i].DISTINCT)
       }
-      res.json({ results: dataResults })
+      res.json(dataResults)
     })
     .catch((err) => {
       console.error(err)

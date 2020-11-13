@@ -94,7 +94,7 @@ export default function Exchange({
                         currentBase={currentBase}
                         currentTarget={currentTarget}
                         url={`/exchange/${exchange}/`}
-                        exchange
+                        exchange={exchange}
                         legend={false}
                       />
                     </Card.Title>
