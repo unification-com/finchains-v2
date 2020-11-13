@@ -76,8 +76,8 @@ export async function getServerSideProps({ query }) {
       currentTarget,
       discrepancyData,
       latestPrices,
-      bases: bases.results,
-      targets: targets.results,
+      bases,
+      targets,
       chartData,
     },
   }

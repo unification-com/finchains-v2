@@ -1,8 +1,6 @@
 import nextConnect from "next-connect"
 import middleware from "../../../../middleware/db"
 
-const { toCanonicalJSON } = require("@tendermint/belt")
-
 const handler = nextConnect()
 
 handler.use(middleware)
@@ -41,7 +39,7 @@ handler.get(async (req, res) => {
         }
         dataReturn[base].targets.push(target)
       }
-      res.json(toCanonicalJSON(dataReturn))
+      res.json(dataReturn)
     })
     .catch((err) => {
       console.error(err)

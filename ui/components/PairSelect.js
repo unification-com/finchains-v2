@@ -34,8 +34,8 @@ export default class PairSelect extends React.Component {
     const targetsDataRes = await fetch(targetsApiUrl)
     if (targetsDataRes.ok && targetsDataRes.status === 200) {
       const targetsJson = await targetsDataRes.json()
-      for (let i = 0; i < targetsJson.results.length; i += 1) {
-        targets.push(targetsJson.results[i])
+      for (let i = 0; i < targetsJson.length; i += 1) {
+        targets.push(targetsJson[i])
       }
     }
 
