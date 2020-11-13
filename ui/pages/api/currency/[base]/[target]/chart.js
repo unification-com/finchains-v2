@@ -23,7 +23,7 @@ handler.get(async (req, res) => {
   const ts = Math.floor(d / 1000)
   const tsToGet = ts - oneWeek
 
-  req.dbModels.CurrencyUpdates.findAndCountAll({
+  req.dbModels.CurrencyUpdates.findAll({
     attributes: ["price", "priceRaw", "timestamp"],
     include: [
       { model: req.dbModels.Pairs, attributes: ["name", "base", "target"], where: { base, target } },

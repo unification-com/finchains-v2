@@ -17,9 +17,9 @@ export default function DiscrepancyTable({ data, base, target }) {
         <Table>
           <thead>
             <tr>
-              <th>Oracle 1</th>
+              <th>Exchange 1</th>
               <th>Time 1</th>
-              <th>Oracle 2</th>
+              <th>Exchange 2</th>
               <th>Time 2</th>
               <th>Price 1 ({target})</th>
               <th>Price 2 ({target})</th>

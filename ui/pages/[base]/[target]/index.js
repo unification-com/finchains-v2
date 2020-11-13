@@ -43,6 +43,14 @@ export async function getServerSideProps({ query }) {
     currencyData = await currencyDataRes.json()
   }
 
+  let chartData = []
+  const chartDatapiUrl = `http://localhost:3000/api/currency/${currentPair}/chart`
+
+  const chartDataRes = await fetch(chartDatapiUrl)
+  if (chartDataRes.ok && chartDataRes.status === 200) {
+    chartData = await chartDataRes.json()
+  }
+
   let discrepancyData = {}
 
   const discrepancyApiUrl = `http://localhost:3000/api/discrepancy/${currentPair}`
@@ -70,6 +78,7 @@ export async function getServerSideProps({ query }) {
       latestPrices,
       bases: bases.results,
       targets: targets.results,
+      chartData,
     },
   }
 }
@@ -83,6 +92,7 @@ export default function Home({
   latestPrices,
   bases,
   targets,
+  chartData,
 }) {
   return (
     <Layout>
@@ -108,7 +118,7 @@ export default function Home({
                 </Row>
               </Card.Header>
               <Card.Body>
-                <PriceChart priceData={currencyData} base={currentBase} target={currentTarget} />
+                <PriceChart priceData={chartData} base={currentBase} target={currentTarget} legend={true} />
               </Card.Body>
             </Card>
           </Col>
@@ -163,4 +173,5 @@ Home.propTypes = {
   currentTarget: PropTypes.string,
   bases: PropTypes.array,
   targets: PropTypes.array,
+  chartData: PropTypes.array,
 }
