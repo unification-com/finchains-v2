@@ -1,5 +1,5 @@
 import nextConnect from "next-connect"
-import middleware from "../../../../../middleware/db"
+import middleware from "../../../../../../middleware/db"
 
 const { Op } = require("sequelize")
 
@@ -9,7 +9,7 @@ handler.use(middleware)
 
 handler.get(async (req, res) => {
   const {
-    query: { base, target },
+    query: { base, target, exchange },
   } = req
 
   const oneHour = 60 * 60
@@ -27,7 +27,7 @@ handler.get(async (req, res) => {
     attributes: ["price", "priceRaw", "timestamp"],
     include: [
       { model: req.dbModels.Pairs, attributes: ["name", "base", "target"], where: { base, target } },
-      { model: req.dbModels.ExchangeOracles, attributes: ["exchange", "address"] },
+      { model: req.dbModels.ExchangeOracles, attributes: ["exchange", "address"], where: { exchange } },
     ],
     where: { timestamp: { [Op.gt]: tsToGet } },
     order: [["timestamp", "ASC"]],

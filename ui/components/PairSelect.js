@@ -10,18 +10,26 @@ export default class PairSelect extends React.Component {
     this.handleTargetChange = this.handleTargetChange.bind(this)
     this.fetchTargets = this.fetchTargets.bind(this)
 
-    const { currentBase, bases, currentTarget, targets } = this.props
+    const { currentBase, bases, currentTarget, targets, exchange } = this.props
 
     this.state = {
       currentBase,
       bases,
       currentTarget,
       targets,
+      exchange,
     }
   }
 
   async fetchTargets(currentBase) {
-    const targetsApiUrl = `/api/pairs/${currentBase}`
+    const { exchange } = this.state
+    let targetsApiUrl = ""
+    if (exchange) {
+      targetsApiUrl = `/api/exchange/${exchange}/${currentBase}/targets`
+    } else {
+      targetsApiUrl = `/api/pairs/${currentBase}`
+    }
+
     const targets = ["Select..."]
     const targetsDataRes = await fetch(targetsApiUrl)
     if (targetsDataRes.ok && targetsDataRes.status === 200) {
@@ -85,4 +93,5 @@ PairSelect.propTypes = {
   currentTarget: PropTypes.string,
   targets: PropTypes.array,
   url: PropTypes.string,
+  exchange: PropTypes.string,
 }

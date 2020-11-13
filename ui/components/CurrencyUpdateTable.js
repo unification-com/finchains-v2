@@ -17,7 +17,7 @@ export default function CurrencyUpdateTable({ data, base, target }) {
           <thead>
             <tr>
               <th>Timestamp</th>
-              <th>Oracle</th>
+              <th>Exchange</th>
               <th>Price ({target})</th>
               <th>Tx</th>
             </tr>
