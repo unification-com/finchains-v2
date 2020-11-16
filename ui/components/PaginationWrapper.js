@@ -3,7 +3,7 @@ import PropTypes from "prop-types"
 import Pagination from "react-bootstrap/Pagination"
 import styles from "./Pagination.module.css"
 
-export default function PaginationWrapper({ currentPage, totalPages, page }) {
+export default function PaginationWrapper({ currentPage, totalPages, cbFunc }) {
   const items = []
   let prevPage = 1
   let nextPage = totalPages
@@ -27,22 +27,54 @@ export default function PaginationWrapper({ currentPage, totalPages, page }) {
 
   for (let number = pagesStart; number <= pagesEnd; number += 1) {
     items.push(
-      <Pagination.Item key={number} active={number === currentPage} href={`${page}?page=${number}`}>
-        {number}
-      </Pagination.Item>,
+      <span
+        onClick={() => {
+          cbFunc(number)
+        }}
+      >
+        <Pagination.Item key={number} active={number === currentPage} href="#">
+          {number}
+        </Pagination.Item>
+      </span>,
     )
   }
 
   return (
     <div className={styles.pagination_wrapper}>
       <Pagination>
-        <Pagination.First href={`${page}?page=1`} />
-        <Pagination.Prev href={`${page}?page=${prevPage}`} />
+        <span
+          onClick={() => {
+            cbFunc(1)
+          }}
+        >
+          <Pagination.First href="#" />
+        </span>
+        <span
+          onClick={() => {
+            cbFunc(prevPage)
+          }}
+        >
+          <Pagination.Prev href="#" />
+        </span>
         <Pagination.Ellipsis />
         {items}
         <Pagination.Ellipsis />
-        <Pagination.Next href={`${page}?page=${nextPage}`} />
-        <Pagination.Last href={`${page}?page=${totalPages}`} />
+
+        <span
+          onClick={() => {
+            cbFunc(nextPage)
+          }}
+        >
+          <Pagination.Next href="#" />
+        </span>
+
+        <span
+          onClick={() => {
+            cbFunc(totalPages)
+          }}
+        >
+          <Pagination.Last href="#" />
+        </span>
       </Pagination>
     </div>
   )
@@ -51,5 +83,5 @@ export default function PaginationWrapper({ currentPage, totalPages, page }) {
 PaginationWrapper.propTypes = {
   currentPage: PropTypes.number,
   totalPages: PropTypes.number,
-  page: PropTypes.string,
+  cbFunc: PropTypes.func,
 }
