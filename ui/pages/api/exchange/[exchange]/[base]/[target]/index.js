@@ -17,7 +17,7 @@ handler.get(async (req, res) => {
     pageQuery = parseInt(page, 10)
   }
 
-  const size = 100
+  const size = 20
 
   if (pageQuery < 1) {
     pageQuery = 1

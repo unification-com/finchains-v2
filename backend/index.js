@@ -107,25 +107,37 @@ const run = async () => {
           console.error(err)
         }
         if (events) {
-          const addTasks = []
           for (let i = 0; i < events.length; i += 1) {
             switch (eventToGet) {
               case "CurrencyUpdate":
-                addTasks.push(processCurrencyUpdate(events[i]))
+                await processCurrencyUpdate(events[i])
                 break
               case "Discrepancy":
-                addTasks.push(processDiscrepancy(events[i]))
+                await processDiscrepancy(events[i])
                 break
               default:
                 break
             }
           }
-          await Promise.all(addTasks)
           console.log(new Date(), "lastGethBlock", lastGethBlock)
           console.log(new Date(), "eventToGet", eventToGet)
           console.log(new Date(), "fromBlock", fromBlock)
           console.log(new Date(), "blocksToProcess", blocksToProcess)
           console.log(new Date(), "toBlock", toBlock)
+
+          const [l, lCreated] = await LastGethBlock.findOrCreate({
+            where: {
+              event: eventToGet,
+            },
+            defaults: {
+              event: eventToGet,
+              height: toBlock,
+            },
+          })
+
+          if (!lCreated) {
+            await l.update({ height: toBlock })
+          }
           process.exit(0)
         }
       })

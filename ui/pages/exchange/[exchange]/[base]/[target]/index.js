@@ -7,13 +7,14 @@ import PropTypes from "prop-types"
 import PriceChart from "../../../../../components/PriceChart"
 import Layout from "../../../../../layouts/layout"
 import CurrencyUpdateTable from "../../../../../components/CurrencyUpdateTable"
+import DiscrepancyTable from "../../../../../components/DiscrepancyTable"
 import PairSelect from "../../../../../components/PairSelect"
-import PaginationWrapper from "../../../../../components/PaginationWrapper"
 import ExchangeSelect from "../../../../../components/ExchangeSelect"
 import { exchangeLookup } from "../../../../../utils/exchange"
+import LatestPrices from "../../../../../components/LatestPrices"
 
 export async function getServerSideProps({ query }) {
-  const { base, exchange, target, page } = query
+  const { base, exchange, target } = query
 
   const currentBase = base
   const currentTarget = target
@@ -43,12 +44,24 @@ export async function getServerSideProps({ query }) {
   const currentPair = `${currentBase}/${currentTarget}`
 
   let currencyData = {}
-
-  const dataApiUrl = `http://localhost:3000/api/exchange/${exchange}/${currentPair}?page=${page}`
-
+  const dataApiUrl = `http://localhost:3000/api/exchange/${exchange}/${currentPair}`
   const currencyDataRes = await fetch(dataApiUrl)
   if (currencyDataRes.ok && currencyDataRes.status === 200) {
     currencyData = await currencyDataRes.json()
+  }
+
+  let disrepancyData = {}
+  const discrepancyApiUrl = `http://localhost:3000/api/exchange/${exchange}/${currentPair}/discrepancy`
+  const discrepancyDataRes = await fetch(discrepancyApiUrl)
+  if (discrepancyDataRes.ok && discrepancyDataRes.status === 200) {
+    disrepancyData = await discrepancyDataRes.json()
+  }
+
+  const latestPriceData = []
+  const latestPriceUrl = `http://localhost:3000/api/exchange/${exchange}/${currentPair}/latest`
+  const latestPriceDataRes = await fetch(latestPriceUrl)
+  if (latestPriceDataRes.ok && latestPriceDataRes.status === 200) {
+    latestPriceData.push(await latestPriceDataRes.json())
   }
 
   let chartData = []
@@ -66,6 +79,8 @@ export async function getServerSideProps({ query }) {
       currentPair,
       currentBase,
       currentTarget,
+      latestPriceData,
+      disrepancyData,
       bases,
       targets,
       exchange,
@@ -80,6 +95,8 @@ export default function Exchange({
   currentPair,
   currentBase,
   currentTarget,
+  latestPriceData,
+  disrepancyData,
   bases,
   targets,
   exchange,
@@ -88,6 +105,7 @@ export default function Exchange({
   return (
     <Layout>
       <div className="content">
+        <LatestPrices latestPrices={latestPriceData} />
         <Row>
           <Col>
             <Card className="card-chart">
@@ -95,26 +113,25 @@ export default function Exchange({
                 <Row>
                   <Col className="text-left">
                     <Card.Title tag="h3">
-                      <h3>
-                        {exchangeLookup(exchange)}: {currentPair} - Chart
-                      </h3>
-                      <ExchangeSelect url={"/exchange/"} exchanges={exchanges} currentExchange={exchange} />
-                      <br />
-                      <PairSelect
-                        bases={bases}
-                        targets={targets}
-                        currentBase={currentBase}
-                        currentTarget={currentTarget}
-                        url={`/exchange/${exchange}/`}
-                        exchange={exchange}
-                        legend={false}
-                      />
+                      <h4>
+                        <img src={`/img/${exchange}.webp`} alt={exchangeLookup(exchange)} width={"40"} />{" "}
+                        <ExchangeSelect url={"/exchange/"} exchanges={exchanges} currentExchange={exchange} />
+                        {" : "}
+                        <PairSelect
+                          bases={bases}
+                          targets={targets}
+                          currentBase={currentBase}
+                          currentTarget={currentTarget}
+                          url={`/exchange/${exchange}/`}
+                          exchange={exchange}
+                        />
+                      </h4>
                     </Card.Title>
                   </Col>
                 </Row>
               </Card.Header>
               <Card.Body>
-                <PriceChart priceData={chartData} base={currentBase} target={currentTarget} />
+                <PriceChart priceData={chartData} base={currentBase} target={currentTarget} legend={false} />
               </Card.Body>
             </Card>
           </Col>
@@ -134,11 +151,39 @@ export default function Exchange({
                 </Row>
               </Card.Header>
               <Card.Body>
-                <CurrencyUpdateTable data={currencyData} base={currentBase} target={currentTarget} />
-                <PaginationWrapper
-                  currentPage={currencyData.currentPage}
-                  totalPages={currencyData.totalPages}
-                  page={`/exchange/${exchange}/${currentBase}/${currentTarget}`}
+                <CurrencyUpdateTable
+                  data={currencyData}
+                  base={currentBase}
+                  target={currentTarget}
+                  paginate={true}
+                  apiUrl={`/api/exchange/${exchange}/${currentPair}`}
+                />
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+
+        <Row>
+          <Col>
+            <Card className="card-chart">
+              <Card.Header>
+                <Row>
+                  <Col className="text-left">
+                    <Card.Title tag="h3">
+                      <h3>
+                        {exchangeLookup(exchange)}: {currentPair} - Discrepancy History
+                      </h3>
+                    </Card.Title>
+                  </Col>
+                </Row>
+              </Card.Header>
+              <Card.Body>
+                <DiscrepancyTable
+                  data={disrepancyData}
+                  base={currentBase}
+                  target={currentTarget}
+                  paginate={true}
+                  apiUrl={`/api/exchange/${exchange}/${currentPair}/discrepancy`}
                 />
               </Card.Body>
             </Card>
@@ -152,9 +197,11 @@ export default function Exchange({
 Exchange.propTypes = {
   chartData: PropTypes.array,
   currencyData: PropTypes.object,
+  disrepancyData: PropTypes.object,
   currentPair: PropTypes.string,
   currentBase: PropTypes.string,
   currentTarget: PropTypes.string,
+  latestPriceData: PropTypes.array,
   bases: PropTypes.array,
   targets: PropTypes.array,
   exchange: PropTypes.string,

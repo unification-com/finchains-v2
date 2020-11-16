@@ -282,7 +282,8 @@ export default class PriceChart extends React.Component {
 }
 
 PriceChart.propTypes = {
-  priceData: PropTypes.object,
+  priceData: PropTypes.array,
   base: PropTypes.string,
   target: PropTypes.string,
+  legend: PropTypes.bool,
 }

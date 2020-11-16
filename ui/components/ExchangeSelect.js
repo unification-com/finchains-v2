@@ -47,7 +47,6 @@ export default class ExchangeSelect extends React.Component {
 
     return (
       <>
-        <label>Exchange:</label>
         <select value={currentExchange} onChange={this.handleExchangeChange}>
           {exchangeOptions}
         </select>

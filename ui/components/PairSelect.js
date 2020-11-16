@@ -59,6 +59,7 @@ export default class PairSelect extends React.Component {
 
   render() {
     const { currentBase, bases, currentTarget, targets } = this.state
+    const { showLabel } = this.props
 
     const baseOptions = bases.map((v) => (
       <option key={`B_${v}`} value={v}>
@@ -74,7 +75,7 @@ export default class PairSelect extends React.Component {
 
     return (
       <>
-        <label>Pair:</label>
+        {(showLabel && <label>Pair:</label>)}
         <select value={currentBase} onChange={this.handleBaseChange}>
           {baseOptions}
         </select>
@@ -94,4 +95,5 @@ PairSelect.propTypes = {
   targets: PropTypes.array,
   url: PropTypes.string,
   exchange: PropTypes.string,
+  showLabel: PropTypes.bool,
 }

@@ -105,14 +105,15 @@ export default function Home({
                 <Row>
                   <Col className="text-left">
                     <Card.Title tag="h3">
-                      <h3>{currentPair} - Chart</h3>
-                      <PairSelect
-                        bases={bases}
-                        targets={targets}
-                        currentBase={currentBase}
-                        currentTarget={currentTarget}
-                        url={"/"}
-                      />
+                      <h4>
+                        <PairSelect
+                          bases={bases}
+                          targets={targets}
+                          currentBase={currentBase}
+                          currentTarget={currentTarget}
+                          url={"/"}
+                        />
+                      </h4>
                     </Card.Title>
                   </Col>
                 </Row>
