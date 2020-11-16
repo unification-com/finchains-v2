@@ -1,6 +1,7 @@
 import nextConnect from "next-connect"
 import Sequelize from "sequelize"
 import Web3 from "web3"
+import BN from "bn.js"
 import middleware from "../../middleware/db"
 
 const handler = nextConnect()
@@ -20,12 +21,18 @@ handler.get(async (req, res) => {
     .then((data) => {
       const processedData = []
       for (let i = 0; i < data.length; i += 1) {
+        const maxDiffBn = new BN(data[i].maxDiff)
+        const minDiffBn = new BN(data[i].minDiff)
+        const addRes = maxDiffBn.add(minDiffBn)
+        const mean = addRes.div(new BN("2"))
+
         const d = {
           pair: data[i]["Pair.name"],
           minDiff: data[i].minDiff,
           maxDiff: data[i].maxDiff,
           min: Web3.utils.fromWei(data[i].minDiff),
           max: Web3.utils.fromWei(data[i].maxDiff),
+          mean: Web3.utils.fromWei(String(mean)),
         }
         processedData.push(d)
       }
