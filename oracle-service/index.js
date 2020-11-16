@@ -46,8 +46,8 @@ const runAddOracle = async (args) => {
 }
 
 const runOracle = async () => {
-  const { BASES, EXCHANGE, WALLET_ADDRESS } = process.env
-  await getExchangePrices(EXCHANGE, BASES)
+  const { EXCHANGE, WALLET_ADDRESS } = process.env
+  await getExchangePrices(EXCHANGE)
     .then(async (data) => {
       for (let i = 0; i < data.length; i += 1) {
         try {
