@@ -51,7 +51,7 @@ module.exports = {
           type: Sequelize.INTEGER,
         },
         threshold: {
-          type: Sequelize.INTEGER,
+          type: Sequelize.STRING,
         },
         txHash: {
           type: Sequelize.STRING,

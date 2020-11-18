@@ -115,3 +115,6 @@ dist
 .openzeppelin/.session
 .openzeppelin/dev*
 build
+
+# custom
+dev_scripts

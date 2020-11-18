@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
       timestamp1: DataTypes.INTEGER,
       timestamp2: DataTypes.INTEGER,
       txHash: DataTypes.STRING,
-      threshold: DataTypes.INTEGER,
+      threshold: DataTypes.STRING,
     },
     {
       sequelize,

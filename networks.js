@@ -15,8 +15,8 @@ module.exports = {
     },
     finchains: {
       provider: () => new HDWalletProvider([CONTRACT_DEPLOY_PKEY], WEB3_PROVIDER_HTTP, 0, 1),
-      networkId: 867,
-      gasPrice: 10e9,
+      networkId: 6924998642,
+      gasPrice: 100e9,
     },
   },
 }

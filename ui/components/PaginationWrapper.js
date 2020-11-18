@@ -47,14 +47,14 @@ export default function PaginationWrapper({ currentPage, totalPages, cbFunc }) {
             cbFunc(1)
           }}
         >
-          <Pagination.First href="#" />
+          <Pagination.First href="#" key="p_first" />
         </span>
         <span
           onClick={() => {
             cbFunc(prevPage)
           }}
         >
-          <Pagination.Prev href="#" />
+          <Pagination.Prev href="#" key="p_prev" />
         </span>
         <Pagination.Ellipsis />
         {items}
@@ -65,7 +65,7 @@ export default function PaginationWrapper({ currentPage, totalPages, cbFunc }) {
             cbFunc(nextPage)
           }}
         >
-          <Pagination.Next href="#" />
+          <Pagination.Next href="#" key="p_next" />
         </span>
 
         <span
@@ -73,7 +73,7 @@ export default function PaginationWrapper({ currentPage, totalPages, cbFunc }) {
             cbFunc(totalPages)
           }}
         >
-          <Pagination.Last href="#" />
+          <Pagination.Last href="#" key="p_last" />
         </span>
       </Pagination>
     </div>
