@@ -1,15 +1,9 @@
-import nextConnect from "next-connect"
-import Sequelize from "sequelize"
-import Web3 from "web3"
-import BN from "bn.js"
-import middleware from "../ui/middleware/db"
+const Web3 = require("web3")
+const BN = require("bn.js")
+const { Pairs, Discrepancies } = require("../common/db/models")
 
-const handler = nextConnect()
-
-handler.use(middleware)
-
-handler.get(async (req, res) => {
-  req.dbModels.Pairs.findAll({
+const discMean = async () => {
+  Pairs.findAll({
     attributes: ["id", "name", "base", "target"],
     order: [["name", "ASC"]],
   })
@@ -26,12 +20,12 @@ handler.get(async (req, res) => {
           let min = new BN(minWei)
           let total = new BN("0")
           let mean = new BN("1")
-          const descRes = await req.dbModels.Discrepancies.findAll({
+          const descRes = await Discrepancies.findAll({
             attributes: ["diff"],
             where: { pairId },
-            // limit: 3600,
             order: [["timestamp1", "DESC"]],
           })
+
           if(descRes.length > 0) {
             for (let j = 0; j < descRes.length; j += 1) {
               const diff = new BN(descRes[j].diff)
@@ -64,14 +58,13 @@ handler.get(async (req, res) => {
           processedData.push(d)
         }
       }
-      res.json(processedData)
+      console.log(JSON.stringify(processedData))
+      process.exit(0)
     })
     .catch((err) => {
       console.error(err)
-      res.status(500).send({
-        message: "error occurred while retrieving data.",
-      })
+      process.exit(0)
     })
-})
+}
 
-export default handler
+discMean()

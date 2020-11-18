@@ -160,6 +160,10 @@ export default class PriceChart extends React.Component {
           backgroundColor: colours[exchange].backgroundColor,
           borderColor: colours[exchange].borderColor,
           fill: true,
+          // borderWidth: 1,
+          borderDashOffset: 0.0,
+          pointRadius: 1,
+          // lineTension: 0.5,
         }
         dataSets.push(exchangeData)
       }
