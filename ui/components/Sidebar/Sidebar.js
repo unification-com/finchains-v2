@@ -3,7 +3,7 @@ import Link from "next/link"
 import Nav from "react-bootstrap/Nav"
 import NavLink from "react-bootstrap/NavLink"
 
-import { LayoutSidebarInset, ClockHistory, Link45deg, Building } from "react-bootstrap-icons"
+import { LayoutSidebarInset, ClockHistory, Link45deg, Building, Eyeglasses } from "react-bootstrap-icons"
 import PropTypes from "prop-types"
 import styles from "./Sidebar.module.css"
 
@@ -81,6 +81,13 @@ export default class Sidebar extends React.Component {
                 <NavLink to="/wrkchain" href="/wrkchain" className="nav-link">
                   <h4>
                     <Link45deg /> WRKChain
+                  </h4>
+                </NavLink>
+              </li>
+              <li key="sidebar-link-5">
+                <NavLink href={process.env.ETH_EXPLORER} target="_blank">
+                  <h4>
+                    <Eyeglasses /> Block Explorer
                   </h4>
                 </NavLink>
               </li>
