@@ -202,8 +202,8 @@ export default function Home({ dashboardData, bases, targets, exchanges }) {
                         </td>
                         <td>
                           <Link
-                            href={`/exchange/${item["ExchangeOracle.exchange"]}`}
-                            as={`/exchange/${item["ExchangeOracle.exchange"]}`}
+                            href={`/exchange/${item["ExchangeOracle.exchange"]}/${item["Pair.name"]}`}
+                            as={`/exchange/${item["ExchangeOracle.exchange"]}/${item["Pair.name"]}`}
                           >
                             <img
                               src={`/img/${item["ExchangeOracle.exchange"]}.webp`}
@@ -212,8 +212,8 @@ export default function Home({ dashboardData, bases, targets, exchanges }) {
                             />
                           </Link>{" "}
                           <Link
-                            href={`/exchange/${item["ExchangeOracle.exchange"]}`}
-                            as={`/exchange/${item["ExchangeOracle.exchange"]}`}
+                            href={`/exchange/${item["ExchangeOracle.exchange"]}/${item["Pair.name"]}`}
+                            as={`/exchange/${item["ExchangeOracle.exchange"]}/${item["Pair.name"]}`}
                           >
                             {exchangeLookup(item["ExchangeOracle.exchange"])}
                           </Link>
