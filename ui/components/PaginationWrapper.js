@@ -31,8 +31,9 @@ export default function PaginationWrapper({ currentPage, totalPages, cbFunc }) {
         onClick={() => {
           cbFunc(number)
         }}
+        key={`pg_span_${number}`}
       >
-        <Pagination.Item key={number} active={number === currentPage} href="#">
+        <Pagination.Item key={`pg_item_${number}`} active={number === currentPage} href="#">
           {number}
         </Pagination.Item>
       </span>,
