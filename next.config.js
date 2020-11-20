@@ -13,5 +13,6 @@ module.exports = {
     MAINCHAIN_REST_URL: process.env.MAINCHAIN_REST_URL,
     WRKCHAIN_ID: process.env.WRKCHAIN_ID,
     ETH_EXPLORER: process.env.ETH_EXPLORER,
+    WEB3_PROVIDER_HTTP: process.env.WEB3_PROVIDER_HTTP,
   },
 }

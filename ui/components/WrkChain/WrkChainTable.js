@@ -1,26 +1,20 @@
+import Link from "next/link"
 import React from "react"
 import PropTypes from "prop-types"
 import Table from "react-bootstrap/Table"
 import fetch from "isomorphic-unfetch"
-import DateTime from "./DateTime"
-import EthTx from "./EthTx"
-import PaginationWrapper from "./PaginationWrapper"
-import styles from "./CurrencyUpdateTable.module.css"
+import DateTime from "../DateTime"
+import PaginationWrapper from "../PaginationWrapper"
 
-import { exchangeLookup } from "../utils/exchange"
-import { formatNumber } from "../utils/format"
-
-export default class CurrencyUpdateTable extends React.Component {
+export default class WrkChainTable extends React.Component {
   constructor(props) {
     super(props)
-    const { data, base, target, paginate } = this.props
+    const { data, paginate } = this.props
 
     this.fetchData = this.fetchData.bind(this)
 
     this.state = {
       data,
-      base,
-      target,
       paginate,
       dataLoading: false,
     }
@@ -40,8 +34,8 @@ export default class CurrencyUpdateTable extends React.Component {
   }
 
   render() {
-    const { data, base, target, paginate, dataLoading } = this.state
-    if(dataLoading) {
+    const { data, paginate, dataLoading } = this.state
+    if (dataLoading) {
       return (
         <>
           <h3>Loading...</h3>
@@ -59,35 +53,45 @@ export default class CurrencyUpdateTable extends React.Component {
         />
       )
     }
+
     if (data.results.length > 0) {
       return (
-        <div className={`table-full-width table-responsive ${styles.dataTable}`}>
+        <div className={`table-full-width table-responsive dataTable`}>
           <Table>
             <thead>
               <tr>
-                <th>Timestamp</th>
-                <th>Exchange</th>
-                <th>Price ({target})</th>
-                <th>Tx</th>
+                <th>Height</th>
+                <th>Submission Time</th>
+                <th>Mainchain Tx: Explorer</th>
+                <th>Mainchain Tx: REST</th>
               </tr>
             </thead>
             <tbody>
               {data.results.map((item) => (
-                <tr key={item.txHash}>
+                <tr key={`wc_${item.height}`}>
+                  <td>
+                    <Link href={`/wrkchain/${item.height}`} as={`/wrkchain/${item.height}`}>
+                      <a>{item.height}</a>
+                    </Link>
+                  </td>
                   <td>
                     <DateTime datetime={item.timestamp} withTime={true} />{" "}
                   </td>
                   <td>
-                    <img
-                      src={`/img/${item["ExchangeOracle.exchange"]}.webp`}
-                      alt={exchangeLookup(item["ExchangeOracle.exchange"])}
-                      width={"15"}
-                    />{" "}
-                    {exchangeLookup(item["ExchangeOracle.exchange"])}
+                    <Link
+                      href={`${process.env.MAINCHAIN_EXPLORER}/transactions/${item.mainchainTx}`}
+                      as={`${process.env.MAINCHAIN_EXPLORER}/transactions/${item.mainchainTx}`}
+                    >
+                      <a target="_blank">{item.mainchainTx.substr(0, 16)}...</a>
+                    </Link>
                   </td>
-                  <td>{formatNumber(item.priceRaw)}</td>
                   <td>
-                    <EthTx txHash={item.txHash} trim={true} />
+                    <Link
+                      href={`${process.env.MAINCHAIN_REST_URL}/txs/${item.mainchainTx}`}
+                      as={`${process.env.MAINCHAIN_REST_URL}/txs/${item.mainchainTx}`}
+                    >
+                      <a target="_blank">{item.mainchainTx.substr(0, 16)}...</a>
+                    </Link>
                   </td>
                 </tr>
               ))}
@@ -101,10 +105,8 @@ export default class CurrencyUpdateTable extends React.Component {
   }
 }
 
-CurrencyUpdateTable.propTypes = {
+WrkChainTable.propTypes = {
   data: PropTypes.object,
-  base: PropTypes.string,
-  target: PropTypes.string,
   paginate: PropTypes.bool,
   apiUrl: PropTypes.string,
 }

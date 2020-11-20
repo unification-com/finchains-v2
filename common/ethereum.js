@@ -79,7 +79,7 @@ const submitPrice = async (pair, priceInt, priceRaw, timestamp) => {
 const watchBlocks = async (cb = function () {}) => {
   const web3Ws = new Web3(WEB3_PROVIDER_WS)
 
-  console.log(new Date(), "running watcher")
+  console.log(new Date(), "running block watcher")
   web3Ws.eth
     .subscribe("newBlockHeaders")
     .on("connected", function newBlockHeadersConnected(subscriptionId) {

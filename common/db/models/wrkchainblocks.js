@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+const { Model } = require("sequelize")
+
 module.exports = (sequelize, DataTypes) => {
   class WrkchainBlocks extends Model {
     /**
@@ -12,13 +10,17 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
     }
-  };
-  WrkchainBlocks.init({
-    height: DataTypes.INTEGER,
-    mainchainTx: DataTypes.STRING
-  }, {
-    sequelize,
-    modelName: 'WrkchainBlocks',
-  });
-  return WrkchainBlocks;
-};
+  }
+  WrkchainBlocks.init(
+    {
+      height: DataTypes.INTEGER,
+      mainchainTx: DataTypes.STRING,
+      timestamp: DataTypes.INTEGER,
+    },
+    {
+      sequelize,
+      modelName: "WrkchainBlocks",
+    },
+  )
+  return WrkchainBlocks
+}
