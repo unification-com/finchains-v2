@@ -11,6 +11,7 @@ import { exchangeLookup } from "../utils/exchange"
 import { formatNumber } from "../utils/format"
 import EthTx from "./EthTx"
 import PaginationWrapper from "./PaginationWrapper"
+import Currency from "./Currency"
 
 export default class DiscrepancyTable extends React.Component {
   constructor(props) {
@@ -102,12 +103,20 @@ export default class DiscrepancyTable extends React.Component {
                     {exchangeLookup(item["ExchangeOracle2.exchange"])}
                   </td>
                   <td>
-                    <DateTime datetime={item.timestamp2} withTime={true} />{" "}
+                    <DateTime datetime={item.timestamp2} withTime={false} />{" "}
                   </td>
-                  <td>{formatNumber(Web3.utils.fromWei(item.price1))}</td>
-                  <td>{formatNumber(Web3.utils.fromWei(item.price2))}</td>
-                  <td>{formatNumber(Web3.utils.fromWei(item.diff))}</td>
-                  <td>{formatNumber(Web3.utils.fromWei(String(item.threshold)))}</td>
+                  <td>
+                    <Currency currency={target} price={Web3.utils.fromWei(item.price1)} />
+                  </td>
+                  <td>
+                    <Currency currency={target} price={Web3.utils.fromWei(item.price2)} />
+                  </td>
+                  <td>
+                    <Currency currency={target} price={Web3.utils.fromWei(item.diff)} displaySymbol={false} />
+                  </td>
+                  <td>
+                    <Currency currency={target} price={Web3.utils.fromWei(item.threshold)} />
+                  </td>
                   <td>
                     <EthTx txHash={item.txHash} trim={true} />
                   </td>

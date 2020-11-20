@@ -1,12 +1,11 @@
-import Link from "next/link"
 import React from "react"
 import Card from "react-bootstrap/Card"
 import Row from "react-bootstrap/Row"
 import Col from "react-bootstrap/Col"
 import PropTypes from "prop-types"
 import { exchangeLookup } from "../utils/exchange"
-import { currencySymbol, formatNumber } from "../utils/format"
 import DateTime from "./DateTime"
+import Currency from "./Currency"
 
 export default function LatestPrices({ latestPrices }) {
   return (
@@ -25,8 +24,7 @@ export default function LatestPrices({ latestPrices }) {
                 : <DateTime datetime={item.timestamp} withTime={true} />
               </Card.Title>
               <h3>
-                {currencySymbol(item["Pair.target"])}
-                {formatNumber(item.priceRaw)}
+                <Currency currency={item["Pair.target"]} price={item.priceRaw} displaySymbol={true} />
               </h3>
             </Card.Header>
           </Card>
