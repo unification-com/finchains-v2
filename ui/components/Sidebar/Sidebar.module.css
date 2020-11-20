@@ -7,7 +7,7 @@
 @media screen and (max-width: 991px) {
     .toggle_button {
         position: absolute;
-        top: 60px;
+        top: 20px;
         left: 5px;
         display: flex;
         flex-direction: column;
@@ -38,7 +38,7 @@
     }
 
     .close_button div:first-child {
-        background: black;
+        background: #32325d;
         transform: rotate(45deg);
     }
 
