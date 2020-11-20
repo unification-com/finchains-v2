@@ -30,7 +30,7 @@ export default class PairSelect extends React.Component {
       targetsApiUrl = `/api/pairs/${currentBase}`
     }
 
-    const targets = ["Select..."]
+    const targets = []
     const targetsDataRes = await fetch(targetsApiUrl)
     if (targetsDataRes.ok && targetsDataRes.status === 200) {
       const targetsJson = await targetsDataRes.json()
@@ -48,12 +48,12 @@ export default class PairSelect extends React.Component {
     await this.fetchTargets(currentBase)
   }
 
-  handleTargetChange(event) {
+  async handleTargetChange(event) {
     const { url } = this.props
 
     const { currentBase } = this.state
     const currentTarget = event.target.value
-    this.setState({ currentTarget })
+    await this.setState({ currentTarget })
     window.location = `${url}${currentBase}/${currentTarget}`
   }
 
@@ -76,11 +76,14 @@ export default class PairSelect extends React.Component {
     return (
       <>
         {(showLabel && <label>Pair:</label>)}
-        <select value={currentBase} onChange={this.handleBaseChange}>
+        <select value={currentBase} onChange={this.handleBaseChange} className={"select-css"}>
           {baseOptions}
         </select>
         {" / "}
-        <select value={currentTarget} onChange={this.handleTargetChange}>
+        <select value={currentTarget} onChange={this.handleTargetChange} className={"select-css"}>
+          <option key={`t_select_default`} value={targets[0]}>
+            Select...
+          </option>
           {targetOptions}
         </select>
       </>

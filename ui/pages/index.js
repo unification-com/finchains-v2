@@ -36,14 +36,14 @@ export async function getServerSideProps() {
     dashboardData = await dashboardDataRes.json()
   }
 
-  let bases = {}
+  let bases = []
   const basesApiUrl = "http://localhost:3000/api/pairs/bases"
   const basesDataRes = await fetch(basesApiUrl)
   if (basesDataRes.ok && basesDataRes.status === 200) {
     bases = await basesDataRes.json()
   }
 
-  let targets = {}
+  let targets = []
   const targetsApiUrl = `http://localhost:3000/api/pairs/${bases[0]}`
 
   const targetsDataRes = await fetch(targetsApiUrl)
@@ -84,7 +84,6 @@ export default function Home({ dashboardData, bases, targets, exchanges }) {
                     targets={targets}
                     url={"/history/"}
                     currentBase={bases[0]}
-                    currentTarget={targets[0]}
                   />
                 </h4>
               </Card.Header>

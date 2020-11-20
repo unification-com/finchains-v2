@@ -11,10 +11,12 @@ export default class ExchangeSelect extends React.Component {
     this.handleExchangeChange = this.handleExchangeChange.bind(this)
     this.fetchPairs = this.fetchPairs.bind(this)
 
+    const { currentExchange } = this.props
+    this.state = { currentExchange }
   }
 
   async fetchPairs() {
-    const { currentExchange } = this.props
+    const { currentExchange } = this.state
     const targetsApiUrl = `/api/exchange/${currentExchange}/pairs`
 
     let pairs = []
@@ -29,9 +31,9 @@ export default class ExchangeSelect extends React.Component {
   async handleExchangeChange(event) {
     const { url } = this.props
     const exchange = event.target.value
+    await this.setState({ currentExchange: exchange })
     const pairs = await this.fetchPairs()
-    console.log(exchange)
-    if (pairs) {
+    if (pairs.length > 0) {
       window.location = `${url}${exchange}/${pairs[0].base}/${pairs[0].targets[0]}`
     }
   }
@@ -47,7 +49,10 @@ export default class ExchangeSelect extends React.Component {
 
     return (
       <>
-        <select value={currentExchange} onChange={this.handleExchangeChange}>
+        <select value={currentExchange} onChange={this.handleExchangeChange} className={"select-css"}>
+          <option key={`e_select_default`} value={exchanges[0].exchange}>
+            Select...
+          </option>
           {exchangeOptions}
         </select>
       </>
