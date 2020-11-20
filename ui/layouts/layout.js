@@ -4,6 +4,7 @@ import Container from "react-bootstrap/Container"
 import PropTypes from "prop-types"
 import classNames from "classnames"
 import Sidebar from "../components/Sidebar/Sidebar"
+import Footer from "../components/Footer"
 
 export const siteTitle = "Finchains: Crypto"
 
@@ -18,10 +19,13 @@ export default function Layout({ children }) {
         <meta name="description" content={siteTitle} />
         <title>{siteTitle}</title>
       </Head>
-        <div className={classNames("wrapper")}>
-          <Sidebar bgColor="white" />
+      <div className={classNames("wrapper")}>
+        <Sidebar bgColor="white" />
+        <div className="main-panel">
           <div className={classNames("main-panel")}>{children}</div>
+          <Footer fluid />
         </div>
+      </div>
     </>
   )
 }
