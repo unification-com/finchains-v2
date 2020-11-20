@@ -4,6 +4,7 @@ const { getBlockNumber, getPastEvents, watchBlocks, watchEvent } = require("../c
 const { LastGethBlock } = require("../common/db/models")
 const { processCurrencyUpdate } = require("./currencyUpdates")
 const { processDiscrepancy } = require("./discrepancies")
+const { processWrkchainBlock } = require("./wrkchain")
 
 const args = arg({
   // Types
@@ -32,15 +33,14 @@ const run = async () => {
   let toBlock = 0
 
   switch (doWhat) {
-    case "wrkchain":
-      watchBlocks(function processBlock(data, err) {
+    case "WrkChain":
+      watchBlocks(async function processBlock(data, err) {
         if (err) {
           console.error(new Date(), "ERROR:")
           console.error(err)
         }
         if (data) {
-          console.log(new Date(), data)
-          // submit WRKChain hashes
+          await processWrkchainBlock(data)
         }
       })
       break
