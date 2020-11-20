@@ -99,11 +99,6 @@ export default class Sidebar extends React.Component {
                     alt={"Powered by Unification"}
                   />
                 </NavLink>
-                <NavLink href="https://github.com/unification-com/finchains-v2" target="_blank">
-                  <h4>
-                    <img src="/img/GitHub-Mark-Light-120px-plus.png" alt="GitHub" width="15" /> Github
-                  </h4>
-                </NavLink>
               </li>
             </Nav>
           </div>

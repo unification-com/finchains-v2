@@ -29,7 +29,7 @@
   background-position: center center;
   display: block;
   box-shadow: 0px 0px 45px 0px rgba(0,0,0,0.6);
-  margin-top: 80px;
+  margin-top: 18px;
   margin-left: 20px;
   border-radius: 5px;
 
@@ -147,12 +147,12 @@
         margin-top: 5px;
         li > a{
           margin-top: 0px;
-          padding: 8px 8px;
+          padding: 0px 0px;
         }
       }
 
       > a{
-        margin: 10px 15px 0;
+        margin: 5px 15px 0;
         border-radius: $btn-round-radius;
         color: $white;
         display: block;
@@ -161,7 +161,7 @@
         text-transform: uppercase;
         cursor: pointer;
         font-size: $font-size-xs;
-        padding: 10px 8px;
+        padding: 2px 8px;
         line-height: $line-height-lg;
       }
 
@@ -441,7 +441,6 @@
   float: right;
   width: $full-width;
   min-height: 100vh;
-  border-top: 2px solid $primary;
   background: linear-gradient($background-black, $background-states-black);
 
   @include transitions (0.50s, cubic-bezier(0.685, 0.0473, 0.346, 1));
@@ -459,7 +458,7 @@
   }
 
   > .content {
-    padding: 78px 30px 30px 280px;
+    padding: 18px 30px 30px 280px;
     min-height: calc(100vh - 70px);
   }
 
@@ -651,6 +650,9 @@
     overflow-y: visible;
     padding: 0;
     @include transition(0.5s cubic-bezier(0.685, 0.0473, 0.346, 1));
+  }
+
+  .sidebar_closed{
     @include transform-translate-x(-260px);
   }
 
