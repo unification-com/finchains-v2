@@ -14,6 +14,7 @@ import { currencySymbol, formatNumber } from "../utils/format"
 import EthTx from "../components/EthTx"
 import PairSelect from "../components/PairSelect"
 import ExchangeSelect from "../components/ExchangeSelect"
+import styles from "../components/CurrencyUpdateTable.module.css"
 
 export async function getServerSideProps() {
   let dashboardData = {
@@ -94,9 +95,8 @@ export default function Home({ dashboardData, bases, targets, exchanges }) {
               <Card.Header>
                 <Card.Title>Exchange Oracles</Card.Title>
                 <h4>
-                  {dashboardData.exchanges.num} Exchanges
-                  {" "}
-                  <ExchangeSelect url={"/exchange/"} exchanges={exchanges}  />
+                  {dashboardData.exchanges.num} Exchanges{" "}
+                  <ExchangeSelect url={"/exchange/"} exchanges={exchanges} />
                 </h4>
               </Card.Header>
             </Card>
@@ -184,56 +184,58 @@ export default function Home({ dashboardData, bases, targets, exchanges }) {
                 </Row>
               </Card.Header>
               <Card.Body>
-                <Table>
-                  <thead>
-                    <tr>
-                      <th>Timestamp</th>
-                      <th>Exchange</th>
-                      <th>Pair</th>
-                      <th>Price</th>
-                      <th>Tx</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {dashboardData.latestExchangeUpdates.map((item) => (
-                      <tr key={item.txHash}>
-                        <td>
-                          <DateTime datetime={item.timestamp} withTime={true} />{" "}
-                        </td>
-                        <td>
-                          <Link
-                            href={`/exchange/${item["ExchangeOracle.exchange"]}/${item["Pair.name"]}`}
-                            as={`/exchange/${item["ExchangeOracle.exchange"]}/${item["Pair.name"]}`}
-                          >
-                            <img
-                              src={`/img/${item["ExchangeOracle.exchange"]}.webp`}
-                              alt={exchangeLookup(item["ExchangeOracle.exchange"])}
-                              width={"15"}
-                            />
-                          </Link>{" "}
-                          <Link
-                            href={`/exchange/${item["ExchangeOracle.exchange"]}/${item["Pair.name"]}`}
-                            as={`/exchange/${item["ExchangeOracle.exchange"]}/${item["Pair.name"]}`}
-                          >
-                            {exchangeLookup(item["ExchangeOracle.exchange"])}
-                          </Link>
-                        </td>
-                        <td>
-                          <Link href={`/history/${item["Pair.name"]}`} as={`/history/${item["Pair.name"]}`}>
-                            {item["Pair.name"]}
-                          </Link>
-                        </td>
-                        <td>
-                          {currencySymbol(item["Pair.target"])}
-                          {formatNumber(item.priceRaw)}
-                        </td>
-                        <td>
-                          <EthTx txHash={item.txHash} trim={true} />
-                        </td>
+                <div className={`table-full-width table-responsive ${styles.dataTable}`}>
+                  <Table>
+                    <thead>
+                      <tr>
+                        <th>Timestamp</th>
+                        <th>Exchange</th>
+                        <th>Pair</th>
+                        <th>Price</th>
+                        <th>Tx</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </Table>
+                    </thead>
+                    <tbody>
+                      {dashboardData.latestExchangeUpdates.map((item) => (
+                        <tr key={item.txHash}>
+                          <td>
+                            <DateTime datetime={item.timestamp} withTime={true} />{" "}
+                          </td>
+                          <td>
+                            <Link
+                              href={`/exchange/${item["ExchangeOracle.exchange"]}/${item["Pair.name"]}`}
+                              as={`/exchange/${item["ExchangeOracle.exchange"]}/${item["Pair.name"]}`}
+                            >
+                              <img
+                                src={`/img/${item["ExchangeOracle.exchange"]}.webp`}
+                                alt={exchangeLookup(item["ExchangeOracle.exchange"])}
+                                width={"15"}
+                              />
+                            </Link>{" "}
+                            <Link
+                              href={`/exchange/${item["ExchangeOracle.exchange"]}/${item["Pair.name"]}`}
+                              as={`/exchange/${item["ExchangeOracle.exchange"]}/${item["Pair.name"]}`}
+                            >
+                              {exchangeLookup(item["ExchangeOracle.exchange"])}
+                            </Link>
+                          </td>
+                          <td>
+                            <Link href={`/history/${item["Pair.name"]}`} as={`/history/${item["Pair.name"]}`}>
+                              {item["Pair.name"]}
+                            </Link>
+                          </td>
+                          <td>
+                            {currencySymbol(item["Pair.target"])}
+                            {formatNumber(item.priceRaw)}
+                          </td>
+                          <td>
+                            <EthTx txHash={item.txHash} trim={true} />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </div>
               </Card.Body>
             </Card>
           </Col>
