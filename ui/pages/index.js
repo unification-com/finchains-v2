@@ -10,10 +10,10 @@ import Table from "react-bootstrap/Table"
 import Layout from "../layouts/layout"
 import { exchangeLookup } from "../utils/exchange"
 import DateTime from "../components/DateTime"
-import { currencySymbol, formatNumber } from "../utils/format"
 import EthTx from "../components/EthTx"
 import PairSelect from "../components/PairSelect"
 import ExchangeSelect from "../components/ExchangeSelect"
+import Currency from "../components/Currency"
 import styles from "../components/CurrencyUpdateTable.module.css"
 
 export async function getServerSideProps() {
@@ -79,12 +79,7 @@ export default function Home({ dashboardData, bases, targets, exchanges }) {
                 <Card.Title>Pairs Tracked</Card.Title>
                 <h4>
                   {dashboardData.pairs.num} Pairs{" "}
-                  <PairSelect
-                    bases={bases}
-                    targets={targets}
-                    url={"/history/"}
-                    currentBase={bases[0]}
-                  />
+                  <PairSelect bases={bases} targets={targets} url={"/history/"} currentBase={bases[0]} />
                 </h4>
               </Card.Header>
             </Card>
@@ -115,8 +110,11 @@ export default function Home({ dashboardData, bases, targets, exchanges }) {
                   {exchangeLookup(dashboardData.lastUpdate["ExchangeOracle.exchange"])}{" "}
                   {dashboardData.lastUpdate["Pair.name"]}
                   <br />
-                  {currencySymbol(dashboardData.lastUpdate["Pair.target"])}
-                  {formatNumber(dashboardData.lastUpdate.priceRaw)}
+                  <Currency
+                    currency={dashboardData.lastUpdate["Pair.target"]}
+                    price={dashboardData.lastUpdate.priceRaw}
+                    displaySymbol
+                  />
                 </h4>
               </Card.Header>
             </Card>
@@ -137,8 +135,11 @@ export default function Home({ dashboardData, bases, targets, exchanges }) {
                   {exchangeLookup(dashboardData.lastDiscrepancy["ExchangeOracle1.exchange"])}
                   {": "}
                   {dashboardData.lastDiscrepancy["Pair.name"]}{" "}
-                  {currencySymbol(dashboardData.lastDiscrepancy["Pair.target"])}
-                  {formatNumber(Web3.utils.fromWei(dashboardData.lastDiscrepancy.price1))}
+                  <Currency
+                    currency={dashboardData.lastDiscrepancy["Pair.target"]}
+                    price={Web3.utils.fromWei(dashboardData.lastDiscrepancy.price1)}
+                    displaySymbol
+                  />
                   <br />
                   <img
                     src={`/img/${dashboardData.lastDiscrepancy["ExchangeOracle2.exchange"]}.webp`}
@@ -148,8 +149,11 @@ export default function Home({ dashboardData, bases, targets, exchanges }) {
                   {exchangeLookup(dashboardData.lastDiscrepancy["ExchangeOracle2.exchange"])}
                   {": "}
                   {dashboardData.lastDiscrepancy["Pair.name"]}{" "}
-                  {currencySymbol(dashboardData.lastDiscrepancy["Pair.target"])}
-                  {formatNumber(Web3.utils.fromWei(dashboardData.lastDiscrepancy.price2))}
+                  <Currency
+                    currency={dashboardData.lastDiscrepancy["Pair.target"]}
+                    price={Web3.utils.fromWei(dashboardData.lastDiscrepancy.price2)}
+                    displaySymbol
+                  />
                   <br />
                   <img
                     src={`/img/${dashboardData.lastDiscrepancy["ExchangeOracle1.exchange"]}.webp`}
@@ -162,8 +166,12 @@ export default function Home({ dashboardData, bases, targets, exchanges }) {
                     alt={exchangeLookup(dashboardData.lastDiscrepancy["ExchangeOracle2.exchange"])}
                     width={"15"}
                   />{" "}
-                  Diff: {currencySymbol(dashboardData.lastDiscrepancy["Pair.target"])}
-                  {formatNumber(Web3.utils.fromWei(dashboardData.lastDiscrepancy.diff))}
+                  Diff:{" "}
+                  <Currency
+                    currency={dashboardData.lastDiscrepancy["Pair.target"]}
+                    price={Web3.utils.fromWei(dashboardData.lastDiscrepancy.diff)}
+                    displaySymbol
+                  />
                 </h5>
               </Card.Header>
             </Card>
@@ -224,8 +232,7 @@ export default function Home({ dashboardData, bases, targets, exchanges }) {
                             </Link>
                           </td>
                           <td>
-                            {currencySymbol(item["Pair.target"])}
-                            {formatNumber(item.priceRaw)}
+                            <Currency currency={item["Pair.target"]} price={item.priceRaw} displaySymbol />
                           </td>
                           <td>
                             <EthTx txHash={item.txHash} trim={true} />

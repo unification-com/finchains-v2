@@ -5,10 +5,10 @@ import fetch from "isomorphic-unfetch"
 import DateTime from "./DateTime"
 import EthTx from "./EthTx"
 import PaginationWrapper from "./PaginationWrapper"
+import Currency from "./Currency"
 import styles from "./CurrencyUpdateTable.module.css"
 
 import { exchangeLookup } from "../utils/exchange"
-import { formatNumber } from "../utils/format"
 
 export default class CurrencyUpdateTable extends React.Component {
   constructor(props) {
@@ -41,7 +41,7 @@ export default class CurrencyUpdateTable extends React.Component {
 
   render() {
     const { data, base, target, paginate, dataLoading } = this.state
-    if(dataLoading) {
+    if (dataLoading) {
       return (
         <>
           <h3>Loading...</h3>
@@ -85,7 +85,9 @@ export default class CurrencyUpdateTable extends React.Component {
                     />{" "}
                     {exchangeLookup(item["ExchangeOracle.exchange"])}
                   </td>
-                  <td>{formatNumber(item.priceRaw)}</td>
+                  <td>
+                    <Currency currency={target} price={item.priceRaw} />
+                  </td>
                   <td>
                     <EthTx txHash={item.txHash} trim={true} />
                   </td>
