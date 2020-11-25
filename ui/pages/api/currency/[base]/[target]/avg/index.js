@@ -15,7 +15,7 @@ handler.get(async (req, res) => {
 
   const d = new Date()
   const ts = Math.floor(d / 1000)
-  const lastFiveMins = ts - 300
+  const lastFiveMins = ts - 3600
 
   req.dbModels.CurrencyUpdates.findAll({
     attributes: ["exchangeOracleId", [Sequelize.fn("max", Sequelize.col("CurrencyUpdates.id")), "rId"]],
