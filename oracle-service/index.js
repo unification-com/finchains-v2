@@ -1,7 +1,8 @@
 require("dotenv").config()
 const Web3 = require("web3")
 const { addOracle, getLastSubmitTime, setThreshold, submitPrice } = require("../common/ethereum")
-const { getExchangePrices } = require("./apis/coingecko")
+const { exchangeApis } = require("./apis/index")
+const { currencies } = require("./config")
 
 const sleepFor = (ms) => {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -47,7 +48,7 @@ const runAddOracle = async (args) => {
 
 const runOracle = async () => {
   const { EXCHANGE, WALLET_ADDRESS } = process.env
-  await getExchangePrices(EXCHANGE)
+  await exchangeApis[EXCHANGE].getPrices()
     .then(async (data) => {
       for (let i = 0; i < data.length; i += 1) {
         try {
@@ -74,6 +75,44 @@ const runOracle = async () => {
     })
 }
 
+const testOracle = async (args) => {
+  const exchange = args[1]
+  await exchangeApis[exchange]
+    .getPrices()
+    .then(async (data) => {
+      console.log("data", data)
+      for (let i = 0; i < currencies.length; i += 1) {
+        const base = currencies[i].sybmol
+        for (let j = 0; j < currencies[i].targets.length; j += 1) {
+          const target = currencies[i].targets[j]
+          const pair = `${base}/${target}`
+          const found = data.find((element) => element.base === base && element.target === target)
+          console.log(pair, found ? "FOUND" : `pair not supported by ${exchange}?`)
+        }
+      }
+      console.log(exchange, "done")
+      process.exit(0)
+    })
+    .catch((err) => {
+      console.error(new Date(), "ERROR:")
+      console.error(err)
+    })
+}
+
+const listExchanges = () => {
+  Object.keys(exchangeApis).forEach((exchange) => {
+    console.log(exchange)
+  })
+}
+
+const listWantedPairs = () => {
+  for (let i = 0; i < currencies.length; i += 1) {
+    for (let j = 0; j < currencies[i].targets.length; j += 1) {
+      console.log(`${currencies[i].sybmol}/${currencies[i].targets[j]}`)
+    }
+  }
+}
+
 const run = async () => {
   const args = process.argv.slice(2)
   const doWhat = args[0]
@@ -87,6 +126,15 @@ const run = async () => {
       break
     case "set-threshold":
       await runSetThreshold(args)
+      break
+    case "test-oracle":
+      await testOracle(args)
+      break
+    case "list-exchanges":
+      listExchanges()
+      break
+    case "list-pairs":
+      listWantedPairs()
       break
     default:
       console.log(new Date(), "nothing to do")
