@@ -90,11 +90,8 @@ handler.get(async (req, res) => {
     case "24H":
       tsQuery = ts - oneDay
       break
-    case "1WK":
-      tsQuery = ts - oneWeek
-      break
-    case "1MN":
-      tsQuery = ts - oneMonth
+    case "48H":
+      tsQuery = ts - oneDay * 2
       break
   }
 
