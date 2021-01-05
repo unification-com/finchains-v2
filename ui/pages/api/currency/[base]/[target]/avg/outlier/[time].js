@@ -65,35 +65,35 @@ handler.get(async (req, res) => {
 
   // default is one hour
   switch (time) {
-    case "5MIN":
+    case "5M":
       tsQuery = ts - oneMinute * 5
       break
-    case "10MIN":
+    case "10M":
       tsQuery = ts - oneMinute * 10
       break
-    case "30MIN":
+    case "30M":
       tsQuery = ts - oneMinute * 30
       break
-    case "1HR":
+    case "1H":
     default:
       tsQuery = ts - oneHour
       break
-    case "2HR":
+    case "2H":
       tsQuery = ts - oneHour * 2
       break
-    case "6HR":
+    case "6H":
       tsQuery = ts - oneHour * 6
       break
-    case "12HR":
+    case "12H":
       tsQuery = ts - oneHour * 12
       break
-    case "24HR":
+    case "24H":
       tsQuery = ts - oneDay
       break
-    case "1WEEK":
+    case "1WK":
       tsQuery = ts - oneWeek
       break
-    case "1MON":
+    case "1MN":
       tsQuery = ts - oneMonth
       break
   }
