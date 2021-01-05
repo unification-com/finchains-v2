@@ -1,4 +1,5 @@
 import nextConnect from "next-connect"
+import { Op, Sequelize } from "sequelize"
 import middleware from "../../../../middleware/db"
 
 const handler = nextConnect()
@@ -10,41 +11,47 @@ handler.get(async (req, res) => {
     query: { exchange },
   } = req
 
-  req.dbModels.CurrencyUpdates.findAll({
-    attributes: ["pairId"],
-    include: [
-      { model: req.dbModels.ExchangeOracles, attributes: ["id"], where: { exchange } },
-      {
-        model: req.dbModels.Pairs,
-        attributes: ["base", "target"],
-        order: [
-          ["base", "ASC"],
-          ["target", "ASC"],
-        ],
-      },
-    ],
-    group: ["ExchangeOracle.id", "CurrencyUpdates.pairId", "Pair.base", "Pair.target"],
-    raw: true,
+  req.dbModels.ExchangeOracles.findOne({
+    attributes: ["id"],
+    where: { exchange },
   })
-    .then((data) => {
-      const dataReturn = []
-      const pairs = {}
-      for (let i = 0; i < data.length; i += 1) {
-        const base = data[i]["Pair.base"]
-        const target = data[i]["Pair.target"]
-        if (!pairs[base]) {
-          pairs[base] = {
-            base,
-            targets: [],
+    .then(function (exch) {
+      req.dbModels.ExchangePairs.findAll({
+        attributes: ["pairId"],
+        include: [
+          {
+            model: req.dbModels.Pairs,
+            attributes: ["name", "base", "target"],
+            order: [
+              ["base", "ASC"],
+              ["target", "ASC"],
+            ],
+          },
+        ],
+        where: {
+          exchangeOracleId: exch.id,
+        },
+        raw: true,
+      })
+        .then((data) => {
+          const pairs = []
+          for (let i = 0; i < data.length; i += 1) {
+            const d = data[i]
+            const p = {
+              name: d["Pair.name"],
+              base: d["Pair.base"],
+              target: d["Pair.target"],
+            }
+            pairs.push(p)
           }
-        }
-        pairs[base].targets.push(target)
-      }
-      for (const dateKey of Object.keys(pairs)) {
-        const pair = pairs[dateKey]
-        dataReturn.push(pair)
-      }
-      res.json(dataReturn)
+          res.json(pairs.sort())
+        })
+        .catch((err) => {
+          console.error(err)
+          res.status(500).send({
+            message: "error occurred while retrieving data.",
+          })
+        })
     })
     .catch((err) => {
       console.error(err)

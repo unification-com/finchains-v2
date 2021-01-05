@@ -8,6 +8,7 @@ const Discrepancies = require("../../common/db/models/discrepancies")(sequelize,
 const LastGethBlock = require("../../common/db/models/lastgethblock")(sequelize, Sequelize.DataTypes)
 const Pairs = require("../../common/db/models/pairs")(sequelize, Sequelize.DataTypes)
 const WrkchainBlocks = require("../../common/db/models/wrkchainblocks")(sequelize, Sequelize.DataTypes)
+const ExchangePairs = require("../../common/db/models/exchangepairs")(sequelize, Sequelize.DataTypes)
 
 const dbModels = {
   CurrencyUpdates,
@@ -16,6 +17,7 @@ const dbModels = {
   Pairs,
   WrkchainBlocks,
   LastGethBlock,
+  ExchangePairs,
 }
 
 Object.keys(dbModels).forEach((modelName) => {

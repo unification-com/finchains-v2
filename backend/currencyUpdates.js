@@ -1,6 +1,7 @@
 const { CurrencyUpdates, LastGethBlock } = require("../common/db/models")
 const { getOrAddPair } = require("./pairs")
 const { getOrAddExchangeOracle } = require("./exchangeOracles")
+const { getOrAddExchangePair } = require("./exchangePairs")
 
 const getOrAddCurrencyUpdate = async (exchangeOracleId, pairId, txHash, price, priceRaw, timestamp) => {
   return CurrencyUpdates.findOrCreate({
@@ -36,6 +37,12 @@ const processCurrencyUpdate = async (event) => {
     if (eoCreated) {
       console.log(new Date(), "added new exchange oracle", exchange, oracleAddress, eo.id)
     }
+
+    const [exPair, exPairCreated] = await getOrAddExchangePair(eo.id, pair.id)
+    if (exPairCreated) {
+      console.log(new Date(), "added new exchange oracle pair link", exchange, pairName, exPair.id)
+    }
+
     const [cu, cuCreated] = await getOrAddCurrencyUpdate(eo.id, pair.id, txHash, price, priceRaw, timestamp)
 
     if (cuCreated) {
