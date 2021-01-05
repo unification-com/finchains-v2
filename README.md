@@ -51,13 +51,13 @@ Run via `pm2`
 For currency updates:
 
 ```bash
-node backend/index.js watch-currency-update
+node backend/index.js --run=watch-event --event=CurrencyUpdate
 ```
 
 For discrepancies:
 
 ```bash
-node backend/index.js watch-discrepancy
+node backend/index.js --run=watch-event --event=Discrepancy
 ```
 
 For WRKCHain block hash submission:
