@@ -1,5 +1,6 @@
 import nextConnect from "next-connect"
 import middleware from "../../../middleware/db"
+import { exchangeToTla, exchangeLookup } from "../../../utils/exchange"
 
 const handler = nextConnect()
 
@@ -11,7 +12,17 @@ handler.get(async (req, res) => {
     order: [["exchange", "ASC"]],
   })
     .then((data) => {
-      res.json(data)
+      const retData = []
+      for (let i = 0; i < data.length; i += 1) {
+        const d = {
+          exchange: data[i].exchange,
+          address: data[i].address,
+          tla: exchangeToTla(data[i].exchange),
+          name: exchangeLookup(data[i].exchange),
+        }
+        retData.push(d)
+      }
+      res.json(retData)
     })
     .catch((err) => {
       console.error(err)
