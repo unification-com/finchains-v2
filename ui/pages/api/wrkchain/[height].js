@@ -16,6 +16,9 @@ handler.get(async (req, res) => {
     raw: true,
   })
     .then((data) => {
+      if (!data) {
+        res.json({})
+      }
       res.json(data)
     })
     .catch((err) => {

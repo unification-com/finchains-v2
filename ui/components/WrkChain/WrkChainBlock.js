@@ -10,7 +10,10 @@ import Validate from "./Validate"
 
 export default class WrkChainBlock extends React.Component {
   render() {
-    const { data } = this.props
+    const { data, height } = this.props
+    if (Object.keys(data).length === 0) {
+      return <h3>No data for Block #{height}</h3>
+    }
     return (
       <>
         <Row>
@@ -20,7 +23,7 @@ export default class WrkChainBlock extends React.Component {
                 <Row>
                   <Col className="text-left">
                     <Card.Title tag="h3">
-                      <h3>WrkChain Validation</h3>
+                      <h3>WrkChain Validation for {height}</h3>
                     </Card.Title>
                   </Col>
                 </Row>
@@ -92,4 +95,5 @@ export default class WrkChainBlock extends React.Component {
 
 WrkChainBlock.propTypes = {
   data: PropTypes.object,
+  height: PropTypes.number,
 }
