@@ -5,6 +5,7 @@ const { LastGethBlock } = require("../common/db/models")
 const { processCurrencyUpdate } = require("./currencyUpdates")
 const { processDiscrepancy } = require("./discrepancies")
 const { processWrkchainBlock } = require("./wrkchain")
+const { calculateThresholds } = require("./thresholds")
 
 const args = arg({
   // Types
@@ -149,6 +150,10 @@ const run = async () => {
           process.exit(0)
         }
       }
+      process.exit(0)
+      break
+    case "thresholds":
+      await calculateThresholds()
       process.exit(0)
       break
     default:
