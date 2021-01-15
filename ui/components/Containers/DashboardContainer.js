@@ -18,37 +18,26 @@ export default class DashboardContainer extends React.Component {
   constructor(props) {
     super(props)
 
-    this.fetchDashboardData = this.fetchDashboardData.bind(this)
-    this.emptyDashData = this.emptyDashData.bind(this)
     this.fetchPairData = this.fetchPairData.bind(this)
     this.fetchExchangeData = this.fetchExchangeData.bind(this)
+    this.fetchLatestExchangeUpdates = this.fetchLatestExchangeUpdates.bind(this)
+    this.fetchLastUpdate = this.fetchLastUpdate.bind(this)
+    this.fetchLastDiscrepancy = this.fetchLastDiscrepancy.bind(this)
 
     this.state = {
-      dashboardData: this.emptyDashData(),
+      latestExchangeUpdates: [],
+      lastUpdate: {},
+      lastDiscrepancy: {},
       bases: [],
       targets: [],
       exchanges: [],
       pairDataLoading: true,
       exchangeDataLoading: true,
       dashDataLoading: true,
+      latestExchangeUpdatesDataLoading: true,
+      lastUpdateDataLoading: true,
+      lastDiscrepancyDataLoading: true,
     }
-  }
-
-  emptyDashData() {
-    const dashboardData = {
-      pairs: {
-        num: 0,
-        data: [],
-      },
-      exchanges: {
-        num: 0,
-        data: [],
-      },
-      latestExchangeUpdates: [],
-      lastUpdate: {},
-      lastDiscrepancy: {},
-    }
-    return dashboardData
   }
 
   async fetchPairData() {
@@ -79,31 +68,57 @@ export default class DashboardContainer extends React.Component {
     await this.setState({ exchanges, exchangeDataLoading: false })
   }
 
-  async fetchDashboardData() {
-    let dashboardData = this.emptyDashData()
-    const dashboardApiUrl = "/api/dashboard"
+  async fetchLatestExchangeUpdates() {
+    let latestExchangeUpdates = []
+    const dashboardApiUrl = "/api/dashboard/submissions"
     const dashboardDataRes = await fetch(dashboardApiUrl)
     if (dashboardDataRes.ok && dashboardDataRes.status === 200) {
-      dashboardData = await dashboardDataRes.json()
+      latestExchangeUpdates = await dashboardDataRes.json()
     }
-    await this.setState({ dashboardData, dashDataLoading: false })
+    await this.setState({ latestExchangeUpdates, latestExchangeUpdatesDataLoading: false })
+  }
+  
+  async fetchLastUpdate() {
+    let lastUpdate = {}
+    const dashboardApiUrl = "/api/dashboard/last_update"
+    const dashboardDataRes = await fetch(dashboardApiUrl)
+    if (dashboardDataRes.ok && dashboardDataRes.status === 200) {
+      lastUpdate = await dashboardDataRes.json()
+    }
+    await this.setState({ lastUpdate, lastUpdateDataLoading: false })
+  }
+  
+  async fetchLastDiscrepancy() {
+    let lastDiscrepancy = {}
+    const dashboardApiUrl = "/api/dashboard/last_discrepancy"
+    const dashboardDataRes = await fetch(dashboardApiUrl)
+    if (dashboardDataRes.ok && dashboardDataRes.status === 200) {
+      lastDiscrepancy = await dashboardDataRes.json()
+    }
+    await this.setState({ lastDiscrepancy, lastDiscrepancyDataLoading: false })
   }
 
   componentDidMount() {
     this.fetchExchangeData()
     this.fetchPairData()
-    this.fetchDashboardData()
+    this.fetchLatestExchangeUpdates()
+    this.fetchLastUpdate()
+    this.fetchLastDiscrepancy()
   }
 
   render() {
     const {
-      dashboardData,
       bases,
       targets,
       exchanges,
+      latestExchangeUpdates,
+      lastUpdate,
+      lastDiscrepancy,
       pairDataLoading,
       exchangeDataLoading,
-      dashDataLoading,
+      latestExchangeUpdatesDataLoading,
+      lastUpdateDataLoading,
+      lastDiscrepancyDataLoading,
     } = this.state
 
     return (
@@ -117,7 +132,6 @@ export default class DashboardContainer extends React.Component {
                   <h4>Loading</h4>
                 ) : (
                   <h4>
-                    {dashboardData.pairs.num} Pairs{" "}
                     <PairSelect bases={bases} targets={targets} url={"/history/"} currentBase={bases[0]} />
                   </h4>
                 )}
@@ -132,7 +146,7 @@ export default class DashboardContainer extends React.Component {
                   <h4>Loading</h4>
                 ) : (
                   <h4>
-                    {dashboardData.exchanges.num} Exchanges{" "}
+                    {exchanges.length} Exchanges{" "}
                     <ExchangeSelect url={"/exchange/"} exchanges={exchanges} />
                   </h4>
                 )}
@@ -143,23 +157,28 @@ export default class DashboardContainer extends React.Component {
             <Card className="card-chart">
               <Card.Header>
                 <Card.Title>
-                  Last Submission: <DateTime datetime={dashboardData.lastUpdate.timestamp} withTime={true} />
+                  Last Submission:
+                  {lastUpdateDataLoading ? (
+                    <></>
+                  ) : (
+                    <DateTime datetime={lastUpdate.timestamp} withTime={true} />
+                  )}
                 </Card.Title>
-                {dashDataLoading ? (
+                {lastUpdateDataLoading ? (
                   <h4>Loading</h4>
                 ) : (
                   <h4>
                     <img
-                      src={`/img/${dashboardData.lastUpdate["ExchangeOracle.exchange"]}.webp`}
-                      alt={exchangeLookup(dashboardData.lastUpdate["ExchangeOracle.exchange"])}
+                      src={`/img/${lastUpdate["ExchangeOracle.exchange"]}.webp`}
+                      alt={exchangeLookup(lastUpdate["ExchangeOracle.exchange"])}
                       width={"15"}
                     />{" "}
-                    {exchangeLookup(dashboardData.lastUpdate["ExchangeOracle.exchange"])}{" "}
-                    {dashboardData.lastUpdate["Pair.name"]}
+                    {exchangeLookup(lastUpdate["ExchangeOracle.exchange"])}{" "}
+                    {lastUpdate["Pair.name"]}
                     <br />
                     <Currency
-                      currency={dashboardData.lastUpdate["Pair.target"]}
-                      price={dashboardData.lastUpdate.priceRaw}
+                      currency={lastUpdate["Pair.target"]}
+                      price={lastUpdate.priceRaw}
                       displaySymbol
                     />
                   </h4>
@@ -172,55 +191,59 @@ export default class DashboardContainer extends React.Component {
               <Card.Header>
                 <Card.Title>
                   Last Discrepancy:{" "}
-                  <DateTime datetime={dashboardData.lastDiscrepancy.timestamp1} withTime={true} />
+                  {lastDiscrepancyDataLoading ? (
+                    <></>
+                  ) : (
+                    <DateTime datetime={lastDiscrepancy.timestamp1} withTime={true} />
+                  )}
                 </Card.Title>
-                {dashDataLoading ? (
+                {lastDiscrepancyDataLoading ? (
                   <h4>Loading</h4>
                 ) : (
                   <h5>
                     <img
-                      src={`/img/${dashboardData.lastDiscrepancy["ExchangeOracle1.exchange"]}.webp`}
-                      alt={exchangeLookup(dashboardData.lastDiscrepancy["ExchangeOracle1.exchange"])}
+                      src={`/img/${lastDiscrepancy["ExchangeOracle1.exchange"]}.webp`}
+                      alt={exchangeLookup(lastDiscrepancy["ExchangeOracle1.exchange"])}
                       width={"15"}
                     />{" "}
-                    {exchangeLookup(dashboardData.lastDiscrepancy["ExchangeOracle1.exchange"])}
+                    {exchangeLookup(lastDiscrepancy["ExchangeOracle1.exchange"])}
                     {": "}
-                    {dashboardData.lastDiscrepancy["Pair.name"]}{" "}
+                    {lastDiscrepancy["Pair.name"]}{" "}
                     <Currency
-                      currency={dashboardData.lastDiscrepancy["Pair.target"]}
-                      price={Web3.utils.fromWei(dashboardData.lastDiscrepancy.price1)}
+                      currency={lastDiscrepancy["Pair.target"]}
+                      price={Web3.utils.fromWei(lastDiscrepancy.price1)}
                       displaySymbol
                     />
                     <br />
                     <img
-                      src={`/img/${dashboardData.lastDiscrepancy["ExchangeOracle2.exchange"]}.webp`}
-                      alt={exchangeLookup(dashboardData.lastDiscrepancy["ExchangeOracle2.exchange"])}
+                      src={`/img/${lastDiscrepancy["ExchangeOracle2.exchange"]}.webp`}
+                      alt={exchangeLookup(lastDiscrepancy["ExchangeOracle2.exchange"])}
                       width={"15"}
                     />{" "}
-                    {exchangeLookup(dashboardData.lastDiscrepancy["ExchangeOracle2.exchange"])}
+                    {exchangeLookup(lastDiscrepancy["ExchangeOracle2.exchange"])}
                     {": "}
-                    {dashboardData.lastDiscrepancy["Pair.name"]}{" "}
+                    {lastDiscrepancy["Pair.name"]}{" "}
                     <Currency
-                      currency={dashboardData.lastDiscrepancy["Pair.target"]}
-                      price={Web3.utils.fromWei(dashboardData.lastDiscrepancy.price2)}
+                      currency={lastDiscrepancy["Pair.target"]}
+                      price={Web3.utils.fromWei(lastDiscrepancy.price2)}
                       displaySymbol
                     />
                     <br />
                     <img
-                      src={`/img/${dashboardData.lastDiscrepancy["ExchangeOracle1.exchange"]}.webp`}
-                      alt={exchangeLookup(dashboardData.lastDiscrepancy["ExchangeOracle1.exchange"])}
+                      src={`/img/${lastDiscrepancy["ExchangeOracle1.exchange"]}.webp`}
+                      alt={exchangeLookup(lastDiscrepancy["ExchangeOracle1.exchange"])}
                       width={"15"}
                     />
                     {" / "}
                     <img
-                      src={`/img/${dashboardData.lastDiscrepancy["ExchangeOracle2.exchange"]}.webp`}
-                      alt={exchangeLookup(dashboardData.lastDiscrepancy["ExchangeOracle2.exchange"])}
+                      src={`/img/${lastDiscrepancy["ExchangeOracle2.exchange"]}.webp`}
+                      alt={exchangeLookup(lastDiscrepancy["ExchangeOracle2.exchange"])}
                       width={"15"}
                     />{" "}
                     Diff:{" "}
                     <Currency
-                      currency={dashboardData.lastDiscrepancy["Pair.target"]}
-                      price={Web3.utils.fromWei(dashboardData.lastDiscrepancy.diff)}
+                      currency={lastDiscrepancy["Pair.target"]}
+                      price={Web3.utils.fromWei(lastDiscrepancy.diff)}
                       displaySymbol
                     />
                   </h5>
@@ -243,26 +266,23 @@ export default class DashboardContainer extends React.Component {
                 </Row>
               </Card.Header>
               <Card.Body>
-                {dashDataLoading ? (
+                {latestExchangeUpdatesDataLoading ? (
                   <h4>Loading</h4>
                 ) : (
                   <div className={`table-full-width table-responsive ${styles.dataTable}`}>
                     <Table>
                       <thead>
                         <tr>
-                          <th>Timestamp</th>
                           <th>Exchange</th>
+                          <th>Timestamp</th>
                           <th>Pair</th>
                           <th>Price</th>
                           <th>Tx</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {dashboardData.latestExchangeUpdates.map((item) => (
+                        {latestExchangeUpdates.map((item) => (
                           <tr key={item.txHash}>
-                            <td>
-                              <DateTime datetime={item.timestamp} withTime={true} />{" "}
-                            </td>
                             <td>
                               <Link
                                 href={`/exchange/${item["ExchangeOracle.exchange"]}/${item["Pair.name"]}`}
@@ -280,6 +300,9 @@ export default class DashboardContainer extends React.Component {
                               >
                                 {exchangeLookup(item["ExchangeOracle.exchange"])}
                               </Link>
+                            </td>
+                            <td>
+                              <DateTime datetime={item.timestamp} withTime={true} />{" "}
                             </td>
                             <td>
                               <Link
