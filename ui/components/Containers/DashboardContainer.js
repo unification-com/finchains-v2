@@ -20,13 +20,17 @@ export default class DashboardContainer extends React.Component {
 
     this.fetchDashboardData = this.fetchDashboardData.bind(this)
     this.emptyDashData = this.emptyDashData.bind(this)
+    this.fetchPairData = this.fetchPairData.bind(this)
+    this.fetchExchangeData = this.fetchExchangeData.bind(this)
 
     this.state = {
       dashboardData: this.emptyDashData(),
       bases: [],
       targets: [],
       exchanges: [],
-      dataLoading: true,
+      pairDataLoading: true,
+      exchangeDataLoading: true,
+      dashDataLoading: true,
     }
   }
 
@@ -47,7 +51,7 @@ export default class DashboardContainer extends React.Component {
     return dashboardData
   }
 
-  async fetchDashboardData() {
+  async fetchPairData() {
     let bases = []
     const basesApiUrl = "/api/pairs/bases"
     const basesDataRes = await fetch(basesApiUrl)
@@ -62,29 +66,45 @@ export default class DashboardContainer extends React.Component {
     if (targetsDataRes.ok && targetsDataRes.status === 200) {
       targets = await targetsDataRes.json()
     }
-
+    await this.setState({ bases, targets, pairDataLoading: false })
+  }
+  
+  async fetchExchangeData() {
     let exchanges = []
     const exchangesApiUrl = `/api/exchange`
     const exchangesDataRes = await fetch(exchangesApiUrl)
     if (exchangesDataRes.ok && exchangesDataRes.status === 200) {
       exchanges = await exchangesDataRes.json()
     }
+    await this.setState({ exchanges, exchangeDataLoading: false })
+  }
 
+  async fetchDashboardData() {
     let dashboardData = this.emptyDashData()
     const dashboardApiUrl = "/api/dashboard"
     const dashboardDataRes = await fetch(dashboardApiUrl)
     if (dashboardDataRes.ok && dashboardDataRes.status === 200) {
       dashboardData = await dashboardDataRes.json()
     }
-    await this.setState({ dashboardData, bases, targets, exchanges, dataLoading: false })
+    await this.setState({ dashboardData, dashDataLoading: false })
   }
 
   async componentDidMount() {
+    await this.fetchExchangeData()
+    await this.fetchPairData()
     await this.fetchDashboardData()
   }
 
   render() {
-    const { dashboardData, bases, targets, exchanges, dataLoading } = this.state
+    const {
+      dashboardData,
+      bases,
+      targets,
+      exchanges,
+      pairDataLoading,
+      exchangeDataLoading,
+      dashDataLoading,
+    } = this.state
 
     return (
       <>
@@ -93,7 +113,7 @@ export default class DashboardContainer extends React.Component {
             <Card className="card-chart">
               <Card.Header>
                 <Card.Title>Pairs Tracked</Card.Title>
-                {dataLoading ? (
+                {pairDataLoading ? (
                   <h4>Loading</h4>
                 ) : (
                   <h4>
@@ -108,7 +128,7 @@ export default class DashboardContainer extends React.Component {
             <Card className="card-chart">
               <Card.Header>
                 <Card.Title>Exchange Oracles</Card.Title>
-                {dataLoading ? (
+                {exchangeDataLoading ? (
                   <h4>Loading</h4>
                 ) : (
                   <h4>
@@ -125,7 +145,7 @@ export default class DashboardContainer extends React.Component {
                 <Card.Title>
                   Last Submission: <DateTime datetime={dashboardData.lastUpdate.timestamp} withTime={true} />
                 </Card.Title>
-                {dataLoading ? (
+                {dashDataLoading ? (
                   <h4>Loading</h4>
                 ) : (
                   <h4>
@@ -154,7 +174,7 @@ export default class DashboardContainer extends React.Component {
                   Last Discrepancy:{" "}
                   <DateTime datetime={dashboardData.lastDiscrepancy.timestamp1} withTime={true} />
                 </Card.Title>
-                {dataLoading ? (
+                {dashDataLoading ? (
                   <h4>Loading</h4>
                 ) : (
                   <h5>
@@ -223,7 +243,7 @@ export default class DashboardContainer extends React.Component {
                 </Row>
               </Card.Header>
               <Card.Body>
-                {dataLoading ? (
+                {dashDataLoading ? (
                   <h4>Loading</h4>
                 ) : (
                   <div className={`table-full-width table-responsive ${styles.dataTable}`}>
