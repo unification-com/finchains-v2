@@ -135,19 +135,25 @@ const getBlockNumber = async () => {
   return web3.eth.getBlockNumber()
 }
 
-const getPastEvents = async (fromBlock, toBlock, eventName, cb = function () {}) => {
+const getPastEvents = async (fromBlock, toBlock, eventName) => {
   const web3 = new Web3(WEB3_PROVIDER_HTTP)
   const contract = await new web3.eth.Contract(JSON.parse(CONTRACT_ABI), CONTRACT_ADDRESS)
-  await contract.getPastEvents(
-    eventName,
-    {
-      fromBlock,
-      toBlock,
-    },
-    function (error, events) {
-      cb(events, error)
-    },
-  )
+  return new Promise((resolve, reject) => {
+    contract.getPastEvents(
+      eventName,
+      {
+        fromBlock,
+        toBlock,
+      },
+      function (error, events) {
+        if (error) {
+          reject(error)
+        } else {
+          resolve(events)
+        }
+      },
+    )
+  })
 }
 
 module.exports = {
