@@ -25,20 +25,48 @@ handler.get(async (req, res) => {
 
   const { limit, offset } = getPagination(pageQuery, size)
 
-  req.dbModels.CurrencyUpdates.findAndCountAll({
-    attributes: ["price", "priceRaw", "timestamp", "txHash"],
-    include: [
-      { model: req.dbModels.Pairs, attributes: ["name", "base", "target"], where: { base, target } },
-      { model: req.dbModels.ExchangeOracles, attributes: ["exchange", "address"], where: { exchange } },
-    ],
-    limit,
-    offset,
-    order: [["timestamp", "DESC"]],
-    raw: true,
+  let exchangeId
+
+  req.dbModels.ExchangeOracles.findOne({
+    attributes: ["id"],
+    where: { exchange },
   })
-    .then((data) => {
-      const currencyData = getPagingData(data, pageQuery, limit)
-      res.json(currencyData)
+    .then((exch) => {
+      exchangeId = exch.id
+      req.dbModels.Pairs.findOne({
+        attributes: ["id"],
+        where: { base, target },
+      })
+        .then((pair) => {
+          req.dbModels.CurrencyUpdates.findAndCountAll({
+            attributes: ["price", "priceRaw", "timestamp", "txHash"],
+            include: [
+              { model: req.dbModels.Pairs, attributes: ["name", "base", "target"] },
+              { model: req.dbModels.ExchangeOracles, attributes: ["exchange", "address"] },
+            ],
+            where: { pairId: pair.id, exchangeOracleId: exchangeId },
+            limit,
+            offset,
+            order: [["timestamp", "DESC"]],
+            raw: true,
+          })
+            .then((data) => {
+              const currencyData = getPagingData(data, pageQuery, limit)
+              res.json(currencyData)
+            })
+            .catch((err) => {
+              console.error(err)
+              res.status(500).send({
+                message: "error occurred while retrieving data.",
+              })
+            })
+        })
+        .catch((err) => {
+          console.error(err)
+          res.status(500).send({
+            message: "error occurred while retrieving data.",
+          })
+        })
     })
     .catch((err) => {
       console.error(err)

@@ -6,19 +6,16 @@ const handler = nextConnect()
 handler.use(middleware)
 
 handler.get(async (req, res) => {
-  const {
-    query: { height },
-  } = req
-
-  req.dbModels.WrkchainBlocks.findOne({
-    attributes: ["height", "mainchainTx", "timestamp"],
-    where: { height },
+  req.dbModels.CurrencyUpdates.findOne({
+    attributes: ["price", "priceRaw", "timestamp", "txHash"],
+    include: [
+      { model: req.dbModels.ExchangeOracles, attributes: ["exchange"] },
+      { model: req.dbModels.Pairs, attributes: ["name", "base", "target"] },
+    ],
+    order: [["timestamp", "DESC"]],
     raw: true,
   })
     .then((data) => {
-      if (!data) {
-        res.json({})
-      }
       res.json(data)
     })
     .catch((err) => {
