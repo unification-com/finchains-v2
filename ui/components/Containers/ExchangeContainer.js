@@ -19,7 +19,12 @@ export default class ExchangeContainer extends React.Component {
     const { currentBase, currentTarget, exchange } = this.props
     const currentPair = `${currentBase}/${currentTarget}`
 
-    this.fetchData = this.fetchData.bind(this)
+    this.fetchExchangesData = this.fetchExchangesData.bind(this)
+    this.fetchPairData = this.fetchPairData.bind(this)
+    this.fetchCurrencyData = this.fetchCurrencyData.bind(this)
+    this.fetchDiscrepancyData = this.fetchDiscrepancyData.bind(this)
+    this.fetchLatestPricesData = this.fetchLatestPricesData.bind(this)
+    this.fetchChartData = this.fetchChartData.bind(this)
 
     this.state = {
       currentBase,
@@ -33,18 +38,30 @@ export default class ExchangeContainer extends React.Component {
       latestPriceData: [],
       chartData: [],
       discrepancyData: {},
-      dataLoading: true,
+      exchangesDataLoading: true,
+      pairsDataLoading: true,
+      currencyDataLoading: true,
+      discrepancyDataLoading: true,
+      latestPriceDataLoading: true,
+      chartDataLoading: true,
     }
   }
 
-  async fetchData() {
-    const { currentBase, currentPair, exchange } = this.state
+  async fetchExchangesData() {
     let exchanges = []
     const exchangesApiUrl = `/api/exchange`
     const exchangesDataRes = await fetch(exchangesApiUrl)
     if (exchangesDataRes.ok && exchangesDataRes.status === 200) {
       exchanges = await exchangesDataRes.json()
     }
+    await this.setState({
+      exchanges,
+      exchangesDataLoading: false,
+    })
+  }
+
+  async fetchPairData() {
+    const { currentBase, exchange } = this.state
 
     let bases = []
     const basesApiUrl = `/api/exchange/${exchange}/bases`
@@ -60,6 +77,15 @@ export default class ExchangeContainer extends React.Component {
     if (targetsDataRes.ok && targetsDataRes.status === 200) {
       targets = await targetsDataRes.json()
     }
+    await this.setState({
+      bases,
+      targets,
+      pairsDataLoading: false,
+    })
+  }
+
+  async fetchCurrencyData() {
+    const { currentPair, exchange } = this.state
 
     let currencyData = {}
     const dataApiUrl = `/api/exchange/${exchange}/${currentPair}`
@@ -67,6 +93,14 @@ export default class ExchangeContainer extends React.Component {
     if (currencyDataRes.ok && currencyDataRes.status === 200) {
       currencyData = await currencyDataRes.json()
     }
+    await this.setState({
+      currencyData,
+      currencyDataLoading: false,
+    })
+  }
+
+  async fetchDiscrepancyData() {
+    const { currentPair, exchange } = this.state
 
     let discrepancyData = {}
     const discrepancyApiUrl = `/api/exchange/${exchange}/${currentPair}/discrepancy`
@@ -74,6 +108,14 @@ export default class ExchangeContainer extends React.Component {
     if (discrepancyDataRes.ok && discrepancyDataRes.status === 200) {
       discrepancyData = await discrepancyDataRes.json()
     }
+    await this.setState({
+      discrepancyData,
+      discrepancyDataLoading: false,
+    })
+  }
+
+  async fetchLatestPricesData() {
+    const { currentPair, exchange } = this.state
 
     const latestPriceData = []
     const latestPriceUrl = `/api/exchange/${exchange}/${currentPair}/latest`
@@ -81,6 +123,15 @@ export default class ExchangeContainer extends React.Component {
     if (latestPriceDataRes.ok && latestPriceDataRes.status === 200) {
       latestPriceData.push(await latestPriceDataRes.json())
     }
+
+    await this.setState({
+      latestPriceData,
+      latestPriceDataLoading: false,
+    })
+  }
+
+  async fetchChartData() {
+    const { currentPair, exchange } = this.state
 
     let chartData = []
     const chartDatapiUrl = `/api/exchange/${exchange}/${currentPair}/chart`
@@ -91,19 +142,18 @@ export default class ExchangeContainer extends React.Component {
     }
 
     await this.setState({
-      bases,
-      targets,
-      currencyData,
       chartData,
-      exchanges,
-      discrepancyData,
-      latestPriceData,
-      dataLoading: false,
+      chartDataLoading: false,
     })
   }
 
-  async componentDidMount() {
-    await this.fetchData()
+  componentDidMount() {
+    this.fetchExchangesData()
+    this.fetchPairData()
+    this.fetchCurrencyData()
+    this.fetchDiscrepancyData()
+    this.fetchLatestPricesData()
+    this.fetchChartData()
   }
 
   render() {
@@ -119,12 +169,17 @@ export default class ExchangeContainer extends React.Component {
       exchanges,
       discrepancyData,
       latestPriceData,
-      dataLoading,
+      exchangesDataLoading,
+      pairsDataLoading,
+      currencyDataLoading,
+      discrepancyDataLoading,
+      latestPriceDataLoading,
+      chartDataLoading,
     } = this.state
 
     return (
       <>
-        {dataLoading ? <></> : <LatestPrices latestPrices={latestPriceData} />}
+        {latestPriceDataLoading ? <></> : <LatestPrices latestPrices={latestPriceData} />}
         <Row>
           <Col>
             <Card className="card-chart">
@@ -132,12 +187,16 @@ export default class ExchangeContainer extends React.Component {
                 <Row>
                   <Col className="text-left">
                     <Card.Title tag="h3">
-                      {dataLoading ? (
+                      {exchangesDataLoading || pairsDataLoading ? (
                         <h4>Loading</h4>
                       ) : (
                         <h4>
                           <img src={`/img/${exchange}.webp`} alt={exchangeLookup(exchange)} width={"40"} />{" "}
-                          <ExchangeSelect url={"/exchange/"} exchanges={exchanges} currentExchange={exchange} />
+                          <ExchangeSelect
+                            url={"/exchange/"}
+                            exchanges={exchanges}
+                            currentExchange={exchange}
+                          />
                           {" : "}
                           <PairSelect
                             bases={bases}
@@ -154,7 +213,7 @@ export default class ExchangeContainer extends React.Component {
                 </Row>
               </Card.Header>
               <Card.Body>
-                {dataLoading ? (
+                {chartDataLoading ? (
                   <h4>Loading</h4>
                 ) : (
                   <PriceChart
@@ -183,7 +242,7 @@ export default class ExchangeContainer extends React.Component {
                 </Row>
               </Card.Header>
               <Card.Body>
-                {dataLoading ? (
+                {currencyDataLoading ? (
                   <h4>Loading</h4>
                 ) : (
                   <CurrencyUpdateTable
@@ -214,7 +273,7 @@ export default class ExchangeContainer extends React.Component {
                 </Row>
               </Card.Header>
               <Card.Body>
-                {dataLoading ? (
+                {discrepancyDataLoading ? (
                   <h4>Loading</h4>
                 ) : (
                   <DiscrepancyTable

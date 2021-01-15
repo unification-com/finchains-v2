@@ -89,10 +89,10 @@ export default class DashboardContainer extends React.Component {
     await this.setState({ dashboardData, dashDataLoading: false })
   }
 
-  async componentDidMount() {
-    await this.fetchExchangeData()
-    await this.fetchPairData()
-    await this.fetchDashboardData()
+  componentDidMount() {
+    this.fetchExchangeData()
+    this.fetchPairData()
+    this.fetchDashboardData()
   }
 
   render() {
