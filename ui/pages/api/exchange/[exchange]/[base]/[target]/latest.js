@@ -1,5 +1,4 @@
 import nextConnect from "next-connect"
-import { Op, Sequelize } from "sequelize"
 import middleware from "../../../../../../middleware/db"
 
 const handler = nextConnect()
@@ -11,7 +10,7 @@ handler.get(async (req, res) => {
     query: { base, target, exchange },
   } = req
 
-  req.dbModels.CurrencyUpdates.findOne({
+  req.dbModels.CurrencyUpdates7Days.findOne({
     attributes: ["price", "priceRaw", "timestamp"],
     include: [
       { model: req.dbModels.Pairs, attributes: ["name", "base", "target"], where: { base, target } },
