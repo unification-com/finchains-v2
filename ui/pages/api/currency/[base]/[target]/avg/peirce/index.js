@@ -2,7 +2,7 @@ import nextConnect from "next-connect"
 import { Op } from "sequelize"
 import Web3 from "web3"
 import middleware from "../../../../../../../middleware/db"
-import { removeOutliersIQD, cleanseForBn, getStats } from "../../../../../../../utils/stats"
+import { removeOutliersPeirceCriterion, getStats, cleanseForBn } from "../../../../../../../utils/stats"
 
 const handler = nextConnect()
 
@@ -34,9 +34,8 @@ handler.get(async (req, res) => {
         for (let i = 0; i < data.length; i += 1) {
           dataSet.push(Number(data[i].priceRaw))
         }
-        const outliersRemoved = removeOutliersIQD(dataSet)
+        const outliersRemoved = removeOutliersPeirceCriterion(dataSet)
         const stats = getStats(outliersRemoved)
-
         const mean = cleanseForBn(stats.mean)
         dataRet.price = Web3.utils.toWei(String(mean), "ether")
         dataRet.priceRaw = mean
