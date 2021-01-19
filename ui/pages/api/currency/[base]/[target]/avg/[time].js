@@ -1,8 +1,8 @@
 import nextConnect from "next-connect"
-import { Op, Sequelize } from "sequelize"
-import BN from "bn.js"
+import { Op } from "sequelize"
 import Web3 from "web3"
 import middleware from "../../../../../../middleware/db"
+import { cleanseForBn, getStats } from "../../../../../../utils/stats"
 
 const handler = nextConnect()
 
@@ -15,12 +15,11 @@ handler.get(async (req, res) => {
 
   const d = new Date()
   const ts = Math.floor(d / 1000)
+
   let tsQuery = ts
   const oneMinute = 60
   const oneHour = 3600
   const oneDay = oneHour * 24
-  const oneWeek = oneDay * 7
-  const oneMonth = oneDay * 30
 
   // default is one hour
   switch (time) {
@@ -55,52 +54,31 @@ handler.get(async (req, res) => {
   }
 
   req.dbModels.CurrencyUpdates7Days.findAll({
-    attributes: ["exchangeOracleId", [Sequelize.fn("max", Sequelize.col("CurrencyUpdates7Days.id")), "rId"]],
+    attributes: ["priceRaw"],
     include: [{ model: req.dbModels.Pairs, attributes: ["name"], where: { base, target } }],
-    group: ["exchangeOracleId", "Pair.id"],
     where: {
       timestamp: {
         [Op.gte]: tsQuery,
       },
     },
   })
-    .then(function (maxIds) {
-      const rIds = []
-      for (let i = 0; i < maxIds.length; i += 1) {
-        rIds.push(maxIds[i].dataValues.rId)
+    .then(function (data) {
+      const dataRet = {}
+      const dataSet = []
+      if (data.length > 0) {
+        for (let i = 0; i < data.length; i += 1) {
+          dataSet.push(Number(data[i].priceRaw))
+        }
+
+        const stats = getStats(dataSet)
+        const mean = cleanseForBn(stats.mean)
+        dataRet.price = Web3.utils.toWei(String(mean), "ether")
+        dataRet.priceRaw = mean
+      } else {
+        dataRet.price = "0"
+        dataRet.priceRaw = "0"
       }
-      req.dbModels.CurrencyUpdates7Days.findAll({
-        attributes: ["price"],
-        where: {
-          id: {
-            [Op.in]: rIds,
-          },
-        },
-        raw: true,
-      })
-        .then((data) => {
-          const dataRet = {}
-          if (data.length > 0) {
-            let totalBN = new BN("0")
-            for (let i = 0; i < data.length; i += 1) {
-              const priceBn = new BN(data[i].price)
-              totalBN = totalBN.add(priceBn)
-            }
-            const avg = totalBN.div(new BN(data.length))
-            dataRet.price = avg.toString()
-            dataRet.priceRaw = Web3.utils.fromWei(avg)
-          } else {
-            dataRet.price = "0"
-            dataRet.priceRaw = "0"
-          }
-          res.json(dataRet)
-        })
-        .catch((err) => {
-          console.error(err)
-          res.status(500).send({
-            message: "error occurred while retrieving data.",
-          })
-        })
+      res.json(dataRet)
     })
     .catch((err) => {
       console.error(err)
