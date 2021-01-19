@@ -123,6 +123,19 @@ const cleanseForBn = (num) => {
   return scientificToDecimal(num)
 }
 
+const removeOutliersChauvenet = (dataSet, max) => {
+  const dMax = max || 3
+  const stats = getStats(dataSet)
+  const ret = []
+
+  for (let i = 0; i < dataSet.length; i += 1) {
+    if (dMax > Math.abs(dataSet[i] - stats.mean) / stats.stdDev) {
+      ret.push(dataSet[i])
+    }
+  }
+  return ret
+}
+
 module.exports = {
   getStats,
   scientificToDecimal,
@@ -131,6 +144,7 @@ module.exports = {
   calculateMeanBn,
   calculateMean,
   removeOutliersPeirceCriterion,
+  removeOutliersChauvenet,
   countDecimals,
   cleanseForBn,
 }
