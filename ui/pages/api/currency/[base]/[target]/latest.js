@@ -11,8 +11,8 @@ handler.get(async (req, res) => {
     query: { base, target },
   } = req
 
-  req.dbModels.CurrencyUpdates.findAll({
-    attributes: ["exchangeOracleId", [Sequelize.fn("max", Sequelize.col("CurrencyUpdates.id")), "rId"]],
+  req.dbModels.CurrencyUpdates7Days.findAll({
+    attributes: ["exchangeOracleId", [Sequelize.fn("max", Sequelize.col("CurrencyUpdates7Days.id")), "rId"]],
     include: [{ model: req.dbModels.Pairs, attributes: ["name", "base", "target"], where: { base, target } }],
     group: ["exchangeOracleId", "Pair.id"],
   })
@@ -21,7 +21,7 @@ handler.get(async (req, res) => {
       for (let i = 0; i < maxIds.length; i += 1) {
         rIds.push(maxIds[i].dataValues.rId)
       }
-      req.dbModels.CurrencyUpdates.findAll({
+      req.dbModels.CurrencyUpdates7Days.findAll({
         attributes: ["price", "priceRaw", "timestamp", "txHash"],
         include: [
           { model: req.dbModels.ExchangeOracles, attributes: ["exchange"] },

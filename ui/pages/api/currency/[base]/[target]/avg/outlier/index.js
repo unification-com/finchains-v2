@@ -58,7 +58,7 @@ handler.get(async (req, res) => {
   const ts = Math.floor(d / 1000)
   const lastHour = ts - 3600
 
-  req.dbModels.CurrencyUpdates.findAll({
+  req.dbModels.CurrencyUpdates7Days.findAll({
     attributes: ["priceRaw"],
     include: [{ model: req.dbModels.Pairs, attributes: ["name"], where: { base, target } }],
     where: {

@@ -2,8 +2,12 @@ require("dotenv").config()
 const arg = require("arg")
 const { getBlockNumber, getPastEvents, watchBlocks, watchEvent } = require("../common/ethereum")
 const { LastGethBlock } = require("../common/db/models")
-const { processCurrencyUpdate } = require("./currencyUpdates")
-const { processDiscrepancy } = require("./discrepancies")
+const {
+  cleanCurrencyUpdate7Day,
+  copyCurrencyUpdate7Days,
+  processCurrencyUpdate,
+} = require("./currencyUpdates")
+const { cleanDiscrepancy7Day, copyDiscrepancies7Days, processDiscrepancy } = require("./discrepancies")
 const { processWrkchainBlock } = require("./wrkchain")
 const { calculateThresholds } = require("./thresholds")
 
@@ -12,24 +16,31 @@ const args = arg({
   "--run": String,
   "--event": String,
   "--height": Number,
-  "--to-process": Number,
+  "--num-blocks": Number,
 
   // Aliases
   "-r": "--run",
   "-e": "--event",
   "-h": "--height",
-  "-n": "--to-process",
+  "-n": "--num-blocks",
 })
 
 const run = async () => {
+  const startTime = Math.floor(new Date() / 1000)
+  let endTime = 0
   const doWhat = args["--run"]
   const eventToGet = args["--event"]
   const height = args["--height"] || 0
+  let blocksToProcess = args["--num-blocks"] || 250
+  if (blocksToProcess > 1000) {
+    blocksToProcess = 1000
+  }
 
-  let lastGethBlock = await getBlockNumber()
+  const lastGethBlock = await getBlockNumber()
 
   let fromBlockRes
   let fromBlock = 0
+  let toBlock = 0
 
   switch (doWhat) {
     case "WrkChain":
@@ -89,66 +100,77 @@ const run = async () => {
         },
       })
       break
+    case "copy-7days":
+      await copyCurrencyUpdate7Days()
+      await copyDiscrepancies7Days()
+      process.exit(0)
+      break
+    case "clean-7days":
+      await cleanCurrencyUpdate7Day()
+      await cleanDiscrepancy7Day()
+      process.exit(0)
+      break
+    case "iterations":
+      fromBlockRes = await LastGethBlock.findOne({ where: { event: eventToGet } })
+      if (fromBlockRes) {
+        fromBlock = parseInt(fromBlockRes.height, 10)
+      }
+      console.log(Math.round((lastGethBlock - fromBlock) / blocksToProcess))
+      process.exit(0)
+      break
     case "populate-db":
       fromBlockRes = await LastGethBlock.findOne({ where: { event: eventToGet } })
       if (fromBlockRes) {
         fromBlock = parseInt(fromBlockRes.height, 10)
       }
 
-      let blocksToProcess = 1000
+      toBlock = fromBlock + blocksToProcess
 
-      for (let toBlock = fromBlock + blocksToProcess; toBlock <= lastGethBlock; toBlock += blocksToProcess) {
-        lastGethBlock = await getBlockNumber()
-        if (lastGethBlock - toBlock <= 2000) {
-          blocksToProcess = 100
-        }
-        if (lastGethBlock - toBlock <= 200) {
-          blocksToProcess = 10
-        }
-        if (lastGethBlock - toBlock <= 20) {
-          blocksToProcess = 1
-        }
-        console.log(new Date(), "lastGethBlock", lastGethBlock)
-        console.log(new Date(), "eventToGet", eventToGet)
-        console.log(new Date(), "blocksToProcess", blocksToProcess)
-        console.log(new Date(), "fromBlock", fromBlock)
-        console.log(new Date(), "toBlock", toBlock)
-        try {
-          const events = await getPastEvents(fromBlock, toBlock, eventToGet)
-          console.log(new Date(), "process", events.length, eventToGet, "events")
-          if (events) {
-            for (let i = 0; i < events.length; i += 1) {
-              switch (eventToGet) {
-                case "CurrencyUpdate":
-                  await processCurrencyUpdate(events[i])
-                  break
-                case "Discrepancy":
-                  await processDiscrepancy(events[i])
-                  break
-                default:
-                  break
-              }
+      console.log(new Date(), "lastGethBlock", lastGethBlock)
+      console.log(new Date(), "eventToGet", eventToGet)
+      console.log(new Date(), "blocksToProcess", blocksToProcess)
+      console.log(new Date(), "fromBlock", fromBlock)
+      console.log(new Date(), "toBlock", toBlock)
+      try {
+        const events = await getPastEvents(fromBlock, toBlock, eventToGet)
+        console.log(new Date(), "process", events.length, eventToGet, "events")
+        if (events) {
+          for (let i = 0; i < events.length; i += 1) {
+            console.log(new Date(), "process", i, "/", events.length)
+            switch (eventToGet) {
+              case "CurrencyUpdate":
+                await processCurrencyUpdate(events[i])
+                break
+              case "Discrepancy":
+                await processDiscrepancy(events[i])
+                break
+              default:
+                break
             }
+          }
 
-            const [l, lCreated] = await LastGethBlock.findOrCreate({
-              where: {
-                event: eventToGet,
-              },
-              defaults: {
-                event: eventToGet,
-                height: toBlock,
-              },
-            })
+          const [l, lCreated] = await LastGethBlock.findOrCreate({
+            where: {
+              event: eventToGet,
+            },
+            defaults: {
+              event: eventToGet,
+              height: toBlock,
+            },
+          })
 
-            if (!lCreated) {
+          if (!lCreated) {
+            if (toBlock > l.height) {
               await l.update({ height: toBlock })
             }
-            fromBlock = toBlock
           }
-        } catch (e) {
-          console.log(e)
-          process.exit(0)
+
+          endTime = Math.floor(new Date() / 1000)
+          console.log(new Date(), "processed", events.length, "events in", endTime - startTime, "seconds")
         }
+      } catch (e) {
+        console.log(e)
+        process.exit(0)
       }
       process.exit(0)
       break

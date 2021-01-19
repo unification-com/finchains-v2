@@ -17,8 +17,8 @@ handler.get(async (req, res) => {
   const ts = Math.floor(d / 1000)
   const lastHour = ts - 3600
 
-  req.dbModels.CurrencyUpdates.findAll({
-    attributes: ["exchangeOracleId", [Sequelize.fn("max", Sequelize.col("CurrencyUpdates.id")), "rId"]],
+  req.dbModels.CurrencyUpdates7Days.findAll({
+    attributes: ["exchangeOracleId", [Sequelize.fn("max", Sequelize.col("CurrencyUpdates7Days.id")), "rId"]],
     include: [{ model: req.dbModels.Pairs, attributes: ["name"], where: { base, target } }],
     group: ["exchangeOracleId", "Pair.id"],
     where: {
@@ -32,7 +32,7 @@ handler.get(async (req, res) => {
       for (let i = 0; i < maxIds.length; i += 1) {
         rIds.push(maxIds[i].dataValues.rId)
       }
-      req.dbModels.CurrencyUpdates.findAll({
+      req.dbModels.CurrencyUpdates7Days.findAll({
         attributes: ["price"],
         where: {
           id: {

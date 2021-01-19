@@ -95,7 +95,7 @@ handler.get(async (req, res) => {
       break
   }
 
-  req.dbModels.CurrencyUpdates.findAll({
+  req.dbModels.CurrencyUpdates7Days.findAll({
     attributes: ["priceRaw"],
     include: [{ model: req.dbModels.Pairs, attributes: ["name"], where: { base, target } }],
     where: {

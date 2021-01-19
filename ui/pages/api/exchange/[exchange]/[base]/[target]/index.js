@@ -38,7 +38,7 @@ handler.get(async (req, res) => {
         where: { base, target },
       })
         .then((pair) => {
-          req.dbModels.CurrencyUpdates.findAndCountAll({
+          req.dbModels.CurrencyUpdates7Days.findAndCountAll({
             attributes: ["price", "priceRaw", "timestamp", "txHash"],
             include: [
               { model: req.dbModels.Pairs, attributes: ["name", "base", "target"] },

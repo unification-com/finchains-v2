@@ -12,10 +12,19 @@ module.exports = (sequelize, DataTypes) => {
       ExchangeOracles.hasMany(models.CurrencyUpdates, {
         foreignKey: "exchangeOracleId",
       })
+      ExchangeOracles.hasMany(models.CurrencyUpdates7Days, {
+        foreignKey: "exchangeOracleId",
+      })
       ExchangeOracles.hasMany(models.Discrepancies, {
         foreignKey: "exchangeOracle1Id",
       })
       ExchangeOracles.hasMany(models.Discrepancies, {
+        foreignKey: "exchangeOracle2Id",
+      })
+      ExchangeOracles.hasMany(models.Discrepancies7Days, {
+        foreignKey: "exchangeOracle1Id",
+      })
+      ExchangeOracles.hasMany(models.Discrepancies7Days, {
         foreignKey: "exchangeOracle2Id",
       })
     }
