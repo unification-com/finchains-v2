@@ -31,6 +31,8 @@ export default class DashboardContainer extends React.Component {
       bases: [],
       targets: [],
       exchanges: [],
+      numPairs: 0,
+      numExchanges: 0,
       pairDataLoading: true,
       exchangeDataLoading: true,
       dashDataLoading: true,
@@ -41,23 +43,29 @@ export default class DashboardContainer extends React.Component {
   }
 
   async fetchPairData() {
-    let bases = []
-    const basesApiUrl = "/api/pairs/bases"
-    const basesDataRes = await fetch(basesApiUrl)
-    if (basesDataRes.ok && basesDataRes.status === 200) {
-      bases = await basesDataRes.json()
+    let pairs = []
+    const bases = []
+    const targets = []
+    const pairRes = await fetch("/api/pairs")
+    if (pairRes.ok && pairRes.status === 200) {
+      pairs = await pairRes.json()
     }
 
-    let targets = []
-    const targetsApiUrl = `/api/pairs/${bases[0]}`
-
-    const targetsDataRes = await fetch(targetsApiUrl)
-    if (targetsDataRes.ok && targetsDataRes.status === 200) {
-      targets = await targetsDataRes.json()
+    for (let i = 0; i < pairs.length; i += 1) {
+      if (!bases.includes(pairs[i].base)) {
+        bases.push(pairs[i].base)
+      }
+      const defaultBase = bases[0]
+      if (pairs[i].base === defaultBase) {
+        if (!targets.includes(pairs[i].target)) {
+          targets.push(pairs[i].target)
+        }
+      }
     }
-    await this.setState({ bases, targets, pairDataLoading: false })
+
+    await this.setState({ bases, targets, numPairs: pairs.length, pairDataLoading: false })
   }
-  
+
   async fetchExchangeData() {
     let exchanges = []
     const exchangesApiUrl = `/api/exchange`
@@ -65,7 +73,7 @@ export default class DashboardContainer extends React.Component {
     if (exchangesDataRes.ok && exchangesDataRes.status === 200) {
       exchanges = await exchangesDataRes.json()
     }
-    await this.setState({ exchanges, exchangeDataLoading: false })
+    await this.setState({ exchanges, numExchanges: exchanges.length, exchangeDataLoading: false })
   }
 
   async fetchLatestExchangeUpdates() {
@@ -77,7 +85,7 @@ export default class DashboardContainer extends React.Component {
     }
     await this.setState({ latestExchangeUpdates, latestExchangeUpdatesDataLoading: false })
   }
-  
+
   async fetchLastUpdate() {
     let lastUpdate = {}
     const dashboardApiUrl = "/api/dashboard/last_update"
@@ -87,7 +95,7 @@ export default class DashboardContainer extends React.Component {
     }
     await this.setState({ lastUpdate, lastUpdateDataLoading: false })
   }
-  
+
   async fetchLastDiscrepancy() {
     let lastDiscrepancy = {}
     const dashboardApiUrl = "/api/dashboard/last_discrepancy"
@@ -114,6 +122,8 @@ export default class DashboardContainer extends React.Component {
       latestExchangeUpdates,
       lastUpdate,
       lastDiscrepancy,
+      numPairs,
+      numExchanges,
       pairDataLoading,
       exchangeDataLoading,
       latestExchangeUpdatesDataLoading,
@@ -127,7 +137,7 @@ export default class DashboardContainer extends React.Component {
           <Col lg="3" md="6" sm="12" key="num_pairs">
             <Card className="card-chart">
               <Card.Header>
-                <Card.Title>Pairs Tracked</Card.Title>
+                <Card.Title>{numPairs} Pairs Tracked</Card.Title>
                 {pairDataLoading ? (
                   <h4>Loading</h4>
                 ) : (
@@ -141,12 +151,11 @@ export default class DashboardContainer extends React.Component {
           <Col lg="3" md="6" sm="12" key="num_exchanges">
             <Card className="card-chart">
               <Card.Header>
-                <Card.Title>Exchange Oracles</Card.Title>
+                <Card.Title>{numExchanges} Exchange Oracles</Card.Title>
                 {exchangeDataLoading ? (
                   <h4>Loading</h4>
                 ) : (
                   <h4>
-                    {exchanges.length} Exchanges{" "}
                     <ExchangeSelect url={"/exchange/"} exchanges={exchanges} />
                   </h4>
                 )}
@@ -173,8 +182,7 @@ export default class DashboardContainer extends React.Component {
                       alt={exchangeLookup(lastUpdate["ExchangeOracle.exchange"])}
                       width={"15"}
                     />{" "}
-                    {exchangeLookup(lastUpdate["ExchangeOracle.exchange"])}{" "}
-                    {lastUpdate["Pair.name"]}
+                    {exchangeLookup(lastUpdate["ExchangeOracle.exchange"])} {lastUpdate["Pair.name"]}
                     <br />
                     <Currency
                       currency={lastUpdate["Pair.target"]}

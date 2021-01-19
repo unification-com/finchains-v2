@@ -16,6 +16,9 @@ handler.get(async (req, res) => {
     where: { exchange },
   })
     .then(function (exch) {
+      if (!exch) {
+        res.json([])
+      }
       req.dbModels.ExchangePairs.findAll({
         attributes: ["pairId"],
         include: [
