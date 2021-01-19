@@ -73,7 +73,7 @@ export default class Sidebar extends React.Component {
               <li key="sidebar-link-3">
                 <NavLink to="/history/BTC/USD" href="/history/BTC/USD" className="nav-link">
                   <h4>
-                    <ClockHistory /> Pair History
+                    <ClockHistory /> 7 Day Pair Data
                   </h4>
                 </NavLink>
               </li>

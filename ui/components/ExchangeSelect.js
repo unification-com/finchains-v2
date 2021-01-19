@@ -11,8 +11,8 @@ export default class ExchangeSelect extends React.Component {
     this.handleExchangeChange = this.handleExchangeChange.bind(this)
     this.fetchPairs = this.fetchPairs.bind(this)
 
-    const { currentExchange } = this.props
-    this.state = { currentExchange }
+    const { currentExchange, exchanges, url } = this.props
+    this.state = { currentExchange, exchanges, url }
   }
 
   async fetchPairs() {
@@ -29,17 +29,19 @@ export default class ExchangeSelect extends React.Component {
   }
 
   async handleExchangeChange(event) {
-    const { url } = this.props
     const exchange = event.target.value
-    await this.setState({ currentExchange: exchange })
-    const pairs = await this.fetchPairs()
-    if (pairs.length > 0) {
-      window.location = `${url}${exchange}/${pairs[0].base}/${pairs[0].targets[0]}`
+    if (exchange) {
+      const { url } = this.state
+      await this.setState({ currentExchange: exchange })
+      const pairs = await this.fetchPairs()
+      if (pairs.length > 0) {
+        window.location = `${url}${exchange}/${pairs[0].name}`
+      }
     }
   }
 
   render() {
-    const { currentExchange, exchanges } = this.props
+    const { currentExchange, exchanges } = this.state
 
     const exchangeOptions = exchanges.map((v) => (
       <option key={`e_${v.exchange}`} value={v.exchange}>
@@ -50,7 +52,7 @@ export default class ExchangeSelect extends React.Component {
     return (
       <>
         <select value={currentExchange} onChange={this.handleExchangeChange} className={"select-css"}>
-          <option key={`e_select_default`} value={exchanges[0].exchange}>
+          <option key={`e_select_default`} value={""}>
             Select...
           </option>
           {exchangeOptions}

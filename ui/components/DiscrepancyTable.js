@@ -1,4 +1,3 @@
-import Link from "next/link"
 import React from "react"
 import PropTypes from "prop-types"
 import Table from "react-bootstrap/Table"
@@ -8,7 +7,6 @@ import DateTime from "./DateTime"
 import styles from "./DiscrepancyTable.module.css"
 
 import { exchangeLookup } from "../utils/exchange"
-import { formatNumber } from "../utils/format"
 import EthTx from "./EthTx"
 import PaginationWrapper from "./PaginationWrapper"
 import Currency from "./Currency"
@@ -43,7 +41,7 @@ export default class DiscrepancyTable extends React.Component {
   }
 
   render() {
-    const { data, base, target, paginate, dataLoading } = this.state
+    const { data, target, paginate, dataLoading } = this.state
     if (dataLoading) {
       return (
         <>

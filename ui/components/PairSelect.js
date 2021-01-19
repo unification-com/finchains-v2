@@ -39,7 +39,7 @@ export default class PairSelect extends React.Component {
       }
     }
 
-    this.setState({ targets, currentTarget: targets[0] })
+    this.setState({ targets, currentTarget: "" })
   }
 
   async handleBaseChange(event) {
@@ -53,8 +53,10 @@ export default class PairSelect extends React.Component {
 
     const { currentBase } = this.state
     const currentTarget = event.target.value
-    await this.setState({ currentTarget })
-    window.location = `${url}${currentBase}/${currentTarget}`
+    if (currentTarget) {
+      await this.setState({ currentTarget })
+      window.location = `${url}${currentBase}/${currentTarget}`
+    }
   }
 
   render() {
@@ -75,13 +77,13 @@ export default class PairSelect extends React.Component {
 
     return (
       <>
-        {(showLabel && <label>Pair:</label>)}
+        {showLabel && <label>Pair:</label>}
         <select value={currentBase} onChange={this.handleBaseChange} className={"select-css"}>
           {baseOptions}
         </select>
         {" / "}
         <select value={currentTarget} onChange={this.handleTargetChange} className={"select-css"}>
-          <option key={`t_select_default`} value={targets[0]}>
+          <option key={`t_select_default`} value={""}>
             Select...
           </option>
           {targetOptions}
