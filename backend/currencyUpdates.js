@@ -1,4 +1,4 @@
-const { CurrencyUpdates, LastGethBlock } = require("../common/db/models")
+const { CurrencyUpdates, CurrencyUpdates7Days, LastGethBlock, sequelize } = require("../common/db/models")
 const { getOrAddPair } = require("./pairs")
 const { getOrAddExchangeOracle } = require("./exchangeOracles")
 const { getOrAddExchangePair } = require("./exchangePairs")
@@ -18,6 +18,66 @@ const getOrAddCurrencyUpdate = async (exchangeOracleId, pairId, txHash, price, p
   })
 }
 
+const getOrAddCurrencyUpdate7Day = async (exchangeOracleId, pairId, txHash, price, priceRaw, timestamp) => {
+  return CurrencyUpdates7Days.findOrCreate({
+    where: {
+      txHash,
+    },
+    defaults: {
+      exchangeOracleId,
+      pairId,
+      price,
+      priceRaw,
+      timestamp,
+    },
+  })
+}
+
+const cleanCurrencyUpdate7Day = async () => {
+  const d = new Date()
+  const oneWeekAgo = Math.floor(d / 1000) - 604800
+
+  const [results, metadata] = await sequelize.query(
+    `DELETE FROM "CurrencyUpdates7Days" WHERE timestamp <= '${oneWeekAgo}'`,
+  )
+  console.log(new Date(), "results", results)
+  console.log(new Date(), "deleted", metadata.rowCount, "rows from CurrencyUpdates7Days")
+}
+
+// ideally to be run before the contract watcher starts
+// if migrating from an existing database.
+const copyCurrencyUpdate7Days = async () => {
+  const d = new Date()
+  const oneWeekAgo = Math.floor(d / 1000) - 604800
+
+  const last = await CurrencyUpdates7Days.max("timestamp")
+
+  if (isNaN(last)) {
+    console.log(new Date(), "copy 7 days currency updates from", oneWeekAgo)
+
+    const [results, metadata] = await sequelize.query(
+      `INSERT INTO "CurrencyUpdates7Days" SELECT * FROM "CurrencyUpdates" WHERE timestamp >= '${oneWeekAgo}'`,
+    )
+    console.log(new Date(), "results", results)
+    console.log(new Date(), "CurrencyUpdates: copied", metadata, "rows")
+
+    // set auto increment ID
+    if (metadata > 0) {
+      const currId = await CurrencyUpdates7Days.max("id")
+      console.log(new Date(), "set sequence to", currId)
+
+      const [results1, metadata1] = await sequelize.query(
+        `SELECT setval('public."CurrencyUpdates7Days_id_seq"', ${currId}, true)`,
+      )
+
+      console.log(new Date(), "results1", results1)
+      console.log(new Date(), "metadata1", metadata1)
+    }
+  } else {
+    console.log(new Date(), "CurrencyUpdates data already copied")
+  }
+}
+
 const processCurrencyUpdate = async (event) => {
   try {
     const height = event.blockNumber
@@ -28,6 +88,9 @@ const processCurrencyUpdate = async (event) => {
     const priceRaw = event.returnValues.priceRaw
     const timestamp = event.returnValues.timestamp
     const exchange = event.returnValues.exchange
+
+    const d = new Date()
+    const oneWeekAgo = Math.floor(d / 1000) - 604800
 
     const [pair, pairCreated] = await getOrAddPair(pairName)
     if (pairCreated) {
@@ -43,10 +106,27 @@ const processCurrencyUpdate = async (event) => {
       console.log(new Date(), "added new exchange oracle pair link", exchange, pairName, exPair.id)
     }
 
+    // full historical archive
     const [cu, cuCreated] = await getOrAddCurrencyUpdate(eo.id, pair.id, txHash, price, priceRaw, timestamp)
 
     if (cuCreated) {
-      console.log(new Date(), "inserted currency update", cu.id)
+      console.log(new Date(), "inserted currency update - archive", cu.id)
+    }
+
+    // 7 day history for API
+    if (parseInt(timestamp, 10) >= oneWeekAgo) {
+      const [cu7d, cu7dCreated] = await getOrAddCurrencyUpdate7Day(
+        eo.id,
+        pair.id,
+        txHash,
+        price,
+        priceRaw,
+        timestamp,
+      )
+
+      if (cu7dCreated) {
+        console.log(new Date(), "inserted currency update - 7 day", cu7d.id)
+      }
     }
 
     const [l, lCreated] = await LastGethBlock.findOrCreate({
@@ -60,7 +140,9 @@ const processCurrencyUpdate = async (event) => {
     })
 
     if (!lCreated) {
-      await l.update({ height })
+      if (height > l.height) {
+        await l.update({ height })
+      }
     }
   } catch (err) {
     console.error(new Date(), "ERROR:")
@@ -70,5 +152,7 @@ const processCurrencyUpdate = async (event) => {
 }
 
 module.exports = {
+  cleanCurrencyUpdate7Day,
+  copyCurrencyUpdate7Days,
   processCurrencyUpdate,
 }
