@@ -72,13 +72,20 @@ module.exports = {
       .then(() => queryInterface.addIndex("Discrepancies", ["exchangeOracle1Id"]))
       .then(() => queryInterface.addIndex("Discrepancies", ["exchangeOracle2Id"]))
       .then(() => queryInterface.addIndex("Discrepancies", ["diff"]))
-      .then(() => queryInterface.addIndex("Discrepancies", ["txHash"], { unique: true }))
+      .then(() => queryInterface.addIndex("Discrepancies", ["txHash"]))
       .then(() => queryInterface.addIndex("Discrepancies", ["pairId", "threshold"]))
       .then(() => queryInterface.addIndex("Discrepancies", ["pairId", "exchangeOracle1Id"]))
       .then(() => queryInterface.addIndex("Discrepancies", ["pairId", "exchangeOracle2Id"]))
       .then(() => queryInterface.addIndex("Discrepancies", ["exchangeOracle1Id", "exchangeOracle2Id"]))
       .then(() =>
         queryInterface.addIndex("Discrepancies", ["pairId", "exchangeOracle1Id", "exchangeOracle2Id"]),
+      )
+      .then(() =>
+        queryInterface.addIndex(
+          "Discrepancies",
+          ["txHash", "pairId", "exchangeOracle1Id", "exchangeOracle2Id"],
+          { unique: true },
+        ),
       )
       .then(() =>
         queryInterface.addIndex("Discrepancies", [
