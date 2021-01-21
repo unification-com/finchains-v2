@@ -1,3 +1,6 @@
+const fetch = require("isomorphic-unfetch")
+const { currencies } = require("./config")
+
 const scientificToDecimal = function (_num) {
   const nsign = Math.sign(_num)
   // remove the sign
@@ -33,6 +36,27 @@ const scientificToDecimal = function (_num) {
   return nsign < 0 ? `-${num}` : num
 }
 
+const fetcher = (url) => {
+  return new Promise((resolve, reject) => {
+    fetch(url)
+      .then(async (r) => {
+        const json = await r.json()
+        const retData = {
+          json: json,
+          date: r.headers.get("date"),
+        }
+        return retData
+      })
+      .then((data) => {
+        resolve(data)
+      })
+      .catch((err) => {
+        reject(err)
+      })
+  })
+}
+
 module.exports = {
   scientificToDecimal,
+  fetcher,
 }

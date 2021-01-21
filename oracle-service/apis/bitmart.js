@@ -1,71 +1,81 @@
 require("dotenv").config()
 const Web3 = require("web3")
-const fetch = require("isomorphic-unfetch")
-const { scientificToDecimal } = require("../utils")
-const { currencies } = require("../config")
+const { scientificToDecimal, fetcher } = require("../utils")
 
-// standardised function to get prices from an exchange's API
-const getPrices = () => {
-  return new Promise((resolve, reject) => {
-    const bases = []
-    const targets = {}
-    // load desired bases and targets from config.js
-    // ToDo - only load pairs supported by the exchange API. No point querying unsupported pairs
-    // filter can be hard-coded per exchange API.
-    for (let i = 0; i < currencies.length; i += 1) {
-      const c = currencies[i]
-      bases.push(c.base)
-      targets[c.sybmol] = c.targets
+const filter = [
+  "ATOM_USDT",
+  "ATOM_BTC",
+  "BCH_BTC",
+  "BCH_USDT",
+  "BTC_USDT",
+  "BTC_PAX",
+  "BTC_USDC",
+  "EOS_USDT",
+  "EOS_BTC",
+  "ETC_USDT",
+  "ETC_BTC",
+  "ETC_ETH",
+  "EOS_ETH",
+  "DOT_USDT",
+  "ETH_BTC",
+  "ETH_USDT",
+  "LINK_BTC",
+  "LINK_ETH",
+  "LINK_USDT",
+  "LTC_USDT",
+  "LTC_BTC",
+  "LTC_ETH",
+  "NEO_USDT",
+  "NEO_BTC",
+  "NEO_ETH",
+  "TRX_BTC",
+  "TRX_USDT",
+  "TRX_ETH",
+  "XLM_USDT",
+  "XLM_BTC",
+  "XLM_ETH",
+  "XRP_BTC",
+  "XRP_USDT",
+  "XRP_ETH",
+]
+
+const orgExchangeData = async () => {
+  try {
+    const final = []
+    let base
+    let target
+
+    for (let i = 0; i < filter.length; i += 1) {
+      base = filter[i].split("_", 1)[0]
+      target = filter[i].split("_", 2)[1]
+
+      const url = `https://openapi.bitmart.com/v2/ticker?symbol=${filter[i]}`
+      console.log(new Date(), "get", url)
+
+      // eslint-disable-next-line no-await-in-loop
+      const response = await fetcher(url)
+      console.log(response)
+      const price = scientificToDecimal(response.json.current_price).toString()
+      const priceInt = Web3.utils.toWei(price, "ether")
+      const timestamp = Math.floor(Date.parse(response.date)/1000)
+      const td = {
+        base,
+        target,
+        pair: `${base}/${target}`,
+        price,
+        priceInt,
+        timestamp,
+      }
+      final.push(td)
     }
+    return final
+  } catch (err) {
+    console.error(err)
+  }
+}
 
-    // generate query URL
-    const basesStr = bases.join(",")
-    const URL = `https://api.coingecko.com/api/v3/exchanges/bitmart/tickers?coin_ids=${basesStr}`
-    console.log(new Date(), "get", URL)
-
-    // get data
-    fetch(URL)
-      .then((r) => r.json())
-      .then((data) => {
-        // process results
-        const results = []
-
-        for (let i = 0; i < data.tickers.length; i += 1) {
-          const d = data.tickers[i]
-          // only include configured bases
-          if (targets[d.base]) {
-            // only include configured targets
-            if (targets[d.base].includes(d.target)) {
-              // ensure prices are not in "e" format
-              const price = scientificToDecimal(d.last).toString()
-
-              // standardise all prices to 10^18 for int calculations in smart contract
-              const priceInt = Web3.utils.toWei(price, "ether")
-
-              // convert returned time to unix epoch
-              const timestamp = Math.floor(Date.parse(d.timestamp) / 1000)
-
-              // generate standardised return data object
-              const td = {
-                base: d.base,
-                target: d.target,
-                pair: `${d.base}/${d.target}`,
-                price,
-                priceInt,
-                timestamp,
-              }
-              results.push(td)
-            }
-          }
-        }
-        // return the results to the caller
-        resolve(results)
-      })
-      .catch((err) => {
-        // return error to the caller
-        reject(err)
-      })
-  })
+const getPrices = async () => {
+  await orgExchangeData()
 }
 
 module.exports = {
