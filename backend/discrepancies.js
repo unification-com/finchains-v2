@@ -18,6 +18,9 @@ const getOrAddDiscrepancy = async (
   return Discrepancies.findOrCreate({
     where: {
       txHash,
+      pairId,
+      exchangeOracle1Id,
+      exchangeOracle2Id,
     },
     defaults: {
       pairId,
@@ -48,6 +51,9 @@ const getOrAddDiscrepancy7Day = async (
   return Discrepancies7Days.findOrCreate({
     where: {
       txHash,
+      pairId,
+      exchangeOracle1Id,
+      exchangeOracle2Id,
     },
     defaults: {
       pairId,
