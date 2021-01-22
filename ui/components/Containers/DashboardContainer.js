@@ -290,7 +290,7 @@ export default class DashboardContainer extends React.Component {
                       </thead>
                       <tbody>
                         {latestExchangeUpdates.map((item) => (
-                          <tr key={item.txHash}>
+                          <tr key={item["TxHash.txHash"]}>
                             <td>
                               <Link
                                 href={`/exchange/${item["ExchangeOracle.exchange"]}/${item["Pair.name"]}`}
@@ -324,7 +324,7 @@ export default class DashboardContainer extends React.Component {
                               <Currency currency={item["Pair.target"]} price={item.priceRaw} displaySymbol />
                             </td>
                             <td>
-                              <EthTx txHash={item.txHash} trim={true} />
+                              <EthTx txHash={item["TxHash.txHash"]} trim={true} />
                             </td>
                           </tr>
                         ))}

@@ -11,7 +11,7 @@ const exchangeLookup = (exchange) => {
     case "crypto_com":
       return "Crypto.com"
     default:
-      return exchange.charAt(0).toUpperCase() + exchange.slice(1)
+      return exchange ? exchange.charAt(0).toUpperCase() + exchange.slice(1) : ""
   }
 }
 
