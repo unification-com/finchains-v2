@@ -64,7 +64,13 @@ handler.get(async (req, res) => {
     },
   })
     .then(function (data) {
-      const dataRet = {}
+      const dataRet = {
+        base,
+        target,
+        time,
+        pair: `${base}/${target}`,
+        outlierMethod: "peirce",
+      }
       const dataSet = []
       if (data.length > 0) {
         for (let i = 0; i < data.length; i += 1) {

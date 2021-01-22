@@ -3,7 +3,7 @@ import { Op } from "sequelize"
 import Web3 from "web3"
 import middleware from "../../../../../../../middleware/db"
 
-const { removeOutliersIQD, cleanseForBn, getStats } = require("../../../../../../../utils/stats")
+const { removeOutliersChauvenet, getStats, cleanseForBn } = require("../../../../../../../utils/stats")
 
 const handler = nextConnect()
 
@@ -14,30 +14,36 @@ handler.get(async (req, res) => {
     query: { base, target },
   } = req
 
-  // default timespan is last hour
   const d = new Date()
   const ts = Math.floor(d / 1000)
-  const lastHour = ts - 3600
+
+  const tsQuery = ts - 3600
 
   req.dbModels.CurrencyUpdates7Days.findAll({
     attributes: ["priceRaw"],
     include: [{ model: req.dbModels.Pairs, attributes: ["name"], where: { base, target } }],
     where: {
       timestamp: {
-        [Op.gte]: lastHour,
+        [Op.gte]: tsQuery,
       },
     },
   })
     .then(function (data) {
-      const dataRet = {}
+      const dataRet = {
+        base,
+        target,
+        time: "1H",
+        pair: `${base}/${target}`,
+        dMax: 3,
+        outlierMethod: "chauvenet",
+      }
       const dataSet = []
       if (data.length > 0) {
         for (let i = 0; i < data.length; i += 1) {
           dataSet.push(Number(data[i].priceRaw))
         }
-        const outliersRemoved = removeOutliersIQD(dataSet)
+        const outliersRemoved = removeOutliersChauvenet(dataSet)
         const stats = getStats(outliersRemoved)
-
         const mean = cleanseForBn(stats.mean)
         dataRet.price = Web3.utils.toWei(String(mean), "ether")
         dataRet.priceRaw = mean
