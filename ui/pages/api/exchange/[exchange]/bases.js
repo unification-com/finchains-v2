@@ -1,8 +1,6 @@
 import nextConnect from "next-connect"
 import middleware from "../../../../middleware/db"
 
-const { toCanonicalJSON } = require("@tendermint/belt")
-
 const handler = nextConnect()
 
 handler.use(middleware)

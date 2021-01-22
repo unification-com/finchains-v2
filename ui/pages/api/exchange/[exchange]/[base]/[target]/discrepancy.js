@@ -1,5 +1,5 @@
 import nextConnect from "next-connect"
-import { Op, Sequelize } from "sequelize"
+import { Op } from "sequelize"
 import middleware from "../../../../../../middleware/db"
 
 const { getPagination, getPagingData } = require("../../../../../../utils/pagination")

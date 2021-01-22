@@ -2,7 +2,8 @@ import nextConnect from "next-connect"
 import { Op } from "sequelize"
 import Web3 from "web3"
 import middleware from "../../../../../../../../middleware/db"
-import { removeOutliersChauvenet, getStats, cleanseForBn } from "../../../../../../../../utils/stats"
+
+const { removeOutliersChauvenet, getStats, cleanseForBn } = require("../../../../../../../../utils/stats")
 
 const handler = nextConnect()
 
