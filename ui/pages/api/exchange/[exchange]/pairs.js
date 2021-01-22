@@ -1,5 +1,4 @@
 import nextConnect from "next-connect"
-import { Op, Sequelize } from "sequelize"
 import middleware from "../../../../middleware/db"
 
 const handler = nextConnect()

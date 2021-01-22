@@ -1,20 +1,8 @@
 import React from "react"
-import Link from "next/link"
-import fetch from "isomorphic-unfetch"
-import PropTypes from "prop-types"
 import Col from "react-bootstrap/Col"
 import Card from "react-bootstrap/Card"
 import Row from "react-bootstrap/Row"
-import Web3 from "web3"
-import Table from "react-bootstrap/Table"
 import Layout from "../layouts/layout"
-import { exchangeLookup } from "../utils/exchange"
-import DateTime from "../components/DateTime"
-import EthTx from "../components/EthTx"
-import PairSelect from "../components/PairSelect"
-import ExchangeSelect from "../components/ExchangeSelect"
-import Currency from "../components/Currency"
-import styles from "../components/CurrencyUpdateTable.module.css"
 
 export default function About() {
   return (
