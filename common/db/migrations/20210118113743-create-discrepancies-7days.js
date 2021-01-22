@@ -53,8 +53,14 @@ module.exports = {
         threshold: {
           type: Sequelize.STRING,
         },
-        txHash: {
-          type: Sequelize.STRING,
+        txHashId: {
+          type: Sequelize.INTEGER,
+          onDelete: "CASCADE",
+          references: {
+            model: "TxHashes",
+            key: "id",
+            as: "txHashId",
+          },
         },
         createdAt: {
           allowNull: false,
@@ -72,7 +78,7 @@ module.exports = {
       .then(() => queryInterface.addIndex("Discrepancies7Days", ["exchangeOracle1Id"]))
       .then(() => queryInterface.addIndex("Discrepancies7Days", ["exchangeOracle2Id"]))
       .then(() => queryInterface.addIndex("Discrepancies7Days", ["diff"]))
-      .then(() => queryInterface.addIndex("Discrepancies7Days", ["txHash"], { unique: true }))
+      .then(() => queryInterface.addIndex("Discrepancies7Days", ["txHashId"]))
       .then(() => queryInterface.addIndex("Discrepancies7Days", ["pairId", "threshold"]))
       .then(() => queryInterface.addIndex("Discrepancies7Days", ["pairId", "timestamp1"]))
       .then(() => queryInterface.addIndex("Discrepancies7Days", ["pairId", "timestamp2"]))
@@ -82,6 +88,13 @@ module.exports = {
       .then(() => queryInterface.addIndex("Discrepancies7Days", ["exchangeOracle1Id", "exchangeOracle2Id"]))
       .then(() =>
         queryInterface.addIndex("Discrepancies7Days", ["pairId", "exchangeOracle1Id", "exchangeOracle2Id"]),
+      )
+      .then(() =>
+        queryInterface.addIndex(
+          "Discrepancies7Days",
+          ["txHashId", "pairId", "exchangeOracle1Id", "exchangeOracle2Id"],
+          { unique: true },
+        ),
       )
       .then(() =>
         queryInterface.addIndex("Discrepancies7Days", [

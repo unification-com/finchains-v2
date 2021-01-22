@@ -26,8 +26,14 @@ module.exports = {
             as: "pairId",
           },
         },
-        txHash: {
-          type: Sequelize.STRING,
+        txHashId: {
+          type: Sequelize.INTEGER,
+          onDelete: "CASCADE",
+          references: {
+            model: "TxHashes",
+            key: "id",
+            as: "txHashId",
+          },
         },
         price: {
           type: Sequelize.STRING,
@@ -50,7 +56,7 @@ module.exports = {
       .then(() => queryInterface.addIndex("CurrencyUpdates", ["exchangeOracleId"]))
       .then(() => queryInterface.addIndex("CurrencyUpdates", ["pairId"]))
       .then(() => queryInterface.addIndex("CurrencyUpdates", ["exchangeOracleId", "pairId"]))
-      .then(() => queryInterface.addIndex("CurrencyUpdates", ["txHash"], { unique: true }))
+      .then(() => queryInterface.addIndex("CurrencyUpdates", ["txHashId"], { unique: true }))
       .then(() => queryInterface.addIndex("CurrencyUpdates", ["timestamp"]))
       .then(() => queryInterface.addIndex("CurrencyUpdates", ["pairId", "timestamp"]))
       .then(() => queryInterface.addIndex("CurrencyUpdates", ["pairId", "exchangeOracleId", "timestamp"]))
