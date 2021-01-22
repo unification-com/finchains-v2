@@ -26,11 +26,12 @@ handler.get(async (req, res) => {
   const { limit, offset } = getPagination(pageQuery, size)
 
   req.dbModels.Discrepancies.findAndCountAll({
-    attributes: ["price1", "price2", "diff", "timestamp1", "timestamp2", "txHash", "threshold"],
+    attributes: ["price1", "price2", "diff", "timestamp1", "timestamp2", "threshold"],
     include: [
       { model: req.dbModels.Pairs, attributes: ["name", "base", "target"], where: { base, target } },
       { model: req.dbModels.ExchangeOracles, as: "ExchangeOracle1", attributes: ["exchange", "address"] },
       { model: req.dbModels.ExchangeOracles, as: "ExchangeOracle2", attributes: ["exchange", "address"] },
+      { model: req.dbModels.TxHashes, attributes: ["txHash"] },
     ],
     limit,
     offset,

@@ -7,9 +7,10 @@ handler.use(middleware)
 
 handler.get(async (req, res) => {
   req.dbModels.Discrepancies.findOne({
-    attributes: ["price1", "price2", "diff", "timestamp1", "timestamp2", "txHash", "threshold"],
+    attributes: ["price1", "price2", "diff", "timestamp1", "timestamp2", "threshold"],
     include: [
       { model: req.dbModels.Pairs, attributes: ["name", "base", "target"] },
+      { model: req.dbModels.TxHashes, attributes: ["txHash"] },
       {
         model: req.dbModels.ExchangeOracles,
         as: "ExchangeOracle1",
@@ -25,7 +26,11 @@ handler.get(async (req, res) => {
     raw: true,
   })
     .then((data) => {
-      res.json(data)
+      if (data) {
+        res.json(data)
+      } else {
+        res.json({})
+      }
     })
     .catch((err) => {
       console.error(err)

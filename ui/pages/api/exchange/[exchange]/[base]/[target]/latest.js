@@ -20,7 +20,11 @@ handler.get(async (req, res) => {
     raw: true,
   })
     .then((data) => {
-      res.json(data)
+      if (data) {
+        res.json(data)
+      } else {
+        res.json([])
+      }
     })
     .catch((err) => {
       console.error(err)

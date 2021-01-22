@@ -15,16 +15,19 @@ handler.get(async (req, res) => {
       for (let i = 0; i < oracleIds.length; i += 1) {
         const oId = oracleIds[i].id
         const dbRes = await req.dbModels.CurrencyUpdates7Days.findOne({
-          attributes: ["price", "priceRaw", "timestamp", "txHash"],
+          attributes: ["price", "priceRaw", "timestamp"],
           include: [
             { model: req.dbModels.ExchangeOracles, attributes: ["exchange"] },
             { model: req.dbModels.Pairs, attributes: ["name", "base", "target"] },
+            { model: req.dbModels.TxHashes, attributes: ["txHash"] },
           ],
           order: [["timestamp", "DESC"]],
           where: { exchangeOracleId: oId },
           raw: true,
         })
-        latestExchangeUpdates.push(dbRes)
+        if (dbRes) {
+          latestExchangeUpdates.push(dbRes)
+        }
       }
       res.json(latestExchangeUpdates)
     })
