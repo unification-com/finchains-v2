@@ -33,9 +33,10 @@ handler.get(async (req, res) => {
     .then((exIdData) => {
       if (exIdData) {
         req.dbModels.Discrepancies.findAndCountAll({
-          attributes: ["price1", "price2", "diff", "timestamp1", "timestamp2", "txHash", "threshold"],
+          attributes: ["price1", "price2", "diff", "timestamp1", "timestamp2", "threshold"],
           include: [
             { model: req.dbModels.Pairs, attributes: ["name", "base", "target"], where: { base, target } },
+            { model: req.dbModels.TxHashes, attributes: ["txHash"] },
             {
               model: req.dbModels.ExchangeOracles,
               as: "ExchangeOracle1",

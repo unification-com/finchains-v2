@@ -73,7 +73,7 @@ export default class CurrencyUpdateTable extends React.Component {
             </thead>
             <tbody>
               {data.results.map((item) => (
-                <tr key={item.txHash}>
+                <tr key={item["TxHash.txHash"]}>
                   <td>
                     <DateTime datetime={item.timestamp} withTime={true} />{" "}
                   </td>
@@ -89,7 +89,7 @@ export default class CurrencyUpdateTable extends React.Component {
                     <Currency currency={target} price={item.priceRaw} />
                   </td>
                   <td>
-                    <EthTx txHash={item.txHash} trim={true} />
+                    <EthTx txHash={item["TxHash.txHash"]} trim={true} />
                   </td>
                 </tr>
               ))}

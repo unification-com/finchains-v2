@@ -23,6 +23,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "pairId",
         onDelete: "CASCADE",
       })
+      Discrepancies7Days.belongsTo(models.TxHashes, {
+        foreignKey: "txHashId",
+        onDelete: "CASCADE",
+      })
     }
   }
   Discrepancies7Days.init(
@@ -35,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
       diff: DataTypes.STRING,
       timestamp1: DataTypes.INTEGER,
       timestamp2: DataTypes.INTEGER,
-      txHash: DataTypes.STRING,
+      txHashId: DataTypes.INTEGER,
       threshold: DataTypes.STRING,
     },
     {

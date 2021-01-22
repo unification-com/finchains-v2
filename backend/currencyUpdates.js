@@ -2,11 +2,12 @@ const { CurrencyUpdates, CurrencyUpdates7Days, LastGethBlock, sequelize } = requ
 const { getOrAddPair } = require("./pairs")
 const { getOrAddExchangeOracle } = require("./exchangeOracles")
 const { getOrAddExchangePair } = require("./exchangePairs")
+const { getOrAddTxHash } = require("./txHashes")
 
-const getOrAddCurrencyUpdate = async (exchangeOracleId, pairId, txHash, price, priceRaw, timestamp) => {
+const getOrAddCurrencyUpdate = async (exchangeOracleId, pairId, txHashId, price, priceRaw, timestamp) => {
   return CurrencyUpdates.findOrCreate({
     where: {
-      txHash,
+      txHashId,
     },
     defaults: {
       exchangeOracleId,
@@ -18,10 +19,10 @@ const getOrAddCurrencyUpdate = async (exchangeOracleId, pairId, txHash, price, p
   })
 }
 
-const getOrAddCurrencyUpdate7Day = async (exchangeOracleId, pairId, txHash, price, priceRaw, timestamp) => {
+const getOrAddCurrencyUpdate7Day = async (exchangeOracleId, pairId, txHashId, price, priceRaw, timestamp) => {
   return CurrencyUpdates7Days.findOrCreate({
     where: {
-      txHash,
+      txHashId,
     },
     defaults: {
       exchangeOracleId,
@@ -106,8 +107,13 @@ const processCurrencyUpdate = async (event) => {
       console.log(new Date(), "added new exchange oracle pair link", exchange, pairName, exPair.id)
     }
 
+    const [txH, txCreated] = await getOrAddTxHash(txHash, height)
+    if (txCreated) {
+      console.log(new Date(), "added new tx hash", txHash, height, txH.id)
+    }
+
     // full historical archive
-    const [cu, cuCreated] = await getOrAddCurrencyUpdate(eo.id, pair.id, txHash, price, priceRaw, timestamp)
+    const [cu, cuCreated] = await getOrAddCurrencyUpdate(eo.id, pair.id, txH.id, price, priceRaw, timestamp)
 
     if (cuCreated) {
       console.log(new Date(), "inserted currency update - archive", cu.id)
@@ -118,7 +124,7 @@ const processCurrencyUpdate = async (event) => {
       const [cu7d, cu7dCreated] = await getOrAddCurrencyUpdate7Day(
         eo.id,
         pair.id,
-        txHash,
+        txH.id,
         price,
         priceRaw,
         timestamp,

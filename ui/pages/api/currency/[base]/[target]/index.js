@@ -26,10 +26,11 @@ handler.get(async (req, res) => {
   const { limit, offset } = getPagination(pageQuery, size)
 
   req.dbModels.CurrencyUpdates7Days.findAndCountAll({
-    attributes: ["price", "priceRaw", "timestamp", "txHash"],
+    attributes: ["price", "priceRaw", "timestamp"],
     include: [
       { model: req.dbModels.Pairs, attributes: ["name", "base", "target"], where: { base, target } },
       { model: req.dbModels.ExchangeOracles, attributes: ["exchange", "address"] },
+      { model: req.dbModels.TxHashes, attributes: ["txHash"] },
     ],
     limit,
     offset,

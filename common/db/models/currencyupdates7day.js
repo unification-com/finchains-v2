@@ -17,13 +17,17 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "pairId",
         onDelete: "CASCADE",
       })
+      CurrencyUpdates7Days.belongsTo(models.TxHashes, {
+        foreignKey: "txHashId",
+        onDelete: "CASCADE",
+      })
     }
   }
   CurrencyUpdates7Days.init(
     {
       exchangeOracleId: DataTypes.INTEGER,
       pairId: DataTypes.INTEGER,
-      txHash: DataTypes.STRING,
+      txHashId: DataTypes.INTEGER,
       price: DataTypes.STRING,
       priceRaw: DataTypes.STRING,
       timestamp: DataTypes.INTEGER,

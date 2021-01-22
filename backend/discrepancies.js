@@ -2,10 +2,11 @@ const BN = require("bn.js")
 const { Discrepancies, Discrepancies7Days, LastGethBlock, sequelize } = require("../common/db/models")
 const { getOrAddPair } = require("./pairs")
 const { getOrAddExchangeOracle } = require("./exchangeOracles")
+const { getOrAddTxHash } = require("./txHashes")
 
 const getOrAddDiscrepancy = async (
   pairId,
-  txHash,
+  txHashId,
   exchangeOracle1Id,
   price1,
   timestamp1,
@@ -17,7 +18,7 @@ const getOrAddDiscrepancy = async (
 ) => {
   return Discrepancies.findOrCreate({
     where: {
-      txHash,
+      txHashId,
       pairId,
       exchangeOracle1Id,
       exchangeOracle2Id,
@@ -38,7 +39,7 @@ const getOrAddDiscrepancy = async (
 
 const getOrAddDiscrepancy7Day = async (
   pairId,
-  txHash,
+  txHashId,
   exchangeOracle1Id,
   price1,
   timestamp1,
@@ -50,7 +51,7 @@ const getOrAddDiscrepancy7Day = async (
 ) => {
   return Discrepancies7Days.findOrCreate({
     where: {
-      txHash,
+      txHashId,
       pairId,
       exchangeOracle1Id,
       exchangeOracle2Id,
@@ -146,6 +147,11 @@ const processDiscrepancy = async (event) => {
       console.log(new Date(), "added new exchange oracle", exchange2, oracle2, eo2.id)
     }
 
+    const [txH, txCreated] = await getOrAddTxHash(txHash, height)
+    if (txCreated) {
+      console.log(new Date(), "added new tx hash", txHash, height, txH.id)
+    }
+
     const p1Bn = new BN(price1)
     const p2Bn = new BN(price2)
 
@@ -154,7 +160,7 @@ const processDiscrepancy = async (event) => {
     // full historical archive
     const [d, dCreated] = await getOrAddDiscrepancy(
       pair.id,
-      txHash,
+      txH.id,
       eo1.id,
       price1,
       timestamp1,
@@ -173,7 +179,7 @@ const processDiscrepancy = async (event) => {
     if (parseInt(timestamp1, 10) >= oneWeekAgo) {
       const [dyDay, d7DayCreated] = await getOrAddDiscrepancy7Day(
         pair.id,
-        txHash,
+        txH.id,
         eo1.id,
         price1,
         timestamp1,

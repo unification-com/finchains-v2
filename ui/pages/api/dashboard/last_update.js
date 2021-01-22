@@ -7,16 +7,21 @@ handler.use(middleware)
 
 handler.get(async (req, res) => {
   req.dbModels.CurrencyUpdates7Days.findOne({
-    attributes: ["price", "priceRaw", "timestamp", "txHash"],
+    attributes: ["price", "priceRaw", "timestamp"],
     include: [
       { model: req.dbModels.ExchangeOracles, attributes: ["exchange"] },
       { model: req.dbModels.Pairs, attributes: ["name", "base", "target"] },
+      { model: req.dbModels.TxHashes, attributes: ["txHash"] },
     ],
     order: [["timestamp", "DESC"]],
     raw: true,
   })
     .then((data) => {
-      res.json(data)
+      if (data) {
+        res.json(data)
+      } else {
+        res.json({})
+      }
     })
     .catch((err) => {
       console.error(err)

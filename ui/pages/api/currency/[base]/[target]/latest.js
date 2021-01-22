@@ -22,10 +22,11 @@ handler.get(async (req, res) => {
         rIds.push(maxIds[i].dataValues.rId)
       }
       req.dbModels.CurrencyUpdates7Days.findAll({
-        attributes: ["price", "priceRaw", "timestamp", "txHash"],
+        attributes: ["price", "priceRaw", "timestamp"],
         include: [
           { model: req.dbModels.ExchangeOracles, attributes: ["exchange"] },
           { model: req.dbModels.Pairs, attributes: ["name", "base", "target"] },
+          { model: req.dbModels.TxHashes, attributes: ["txHash"] },
         ],
         where: {
           id: {
