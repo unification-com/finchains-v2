@@ -52,7 +52,7 @@ export default class TxContainer extends React.Component {
       txData = await txDataRes.json()
       discrepancies = txData.discrepancies
       tx = txData.tx
-      if (txData.submissions) {
+      if (txData.submissions.length > 0) {
         pair = txData.submissions[0]["Pair.name"]
         base = txData.submissions[0]["Pair.base"]
         target = txData.submissions[0]["Pair.target"]

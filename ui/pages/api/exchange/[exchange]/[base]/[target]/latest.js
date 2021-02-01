@@ -10,7 +10,7 @@ handler.get(async (req, res) => {
     query: { base, target, exchange },
   } = req
 
-  req.dbModels.CurrencyUpdates7Days.findOne({
+  req.dbModels.CurrencyUpdates.findOne({
     attributes: ["price", "priceRaw", "timestamp"],
     include: [
       { model: req.dbModels.Pairs, attributes: ["name", "base", "target"], where: { base, target } },

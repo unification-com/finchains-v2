@@ -5,11 +5,6 @@ const { sequelize, Sequelize } = require("../../common/db/models")
 const ExchangeOracles = require("../../common/db/models/exchangeoracles")(sequelize, Sequelize.DataTypes)
 const CurrencyUpdates = require("../../common/db/models/currencyupdates")(sequelize, Sequelize.DataTypes)
 const Discrepancies = require("../../common/db/models/discrepancies")(sequelize, Sequelize.DataTypes)
-const CurrencyUpdates7Days = require("../../common/db/models/currencyupdates7day")(
-  sequelize,
-  Sequelize.DataTypes,
-)
-const Discrepancies7Days = require("../../common/db/models/discrepancies7day")(sequelize, Sequelize.DataTypes)
 const LastGethBlock = require("../../common/db/models/lastgethblock")(sequelize, Sequelize.DataTypes)
 const Pairs = require("../../common/db/models/pairs")(sequelize, Sequelize.DataTypes)
 const WrkchainBlocks = require("../../common/db/models/wrkchainblocks")(sequelize, Sequelize.DataTypes)
@@ -18,9 +13,7 @@ const TxHashes = require("../../common/db/models/txhashes")(sequelize, Sequelize
 
 const dbModels = {
   CurrencyUpdates,
-  CurrencyUpdates7Days,
   Discrepancies,
-  Discrepancies7Days,
   ExchangeOracles,
   Pairs,
   WrkchainBlocks,

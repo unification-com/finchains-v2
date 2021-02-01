@@ -25,7 +25,7 @@ handler.get(async (req, res) => {
         tx.height = data.height
         const txHashId = data.id
 
-        const submissionRes = await req.dbModels.CurrencyUpdates7Days.findOne({
+        const submissionRes = await req.dbModels.CurrencyUpdates.findOne({
           attributes: ["price", "priceRaw", "timestamp"],
           include: [
             { model: req.dbModels.Pairs, attributes: ["name", "base", "target"] },
@@ -42,7 +42,7 @@ handler.get(async (req, res) => {
           submissions.push(submissionRes)
         }
 
-        const discrepanciesResults = await req.dbModels.Discrepancies7Days.findAll({
+        const discrepanciesResults = await req.dbModels.Discrepancies.findAll({
           attributes: ["price1", "price2", "diff", "timestamp1", "timestamp2", "threshold"],
           include: [
             { model: req.dbModels.Pairs, attributes: ["name", "base", "target"] },
