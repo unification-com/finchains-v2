@@ -41,6 +41,7 @@ module.exports = (sequelize, DataTypes) => {
       timestamp2: DataTypes.INTEGER,
       txHashId: DataTypes.INTEGER,
       threshold: DataTypes.STRING,
+      height: DataTypes.BIGINT,
     },
     {
       sequelize,

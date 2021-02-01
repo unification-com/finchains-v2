@@ -62,6 +62,9 @@ module.exports = {
             as: "txHashId",
           },
         },
+        height: {
+          type: Sequelize.BIGINT,
+        },
         createdAt: {
           allowNull: false,
           type: Sequelize.DATE,
@@ -101,6 +104,7 @@ module.exports = {
           "timestamp2",
         ]),
       )
+      .then(() => queryInterface.addIndex("Discrepancies", ["height"]))
   },
   down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable("Discrepancies")

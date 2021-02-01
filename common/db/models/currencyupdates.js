@@ -31,6 +31,7 @@ module.exports = (sequelize, DataTypes) => {
       price: DataTypes.STRING,
       priceRaw: DataTypes.STRING,
       timestamp: DataTypes.INTEGER,
+      height: DataTypes.BIGINT,
     },
     {
       sequelize,

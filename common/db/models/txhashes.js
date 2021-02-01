@@ -12,13 +12,7 @@ module.exports = (sequelize, DataTypes) => {
       TxHashes.hasMany(models.CurrencyUpdates, {
         foreignKey: "txHashId",
       })
-      TxHashes.hasMany(models.CurrencyUpdates7Days, {
-        foreignKey: "txHashId",
-      })
       TxHashes.hasMany(models.Discrepancies, {
-        foreignKey: "txHashId",
-      })
-      TxHashes.hasMany(models.Discrepancies7Days, {
         foreignKey: "txHashId",
       })
     }
