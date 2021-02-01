@@ -1,8 +1,11 @@
+require("dotenv").config()
 const BN = require("bn.js")
-const { Discrepancies, Discrepancies7Days, LastGethBlock, sequelize } = require("../common/db/models")
+const { Discrepancies, LastGethBlock, sequelize } = require("../common/db/models")
 const { getOrAddPair } = require("./pairs")
 const { getOrAddExchangeOracle } = require("./exchangeOracles")
 const { getOrAddTxHash } = require("./txHashes")
+
+const { FULL_ARCHIVE_MODE } = process.env
 
 const getOrAddDiscrepancy = async (
   pairId,
@@ -15,6 +18,7 @@ const getOrAddDiscrepancy = async (
   timestamp2,
   threshold,
   diff,
+  height,
 ) => {
   return Discrepancies.findOrCreate({
     where: {
@@ -33,39 +37,7 @@ const getOrAddDiscrepancy = async (
       timestamp2,
       threshold,
       diff,
-    },
-  })
-}
-
-const getOrAddDiscrepancy7Day = async (
-  pairId,
-  txHashId,
-  exchangeOracle1Id,
-  price1,
-  timestamp1,
-  exchangeOracle2Id,
-  price2,
-  timestamp2,
-  threshold,
-  diff,
-) => {
-  return Discrepancies7Days.findOrCreate({
-    where: {
-      txHashId,
-      pairId,
-      exchangeOracle1Id,
-      exchangeOracle2Id,
-    },
-    defaults: {
-      pairId,
-      exchangeOracle1Id,
-      price1,
-      timestamp1,
-      exchangeOracle2Id,
-      price2,
-      timestamp2,
-      threshold,
-      diff,
+      height,
     },
   })
 }
@@ -75,49 +47,17 @@ const cleanDiscrepancy7Day = async () => {
   const oneWeekAgo = Math.floor(d / 1000) - 604800
 
   const [results, metadata] = await sequelize.query(
-    `DELETE FROM "Discrepancies7Days" WHERE timestamp1 <= '${oneWeekAgo}'`,
+    `DELETE FROM "Discrepancies" WHERE timestamp1 <= '${oneWeekAgo}'`,
   )
   console.log(new Date(), "results", results)
-  console.log(new Date(), "deleted", metadata.rowCount, "rows from Discrepancies7Days")
-}
-
-// ideally to be run before the contract watcher starts
-// if migrating from an existing database.
-const copyDiscrepancies7Days = async () => {
-  const d = new Date()
-  const oneWeekAgo = Math.floor(d / 1000) - 604800
-
-  // to continue from an interrupted copy
-  const last = await Discrepancies7Days.max("timestamp1")
-
-  if (isNaN(last)) {
-    console.log(new Date(), "copy 7 days discrepancies from", oneWeekAgo)
-
-    const [results, metadata] = await sequelize.query(
-      `INSERT INTO "Discrepancies7Days" SELECT * FROM "Discrepancies" WHERE timestamp1 >= '${oneWeekAgo}'`,
-    )
-    console.log(new Date(), "results", results)
-    console.log(new Date(), "Discrepancies: copied", metadata, "rows")
-
-    // set auto increment ID
-    if (metadata > 0) {
-      const currId = await Discrepancies7Days.max("id")
-      console.log(new Date(), "set sequence to", currId)
-
-      const [results1, metadata1] = await sequelize.query(
-        `SELECT setval('public."Discrepancies7Days_id_seq"', ${currId}, true)`,
-      )
-
-      console.log(new Date(), "results1", results1)
-      console.log(new Date(), "metadata1", metadata1)
-    }
-  } else {
-    console.log(new Date(), "Discrepancies data already copied")
-  }
+  console.log(new Date(), "deleted", metadata.rowCount, "rows from Discrepancies")
 }
 
 const processDiscrepancy = async (event) => {
   try {
+    const fullArchive = parseInt(FULL_ARCHIVE_MODE, 10) === 1
+    let addRecord = false
+
     const height = event.blockNumber
     const txHash = event.transactionHash
     const pairName = event.returnValues.pair
@@ -134,6 +74,12 @@ const processDiscrepancy = async (event) => {
     const today = new Date()
     const oneWeekAgo = Math.floor(today / 1000) - 604800
 
+    const tsCheck = Math.min(parseInt(timestamp1, 10), parseInt(timestamp2, 10))
+
+    if (fullArchive || tsCheck >= oneWeekAgo) {
+      addRecord = true
+    }
+
     const [pair, pairCreated] = await getOrAddPair(pairName)
     if (pairCreated) {
       console.log(new Date(), "added new pair", pairName, pair.id)
@@ -147,37 +93,18 @@ const processDiscrepancy = async (event) => {
       console.log(new Date(), "added new exchange oracle", exchange2, oracle2, eo2.id)
     }
 
-    const [txH, txCreated] = await getOrAddTxHash(txHash, height)
-    if (txCreated) {
-      console.log(new Date(), "added new tx hash", txHash, height, txH.id)
-    }
+    if (addRecord) {
+      const [txH, txCreated] = await getOrAddTxHash(txHash, height)
+      if (txCreated) {
+        console.log(new Date(), "added new tx hash", txHash, height, txH.id)
+      }
 
-    const p1Bn = new BN(price1)
-    const p2Bn = new BN(price2)
+      const p1Bn = new BN(price1)
+      const p2Bn = new BN(price2)
 
-    const diff = BN.max(p1Bn, p2Bn).sub(BN.min(p1Bn, p2Bn))
+      const diff = BN.max(p1Bn, p2Bn).sub(BN.min(p1Bn, p2Bn))
 
-    // full historical archive
-    const [d, dCreated] = await getOrAddDiscrepancy(
-      pair.id,
-      txH.id,
-      eo1.id,
-      price1,
-      timestamp1,
-      eo2.id,
-      price2,
-      timestamp2,
-      threshold,
-      diff.toString(),
-    )
-
-    if (dCreated) {
-      console.log(new Date(), "inserted discrepancy - archive", d.id)
-    }
-
-    // 7 day history for API
-    if (parseInt(timestamp1, 10) >= oneWeekAgo) {
-      const [dyDay, d7DayCreated] = await getOrAddDiscrepancy7Day(
+      const [d, dCreated] = await getOrAddDiscrepancy(
         pair.id,
         txH.id,
         eo1.id,
@@ -188,10 +115,11 @@ const processDiscrepancy = async (event) => {
         timestamp2,
         threshold,
         diff.toString(),
+        height,
       )
 
-      if (d7DayCreated) {
-        console.log(new Date(), "inserted discrepancy - 7 day", dyDay.id)
+      if (dCreated) {
+        console.log(new Date(), "inserted discrepancy - archive", d.id)
       }
     }
 
@@ -219,6 +147,5 @@ const processDiscrepancy = async (event) => {
 
 module.exports = {
   cleanDiscrepancy7Day,
-  copyDiscrepancies7Days,
   processDiscrepancy,
 }
