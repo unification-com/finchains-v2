@@ -3,62 +3,69 @@ const Web3 = require("web3")
 const { scientificToDecimal, fetcher } = require("../utils")
 
 const filter = [
-  "adabtc",
-  "adausdt",
-  "atombtc",
-  "atomusdt",
-  "bchbtc",
-  "bchusdt",
-  "btcusdt",
-  "dotusdt",
-  "eosbtc",
-  "eoseth",
-  "eosusdt",
-  "etcbtc",
-  "etcusdt",
-  "ethbtc",
-  "ethusdt",
-  "linkbtc",
-  "linketh",
-  "linkusdt",
-  "ltcbtc",
-  "ltcusdt",
-  "neobtc",
-  "neousdt",
-  "trxbtc",
-  "trxeth",
-  "trxusdt",
-  "xlmbtc",
-  "xlmeth",
-  "xlmusdt",
-  "xmrbtc",
-  "xmrusdt",
-  "xrpbtc",
-  "xrpusdt",
+  "ADA/BTC",
+  "ADA/USDT",
+  "ATOM/BTC",
+  "ATOM/USDT",
+  "BCH/BTC",
+  "BCH/USDT",
+  "BTC/USDT",
+  "DOT/USDT",
+  "EOS/BTC",
+  "EOS/ETH",
+  "EOS/USDT",
+  "ETC/BTC",
+  "ETC/USDT",
+  "ETH/BTC",
+  "ETH/USDT",
+  "LINK/BTC",
+  "LINK/ETH",
+  "LINK/USDT",
+  "LTC/BTC",
+  "LTC/USDT",
+  "NEO/BTC",
+  "NEO/USDT",
+  "TRX/BTC",
+  "TRX/ETH",
+  "TRX/USDT",
+  "XLM/BTC",
+  "XLM/ETH",
+  "XLM/USDT",
+  "XMR/BTC",
+  "XMR/USDT",
+  "XRP/BTC",
+  "XRP/USDT",
 ]
+
+const getPairData = (pair) => {
+  const base = pair.split("/", 1)[0]
+  const target = pair.split("/", 2)[1]
+  const apiPairName = `${base.toLowerCase()}${target.toLowerCase()}`
+  return { apiPairName, pair, base, target }
+}
 
 // get data
 const orgExchangeData = async () => {
   try {
     const final = []
-    let base
-    let target
+    const pairList = []
+    const pairLookup = {}
+    for (let i = 0; i < filter.length; i += 1) {
+      const pairData = getPairData(filter[i])
+      pairList.push(pairData.apiPairName)
+      pairLookup[pairData.apiPairName] = pairData
+    }
     // Iterate through filter array of pairs
     for (let i = 0; i < filter.length; i += 1) {
-      // formatting filter elements for standardized return of base/target/pairs
-      const substr = filter[i].substring(0, 4)
-      if (substr === "link" || substr === "atom") {
-        base = substr.toUpperCase()
-        target = filter[i].substring(4).toUpperCase()
-      } else {
-        base = filter[i].substring(0, 3).toUpperCase()
-        target = filter[i].substring(3).toUpperCase()
-      }
-
-      // Need to access Huobi api pair by pair to get "last price" data
-      const url = `https://api.huobi.pro/market/trade?symbol=${filter[i]}`
+   
+      const url = `https://api.huobi.pro/market/trade?symbol=${pairList[i]}`
       // eslint-disable-next-line no-await-in-loop
       const response = await fetcher(url)
+
+      console.log(new Date(), "get", url)
+
+      const base = pairLookup[pairList[i]].base
+      const target = pairLookup[pairList[i]].target
       const price = scientificToDecimal(response.json.tick.data[0].price).toString()
       const priceInt = Web3.utils.toWei(price, "ether")
       const timestamp = response.json.tick.data[0].ts
@@ -72,17 +79,17 @@ const orgExchangeData = async () => {
       }
       final.push(td)
     }
-    
+    return final
   } catch (err) {
     console.error(err)
   }
-  return final
 }
 
 const getPrices = async () => {
   await orgExchangeData()
 }
 
+getPrices()
 module.exports = {
   getPrices,
 }

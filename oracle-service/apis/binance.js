@@ -41,35 +41,51 @@ const filter = [
   "XRP/ETH",
   "XRP/USDT",
 ]
+
+const getPairData = (pair) => {
+  const base = pair.split("/", 1)[0]
+  const target = pair.split("/", 2)[1]
+  const apiPairName = base + target
+  return { apiPairName, pair, base, target }
+}
+
 const orgExchangeData = async () => {
   try {
     const final = []
-    let base
-    let target
+    const pairList = []
+    const pairLookup = {}
 
     for (let i = 0; i < filter.length; i += 1) {
-      base = filter[i].split("/", 1)[0]
-      target = filter[i].split("/", 2)[1]
-      pair = base + target
-
-      const url = `https://api.binance.com/api/v3/trades?symbol=${pair}`
-      console.log(new Date(), "get", url)
-
-      // eslint-disable-next-line no-await-in-loop
-      const response = await fetcher(url)
-      const res_select = response.json[499]
-      const price = scientificToDecimal(res_select.price).toString()
-      const priceInt = Web3.utils.toWei(price, "ether")
-      const timestamp = res_select.time
-      const td = {
-        base,
-        target,
-        pair: `${base}/${target}`,
-        price,
-        priceInt,
-        timestamp,
+      const pairData = getPairData(filter[i])
+      pairList.push(pairData.apiPairName)
+      pairLookup[pairData.apiPairName] = pairData
+    }
+    const url = `https://api.binance.com/api/v3/ticker/price`
+    // eslint-disable-next-line no-await-in-loop
+    const response = await fetcher(url)
+    console.log(new Date(), "get", url)
+    const res_arr = Object.entries(response.json)
+    for (let i = 0; i < pairList.length; i += 1) {
+      // eslint-disable-next-line no-restricted-syntax
+      for (const [key, value] of res_arr) {
+        if (value.symbol === pairList[i]) {
+          const match = pairLookup[value.symbol]
+          const base = match.base
+          const target = match.target
+          const price = scientificToDecimal(value.price).toString()
+          const priceInt = Web3.utils.toWei(price, "ether")
+          const timestamp = Math.floor(Date.parse(response.date) / 1000)
+          const td = {
+            base,
+            target,
+            pair: `${base}/${target}`,
+            price,
+            priceInt,
+            timestamp,
+          }
+          final.push(td)
+        }
       }
-      final.push(td)
     }
     return final
   } catch (err) {
@@ -80,7 +96,6 @@ const orgExchangeData = async () => {
 const getPrices = async () => {
   await orgExchangeData()
 }
-
 
 module.exports = {
   getPrices,

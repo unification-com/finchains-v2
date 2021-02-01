@@ -3,30 +3,16 @@ const Web3 = require("web3")
 const { scientificToDecimal, fetcher } = require("../utils")
 
 const filter = [
-  "ATOM/USDT",
-  "BCH/BTC",
-  "BCH/USDT",
-  "BTC/USDT",
-  "EOS/BTC",
-  "EOS/ETH",
-  "EOS/USDT",
-  "ETC/BTC",
-  "ETC/USDT",
-  "ETH/BTC",
-  "ETH/USDT",
-  "FUND/BTC",
-  "LINK/BTC",
-  "LINK/USDT",
-  "LTC/BTC",
-  "LTC/USDT",
-  "NEO/BTC",
-  "NEO/USDT",
-  "TRX/BTC",
-  "TRX/USDT",
-  "XLM/BTC",
-  "XLM/USDT",
-  "XRP/BTC",
-  "XRP/USDT",
+  'ATOM/BTC', 'BCH/BTC',  'BCH/EUR',
+  'BCH/GBP',  'BCH/USD',  'BTC/EUR',
+  'BTC/GBP',  'BTC/USD',  'BTC/USDC',
+  'EOS/BTC',  'ETC/BTC',  'ETH/BTC',
+  'ETH/EUR',  'ETH/GBP',  'ETH/USD',
+  'ETH/USDC', 'LINK/BTC', 'LINK/ETH',
+  'LINK/EUR', 'LINK/GBP', 'LINK/USD',
+  'LTC/BTC',  'LTC/EUR',  'LTC/GBP',
+  'LTC/USD',  'XLM/BTC',  'XLM/EUR',
+  'XLM/USD'
 ]
 
 const getPairData = (pair) => {
@@ -35,7 +21,6 @@ const getPairData = (pair) => {
   const apiPairName = `${base}-${target}`
   return { apiPairName, pair, base, target }
 }
-
 
 const orgExchangeData = async () => {
   try {
@@ -47,16 +32,17 @@ const orgExchangeData = async () => {
       pairList.push(pairData.apiPairName)
       pairLookup[pairData.apiPairName] = pairData
     }
-    const filter_list = pairList.join("%2C")
-    const url = `https://api.probit.com/api/exchange/v1/ticker?market_ids=${filter_list}`
-    // eslint-disable-next-line no-await-in-loop
-    const response = await fetcher(url)
     for (let i = 0; i < filter.length; i += 1) {
+      const url = `https://api.pro.coinbase.com/products/${pairList[i]}/ticker`
+      console.log(new Date(), "get", url)
+
+      // eslint-disable-next-line no-await-in-loop
+      const response = await fetcher(url)
       const base = pairLookup[pairList[i]].base
       const target = pairLookup[pairList[i]].target
-      const price = scientificToDecimal(response.json.data[i].last).toString()
+      const price = scientificToDecimal(response.json.price).toString()
       const priceInt = Web3.utils.toWei(price, "ether")
-      const timestamp = Math.floor(Date.parse(response.json.data[i].time) / 1000)
+      const timestamp = Math.floor(Date.parse(response.json.time)/1000)
       const td = {
         base,
         target,

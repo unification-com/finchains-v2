@@ -3,49 +3,45 @@ const Web3 = require("web3")
 const { scientificToDecimal, fetcher } = require("../utils")
 
 const filter = [
-  "BCH_BTC",
-  "BCH_USD",
-  "BTC_EUR",
-  "BTC_PAX",
-  "BTC_USD",
-  "BTC_USDC",
-  "BTC_USDT",
-  "EOS_BTC",
-  "EOS_ETH",
-  "EOS_USDT",
-  "ETC_BTC",
-  "ETC_ETH",
-  "ETH_BTC",
-  "ETH_EUR",
-  "ETH_USD",
-  "ETH_USDC",
-  "ETH_USDT",
-  "LINK_BTC",
-  "LINK_ETH",
-  "LINK_USDT",
-  "LTC_BTC",
-  "LTC_ETH",
-  "LTC_USD",
-  "LTC_USDT",
-  "TRX_BTC",
-  "TRX_ETH",
-  "TRX_USDT",
-  "XLM_BTC",
-  "XRP_BTC",
+  'BCH/BTC',  'BCH/USD',   'BTC/EUR',
+  'BTC/PAX',  'BTC/USD',   'BTC/USDC',
+  'BTC/USDT', 'EOS/BTC',   'EOS/ETH',
+  'EOS/USDT', 'ETC/BTC',   'ETC/ETH',
+  'ETH/BTC',  'ETH/EUR',   'ETH/USD',
+  'ETH/USDC', 'ETH/USDT',  'LINK/BTC',
+  'LINK/ETH', 'LINK/USDT', 'LTC/BTC',
+  'LTC/ETH',  'LTC/USD',   'LTC/USDT',
+  'TRX/BTC',  'TRX/ETH',   'TRX/USDT',
+  'XLM/BTC',  'XRP/BTC'
 ]
+
+const getPairData = (pair) => {
+  const base = pair.split("/", 1)[0]
+  const target = pair.split("/", 2)[1]
+  const apiPairName = `${base}_${target}`
+  return { apiPairName, pair, base, target }
+}
 
 const orgExchangeData = async () => {
   try {
     const final = []
+    const pairList = []
+    const pairLookup = {}
+    for (let i = 0; i < filter.length; i += 1) {
+      const pairData = getPairData(filter[i])
+      pairList.push(pairData.apiPairName)
+      pairLookup[pairData.apiPairName] = pairData
+    }
     const url = "https://coinsbit.io/api/v1/public/tickers"
     // eslint-disable-next-line no-await-in-loop
     const response = await fetcher(url)
+    console.log(new Date(), "get", url)
     const res_arr = response.json.result
     for (let i = 0; i < filter.length; i += 1) {
-      const selection = res_arr[filter[i]]
+      const selection = res_arr[pairList[i]]
       if (selection != null) {
-        const base = filter[i].split("_", 1)[0]
-        const target = filter[i].split("_", 2)[1]
+        const base = pairLookup[pairList[i]].base
+        const target = pairLookup[pairList[i]].target
         const price = scientificToDecimal(selection.ticker.last).toString()
         const priceInt = Web3.utils.toWei(price, "ether")
         // time already returned in unix epoch format

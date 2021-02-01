@@ -3,55 +3,71 @@ const Web3 = require("web3")
 const { scientificToDecimal, fetcher } = require("../utils")
 
 const filter = [
-  "ada_usdt",
-  "atom_btc",
-  "atom_usdt",
-  "bch_btc",
-  "bch_usdt",
-  "btc_usdt",
-  "dot_usdt",
-  "eos_btc",
-  "eos_eth",
-  "eos_usdt",
-  "etc_btc",
-  "etc_eth",
-  "etc_usdt",
-  "eth_btc",
-  "eth_usdt",
-  "fund_btc",
-  "fund_eth",
-  "fund_usdt",
-  "link_usdt",
-  "ltc_btc",
-  "ltc_usdt",
-  "neo_btc",
-  "neo_eth",
-  "neo_usdt",
-  "trx_btc",
-  "trx_eth",
-  "trx_usdt",
-  "xlm_usdt",
-  "xmr_btc",
-  "xmr_usdt",
-  "xrp_btc",
-  "xrp_eth",
-  "xrp_usdt",
+  "ADA/USDT",
+  "ATOM/BTC",
+  "ATOM/USDT",
+  "BCH/BTC",
+  "BCH/USDT",
+  "BTC/USDT",
+  "DOT/USDT",
+  "EOS/BTC",
+  "EOS/ETH",
+  "EOS/USDT",
+  "ETC/BTC",
+  "ETC/ETH",
+  "ETC/USDT",
+  "ETH/BTC",
+  "ETH/USDT",
+  "FUND/BTC",
+  "FUND/ETH",
+  "FUND/USDT",
+  "LINK/USDT",
+  "LTC/BTC",
+  "LTC/USDT",
+  "NEO/BTC",
+  "NEO/ETH",
+  "NEO/USDT",
+  "TRX/BTC",
+  "TRX/ETH",
+  "TRX/USDT",
+  "XLM/USDT",
+  "XMR/BTC",
+  "XMR/USDT",
+  "XRP/BTC",
+  "XRP/ETH",
+  "XRP/USDT",
 ]
+
+const getPairData = (pair) => {
+  const base = pair.split("/", 1)[0]
+  const target = pair.split("/", 2)[1]
+  const apiPairName = `${base.toLowerCase()}_${target.toLowerCase()}`
+  return { apiPairName, pair, base, target }
+}
 
 const orgExchangeData = async () => {
   try {
     const final = []
+    const pairList = []
+    const pairLookup = {}
+    for (let i = 0; i < filter.length; i += 1) {
+      const pairData = getPairData(filter[i])
+      pairList.push(pairData.apiPairName)
+      pairLookup[pairData.apiPairName] = pairData
+    }
+
     const url = "https://openapi.digifinex.com/v3/ticker"
     // eslint-disable-next-line no-await-in-loop
     const response = await fetcher(url)
+    console.log(new Date(), "get", url)
     const res_arr = Object.entries(response.json.ticker)
     const timestamp = response.json.date
     for (let i = 0; i < filter.length; i += 1) {
       // eslint-disable-next-line no-restricted-syntax
       for (const [key, value] of res_arr) {
-        if (value.symbol === filter[i]) {
-          const base = filter[i].split("_", 1)[0].toUpperCase()
-          const target = filter[i].split("_", 2)[1].toUpperCase()
+        if (value.symbol === pairList[i]) {
+          const base = pairLookup[pairList[i]].base
+          const target = pairLookup[pairList[i]].target
           const price = scientificToDecimal(value.last).toString()
           const priceInt = Web3.utils.toWei(price, "ether")
 
@@ -80,4 +96,3 @@ const getPrices = async () => {
 module.exports = {
   getPrices,
 }
-

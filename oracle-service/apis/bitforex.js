@@ -3,44 +3,56 @@ const Web3 = require("web3")
 const { scientificToDecimal, fetcher } = require("../utils")
 
 const filter = [
-  "coin-usdt-ada",
-  "coin-usdt-atom",
-  "coin-btc-bch",
-  "coin-usdt-bch",
-  "coin-usdt-btc",
-  "coin-usdt-dot",
-  "coin-btc-eos",
-  "coin-usdt-eos",
-  "coin-btc-eth",
-  "coin-usdt-eth",
-  "coin-btc-fund",
-  "coin-eth-fund",
-  "coin-usdt-fund",
-  "coin-btc-link",
-  "coin-eth-link",
-  "coin-usdt-ltc",
-  "coin-usdt-neo",
-  "coin-btc-trx",
-  "coin-usdt-trx",
-  "coin-usdt-xlm",
-  "coin-btc-xrp",
-  "coin-usdt-xrp",
+  "ADA/USDT",
+  "ATOM/USDT",
+  "BCH/BTC",
+  "BCH/USDT",
+  "BTC/USDT",
+  "DOT/USDT",
+  "EOS/BTC",
+  "EOS/USDT",
+  "ETH/BTC",
+  "ETH/USDT",
+  "FUND/BTC",
+  "FUND/ETH",
+  "FUND/USDT",
+  "LINK/BTC",
+  "LINK/ETH",
+  "LTC/USDT",
+  "NEO/USDT",
+  "TRX/BTC",
+  "TRX/USDT",
+  "XLM/USDT",
+  "XRP/BTC",
+  "XRP/USDT",
 ]
+
+const getPairData = (pair) => {
+  const base = pair.split("/", 1)[0]
+  const target = pair.split("/", 2)[1]
+  const apiPairName = `coin-${target.toLowerCase()}-${base.toLowerCase()}`
+  return { apiPairName, pair, base, target }
+}
+
+// Example "coin-usdt-ada",
 
 const orgExchangeData = async () => {
   try {
     const final = []
-    let base
-    let target
-
+    const pairList = []
+    const pairLookup = {}
     for (let i = 0; i < filter.length; i += 1) {
-      base = filter[i].split("-", 3)[2].toUpperCase()
-      target = filter[i].split("-", 2)[1].toUpperCase()
-      const url = `https://api.bitforex.com/api/v1/market/ticker?symbol=${filter[i]}`
+      const pairData = getPairData(filter[i])
+      pairList.push(pairData.apiPairName)
+      pairLookup[pairData.apiPairName] = pairData
+    }
+    for (let i = 0; i < filter.length; i += 1) {
+      const url = `https://api.bitforex.com/api/v1/market/ticker?symbol=${pairList[i]}`
       console.log(new Date(), "get", url)
-
       // eslint-disable-next-line no-await-in-loop
       const response = await fetcher(url)
+      const base = pairLookup[pairList[i]].base
+      const target = pairLookup[pairList[i]].target
       const price = scientificToDecimal(response.json.data.last).toString()
       const priceInt = Web3.utils.toWei(price, "ether")
       const timestamp = response.json.time
@@ -61,11 +73,8 @@ const orgExchangeData = async () => {
 }
 
 const getPrices = async () => {
-  await orgExchangeData()
+  console.log(await orgExchangeData())
 }
-
-getPrices()
-
 module.exports = {
   getPrices,
 }

@@ -39,47 +39,57 @@ const filter = [
   "XRP/USD",
 ]
 
+const getPairData = (pair) => {
+  const base = pair.split("/", 1)[0]
+  let target = pair.split("/", 2)[1]
+  let apiPairName
+  switch (base) {
+    case "LINK":
+    case "BCHABC":
+    case "BCHN":
+      apiPairName = `t${base}:${target}`
+      break
+    default:
+      apiPairName = `t${base}${target}`
+      break
+  }
+  // cleanse/standardise
+  if (target === "UST") {
+    target = "USDT"
+  }
+  return { apiPairName, pair, base, target }
+}
+
 const orgExchangeData = async () => {
   try {
     const final = []
     const pairList = []
-    const baseList = []
-    const targetList = []
+    const pairLookup = {}
     for (let i = 0; i < filter.length; i += 1) {
-      const base = filter[i].split("/", 1)[0]
-      const target = filter[i].split("/", 2)[1]
-      baseList.push(base)
-      targetList.push(target)
-
-      if (baseList[i] === "LINK" || baseList[i] === "BCHABC" || baseList[i] === "BCHN" ) {
-        const pair = `t${baseList[i]}:${targetList[i]}`
-        pairList.push(pair)
-        continue
-      }
-
-      const pair = `t${baseList[i]}${targetList[i]}`
-      pairList.push(pair)
+      const pairData = getPairData(filter[i])
+      pairList.push(pairData.apiPairName)
+      pairLookup[pairData.apiPairName] = pairData
     }
+
     // generate query URL
     const url = `https://api-pub.bitfinex.com/v2/tickers?symbols=${pairList}`
     console.log(new Date(), "get", url)
 
-    for (let i = 0; i < targetList; i = +1) {
-      if (targetList[i] === "UST") {
-        targetList[i] = "USDT"
-      }
-    }
     // eslint-disable-next-line no-await-in-loop
     const response = await fetcher(url)
-    for (let i = 0; i < filter.length; i += 1){
+    for (let i = 0; i < response.json.length; i += 1) {
+      const apiPairName = response.json[i][0]
+      const base = pairLookup[apiPairName].base
+      const target = pairLookup[apiPairName].target
+      const pair = `${base}/${target}`
       const p = response.json[i][7]
       const price = scientificToDecimal(p).toString()
       const priceInt = Web3.utils.toWei(price, "ether")
       const timestamp = Math.floor(Date.parse(response.date) / 1000)
       const td = {
-        base: baseList[i],
-        target: targetList[i],
-        pair: `${baseList[i]}/${targetList[i]}`,
+        base,
+        target,
+        pair,
         price,
         priceInt,
         timestamp,
@@ -89,16 +99,14 @@ const orgExchangeData = async () => {
     return final
   } catch (err) {
     console.error(err)
+    return []
   }
 }
 
 const getPrices = async () => {
-  console.log(await orgExchangeData())
+  await orgExchangeData()
 }
 
-getPrices()
-
-// module.exports = {
-//   getPrices,
-// }
-
+module.exports = {
+  getPrices,
+}

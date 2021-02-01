@@ -3,60 +3,64 @@ const Web3 = require("web3")
 const { scientificToDecimal, fetcher } = require("../utils")
 
 const filter = [
-  "btcusd",
-  "btceur",
-  "btcgbp",
-  "btcusdc",
-  "xrpusd",
-  "xrpeur",
-  "xrpbtc",
-  "xrpgbp",
-  "ltcusd",
-  "ltceur",
-  "ltcbtc",
-  "ltcgbp",
-  "ethusd",
-  "etheur",
-  "ethbtc",
-  "ethgbp",
-  "ethusdc",
-  "bchusd",
-  "bcheur",
-  "bchbtc",
-  "bchgbp",
-  "xlmbtc",
-  "xlmusd",
-  "xlmeur",
-  "xlmgbp",
-  "linkusd",
-  "linkeur",
-  "linkgbp",
-  "linkbtc",
-  "linketh",
+  "BTC/USD",
+  "BTC/EUR",
+  "BTC/GBP",
+  "BTC/USDC",
+  "XRP/USD",
+  "XRP/EUR",
+  "XRP/BTC",
+  "XRP/GBP",
+  "LTC/USD",
+  "LTC/EUR",
+  "LTC/BTC",
+  "LTC/GBP",
+  "ETH/USD",
+  "ETH/EUR",
+  "ETH/BTC",
+  "ETH/GBP",
+  "ETH/USDC",
+  "BCH/USD",
+  "BCH/EUR",
+  "BCH/BTC",
+  "BCH/GBP",
+  "XLM/BTC",
+  "XLM/USD",
+  "XLM/EUR",
+  "XLM/GBP",
+  "LINK/USD",
+  "LINK/EUR",
+  "LINK/GBP",
+  "LINK/BTC",
+  "LINK/ETH",
 ]
+
+const getPairData = (pair) => {
+  const base = pair.split("/", 1)[0]
+  const target = pair.split("/", 2)[1]
+  const apiPairName = `${base.toLowerCase()}${target.toLowerCase()}`
+  return { apiPairName, pair, base, target }
+}
 
 const orgExchangeData = async () => {
   try {
     const final = []
-    let base
-    let target
-    // Iterate through filter array of pairs
+    const pairList = []
+    const pairLookup = {}
     for (let i = 0; i < filter.length; i += 1) {
-      const substr = filter[i].substring(0, 4)
-      if (substr === "link" || substr === "atom") {
-        base = substr.toUpperCase()
-        target = filter[i].substring(4).toUpperCase()
-      } else {
-        base = filter[i].substring(0, 3).toUpperCase()
-        target = filter[i].substring(3).toUpperCase()
-      }
-
-      // Need to access Huobi api pair by pair to get "last price" data
-      const url = `https://www.bitstamp.net/api/v2/ticker/${filter[i]}`
+      const pairData = getPairData(filter[i])
+      pairList.push(pairData.apiPairName)
+      pairLookup[pairData.apiPairName] = pairData
+    }
+    // Need to access Huobi api pair by pair to get "last price" data
+    for (let i = 0; i < filter.length; i += 1) {
+      const url = `https://www.bitstamp.net/api/v2/ticker/${pairList[i]}`
       console.log(new Date(), "get", url)
 
       // eslint-disable-next-line no-await-in-loop
       const response = await fetcher(url)
+      const base = pairLookup[pairList[i]].base
+      const target = pairLookup[pairList[i]].target
       const price = scientificToDecimal(response.json.last).toString()
       const priceInt = Web3.utils.toWei(price, "ether")
       const timestamp = response.json.timestamp
