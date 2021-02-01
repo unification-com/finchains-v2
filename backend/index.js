@@ -2,14 +2,11 @@ require("dotenv").config()
 const arg = require("arg")
 const { getBlockNumber, getPastEvents, watchBlocks, watchEvent } = require("../common/ethereum")
 const { LastGethBlock } = require("../common/db/models")
-const {
-  cleanCurrencyUpdate7Day,
-  copyCurrencyUpdate7Days,
-  processCurrencyUpdate,
-} = require("./currencyUpdates")
-const { cleanDiscrepancy7Day, copyDiscrepancies7Days, processDiscrepancy } = require("./discrepancies")
+const { cleanCurrencyUpdate7Day, processCurrencyUpdate } = require("./currencyUpdates")
+const { cleanDiscrepancy7Day, processDiscrepancy } = require("./discrepancies")
 const { processWrkchainBlock } = require("./wrkchain")
 const { calculateThresholds } = require("./thresholds")
+const { cleanTxHash7Day } = require("./txHashes")
 
 const args = arg({
   // Types
@@ -100,14 +97,10 @@ const run = async () => {
         },
       })
       break
-    case "copy-7days":
-      await copyCurrencyUpdate7Days()
-      await copyDiscrepancies7Days()
-      process.exit(0)
-      break
     case "clean-7days":
       await cleanCurrencyUpdate7Day()
       await cleanDiscrepancy7Day()
+      await cleanTxHash7Day()
       process.exit(0)
       break
     case "iterations":

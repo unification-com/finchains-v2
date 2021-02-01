@@ -12,13 +12,7 @@ module.exports = (sequelize, DataTypes) => {
       Pairs.hasMany(models.CurrencyUpdates, {
         foreignKey: "pairId",
       })
-      Pairs.hasMany(models.CurrencyUpdates7Days, {
-        foreignKey: "pairId",
-      })
       Pairs.hasMany(models.Discrepancies, {
-        foreignKey: "pairId",
-      })
-      Pairs.hasMany(models.Discrepancies7Days, {
         foreignKey: "pairId",
       })
     }

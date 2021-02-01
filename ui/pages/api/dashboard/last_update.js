@@ -6,7 +6,7 @@ const handler = nextConnect()
 handler.use(middleware)
 
 handler.get(async (req, res) => {
-  req.dbModels.CurrencyUpdates7Days.findOne({
+  req.dbModels.CurrencyUpdates.findOne({
     attributes: ["price", "priceRaw", "timestamp"],
     include: [
       { model: req.dbModels.ExchangeOracles, attributes: ["exchange"] },

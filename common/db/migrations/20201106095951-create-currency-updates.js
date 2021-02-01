@@ -44,6 +44,9 @@ module.exports = {
         timestamp: {
           type: Sequelize.INTEGER,
         },
+        height: {
+          type: Sequelize.BIGINT,
+        },
         createdAt: {
           allowNull: false,
           type: Sequelize.DATE,
@@ -61,6 +64,7 @@ module.exports = {
       .then(() => queryInterface.addIndex("CurrencyUpdates", ["pairId", "timestamp"]))
       .then(() => queryInterface.addIndex("CurrencyUpdates", ["pairId", "exchangeOracleId", "timestamp"]))
       .then(() => queryInterface.addIndex("CurrencyUpdates", ["exchangeOracleId", "timestamp"]))
+      .then(() => queryInterface.addIndex("CurrencyUpdates", ["height"]))
   },
   down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable("CurrencyUpdates")
