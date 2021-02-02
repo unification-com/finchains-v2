@@ -30,9 +30,10 @@ const cleanTxHash7Day = async () => {
     delHeight = Math.min(cMinHeight, dMinHeight)
   }
 
+  console.log(new Date(), "cMinHeight", cMinHeight, "dMinHeight", dMinHeight, "delHeight", delHeight)
+
   if (delHeight > 0) {
-    const [results, metadata] = await sequelize.query(`DELETE FROM "TxHashes" WHERE height <= '${delHeight}'`)
-    console.log(new Date(), "results", results)
+    const [, metadata] = await sequelize.query(`DELETE FROM "TxHashes" WHERE height < '${delHeight}'`)
     console.log(new Date(), "deleted", metadata.rowCount, "rows from TxHashes")
   }
 }

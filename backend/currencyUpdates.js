@@ -35,10 +35,9 @@ const cleanCurrencyUpdate7Day = async () => {
   const d = new Date()
   const oneWeekAgo = Math.floor(d / 1000) - 604800
 
-  const [results, metadata] = await sequelize.query(
+  const [, metadata] = await sequelize.query(
     `DELETE FROM "CurrencyUpdates" WHERE timestamp <= '${oneWeekAgo}'`,
   )
-  console.log(new Date(), "results", results)
   console.log(new Date(), "deleted", metadata.rowCount, "rows from CurrencyUpdates")
 }
 
