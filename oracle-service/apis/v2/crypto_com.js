@@ -56,7 +56,7 @@ const getPrices = async () => {
       if (d) {
         const price = scientificToDecimal(d[1].a).toString()
         const priceInt = Web3.utils.toWei(price, "ether")
-        const timestamp = d[1].t
+        const timestamp = Math.floor(parseInt(d[1].t, 10) / 1000)
         const td = {
           base,
           target,

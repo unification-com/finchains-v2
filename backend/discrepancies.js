@@ -118,7 +118,7 @@ const processDiscrepancy = async (event) => {
       )
 
       if (dCreated) {
-        console.log(new Date(), "inserted discrepancy - archive", d.id)
+        console.log(new Date(), "inserted discrepancy", d.id)
       }
     }
 

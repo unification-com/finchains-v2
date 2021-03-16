@@ -48,7 +48,7 @@ const getPrices = async () => {
       const target = pairData.target
       const price = scientificToDecimal(response.json.data.last).toString()
       const priceInt = Web3.utils.toWei(price, "ether")
-      const timestamp = response.json.time
+      const timestamp = Math.floor(parseInt(response.json.time, 10) / 1000)
       const td = {
         base,
         target,
