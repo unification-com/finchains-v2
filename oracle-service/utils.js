@@ -37,12 +37,13 @@ const scientificToDecimal = function (_num) {
 }
 
 const fetcher = (url) => {
+  console.log(new Date(), "fetch", url)
   return new Promise((resolve, reject) => {
     fetch(url)
       .then(async (r) => {
         const json = await r.json()
         const retData = {
-          json: json,
+          json,
           date: r.headers.get("date"),
         }
         return retData
@@ -56,7 +57,12 @@ const fetcher = (url) => {
   })
 }
 
+const sleepFor = (ms) => {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 module.exports = {
   scientificToDecimal,
   fetcher,
+  sleepFor,
 }

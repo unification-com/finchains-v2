@@ -1,8 +1,13 @@
 require("dotenv").config()
 const Web3 = require("web3")
 const { addOracle, getLastSubmitTime, setThreshold, submitPrice } = require("../common/ethereum")
-const { exchangeApis } = require("./apis/index")
+
+const { exchangeApiLoader } = require("./apis")
 const { currencies } = require("./config")
+
+const API_V = process.env.EXCHANGE_API_V || "v2"
+console.log(new Date(), "using exchange API", API_V)
+const exchangeApis = exchangeApiLoader(API_V)
 
 const sleepFor = (ms) => {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -58,7 +63,7 @@ const runOracle = async () => {
           if (parseInt(d.timestamp, 10) > parseInt(lastSubTime, 10)) {
             const txHash = await submitPrice(d.pair, d.priceInt, d.price, d.timestamp)
             console.log(new Date(), "txHash", txHash)
-            await sleepFor(500)
+            await sleepFor(200)
           } else {
             console.log(new Date(), EXCHANGE, "timestamp", d.timestamp, "= lastSubTime", lastSubTime)
           }
@@ -76,27 +81,40 @@ const runOracle = async () => {
 }
 
 const testOracle = async (args) => {
-  const exchange = args[1]
-  await exchangeApis[exchange]
-    .getPrices()
-    .then(async (data) => {
-      console.log("data", data)
-      for (let i = 0; i < currencies.length; i += 1) {
-        const base = currencies[i].sybmol
-        for (let j = 0; j < currencies[i].targets.length; j += 1) {
-          const target = currencies[i].targets[j]
-          const pair = `${base}/${target}`
-          const found = data.find((element) => element.base === base && element.target === target)
-          console.log(pair, found ? "FOUND" : `pair not supported by ${exchange}?`)
+  const exchanges = args[1]
+  let exchangesArr
+  const tasks = []
+
+  if (!exchanges) {
+    exchangesArr = Object.keys(exchangeApis)
+  } else {
+    exchangesArr = exchanges.split(",")
+  }
+
+  for (let i = 0; i < exchangesArr.length; i += 1) {
+    const exchange = exchangesArr[i]
+    const t = exchangeApis[exchange]
+      .getPrices()
+      .then(async (data) => {
+        for (let j = 0; j < data.length; j += 1) {
+          const pair = data[j].pair
+          const base = data[j].base
+          const target = data[j].target
+          const price = data[j].price
+          const ts = data[j].timestamp
+          console.log(exchange, pair, base, target, ts, price)
         }
-      }
-      console.log(exchange, "done")
-      process.exit(0)
-    })
-    .catch((err) => {
-      console.error(new Date(), "ERROR:")
-      console.error(err)
-    })
+        console.log(exchange, "done")
+      })
+      .catch((err) => {
+        console.error(new Date(), "ERROR:")
+        console.error(err)
+      })
+    tasks.push(t)
+  }
+
+  await Promise.all(tasks)
+  process.exit(0)
 }
 
 const listExchanges = () => {

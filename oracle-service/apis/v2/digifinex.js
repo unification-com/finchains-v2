@@ -1,6 +1,7 @@
 require("dotenv").config()
+const _ = require("lodash/core")
 const Web3 = require("web3")
-const { scientificToDecimal, fetcher } = require("../utils")
+const { scientificToDecimal, fetcher } = require("../../utils")
 
 const filter = [
   "ADA/USDT",
@@ -45,9 +46,9 @@ const getPairData = (pair) => {
   return { apiPairName, pair, base, target }
 }
 
-const orgExchangeData = async () => {
+const getPrices = async () => {
+  const final = []
   try {
-    const final = []
     const pairList = []
     const pairLookup = {}
     for (let i = 0; i < filter.length; i += 1) {
@@ -57,40 +58,39 @@ const orgExchangeData = async () => {
     }
 
     const url = "https://openapi.digifinex.com/v3/ticker"
-    // eslint-disable-next-line no-await-in-loop
+
     const response = await fetcher(url)
-    console.log(new Date(), "get", url)
-    const res_arr = Object.entries(response.json.ticker)
+
     const timestamp = response.json.date
     for (let i = 0; i < filter.length; i += 1) {
-      // eslint-disable-next-line no-restricted-syntax
-      for (const [key, value] of res_arr) {
-        if (value.symbol === pairList[i]) {
-          const base = pairLookup[pairList[i]].base
-          const target = pairLookup[pairList[i]].target
-          const price = scientificToDecimal(value.last).toString()
-          const priceInt = Web3.utils.toWei(price, "ether")
+      const pair = filter[i]
+      const pairData = getPairData(pair)
+      const base = pairData.base
+      const target = pairData.target
 
-          const td = {
-            base,
-            target,
-            pair: `${base}/${target}`,
-            price,
-            priceInt,
-            timestamp,
-          }
-          final.push(td)
+      const d = _.find(Object.entries(response.json.ticker), function (o) {
+        return o[1].symbol === pairData.apiPairName
+      })
+
+      if (d) {
+        const price = scientificToDecimal(d[1].last).toString()
+        const priceInt = Web3.utils.toWei(price, "ether")
+
+        const td = {
+          base,
+          target,
+          pair,
+          price,
+          priceInt,
+          timestamp,
         }
+        final.push(td)
       }
     }
-    return final
   } catch (err) {
     console.error(err)
   }
-}
-
-const getPrices = async () => {
-  await orgExchangeData()
+  return final
 }
 
 module.exports = {

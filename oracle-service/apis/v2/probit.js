@@ -1,6 +1,7 @@
 require("dotenv").config()
+const _ = require("lodash/core")
 const Web3 = require("web3")
-const { scientificToDecimal, fetcher } = require("../utils")
+const { scientificToDecimal, fetcher } = require("../../utils")
 
 const filter = [
   "ATOM/USDT",
@@ -36,45 +37,46 @@ const getPairData = (pair) => {
   return { apiPairName, pair, base, target }
 }
 
-
-const orgExchangeData = async () => {
+const getPrices = async () => {
+  const final = []
   try {
-    const final = []
     const pairList = []
-    const pairLookup = {}
     for (let i = 0; i < filter.length; i += 1) {
       const pairData = getPairData(filter[i])
       pairList.push(pairData.apiPairName)
-      pairLookup[pairData.apiPairName] = pairData
     }
-    const filter_list = pairList.join("%2C")
-    const url = `https://api.probit.com/api/exchange/v1/ticker?market_ids=${filter_list}`
+    const url = `https://api.probit.com/api/exchange/v1/ticker?market_ids=${pairList}`
     // eslint-disable-next-line no-await-in-loop
     const response = await fetcher(url)
     for (let i = 0; i < filter.length; i += 1) {
-      const base = pairLookup[pairList[i]].base
-      const target = pairLookup[pairList[i]].target
-      const price = scientificToDecimal(response.json.data[i].last).toString()
-      const priceInt = Web3.utils.toWei(price, "ether")
-      const timestamp = Math.floor(Date.parse(response.json.data[i].time) / 1000)
-      const td = {
-        base,
-        target,
-        pair: `${base}/${target}`,
-        price,
-        priceInt,
-        timestamp,
+      const pair = filter[i]
+      const pairData = getPairData(pair)
+      const base = pairData.base
+      const target = pairData.target
+
+      const d = _.find(Object.entries(response.json.data), function (o) {
+        return o[1].market_id === pairData.apiPairName
+      })
+
+      if (d) {
+        const price = scientificToDecimal(d[1].last).toString()
+        const priceInt = Web3.utils.toWei(price, "ether")
+        const timestamp = Math.floor(Date.parse(d[1].time) / 1000)
+        const td = {
+          base,
+          target,
+          pair: `${base}/${target}`,
+          price,
+          priceInt,
+          timestamp,
+        }
+        final.push(td)
       }
-      final.push(td)
     }
-    return final
   } catch (err) {
     console.error(err)
   }
-}
-
-const getPrices = async () => {
-  await orgExchangeData()
+  return final
 }
 
 module.exports = {

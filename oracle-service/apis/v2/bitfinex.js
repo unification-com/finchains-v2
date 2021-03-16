@@ -1,6 +1,7 @@
 require("dotenv").config()
+const _ = require("lodash/core")
 const Web3 = require("web3")
-const { scientificToDecimal, fetcher } = require("../utils")
+const { scientificToDecimal, fetcher } = require("../../utils")
 
 const filter = [
   "ADA/UST",
@@ -20,7 +21,6 @@ const filter = [
   "ETH/GBP",
   "ETH/USD",
   "ETH/UST",
-  "LINK/BTC",
   "LINK/UST",
   "LINK/USD",
   "LTC/BTC",
@@ -60,51 +60,47 @@ const getPairData = (pair) => {
   return { apiPairName, pair, base, target }
 }
 
-const orgExchangeData = async () => {
+const getPrices = async () => {
+  const final = []
   try {
-    const final = []
     const pairList = []
-    const pairLookup = {}
     for (let i = 0; i < filter.length; i += 1) {
       const pairData = getPairData(filter[i])
       pairList.push(pairData.apiPairName)
-      pairLookup[pairData.apiPairName] = pairData
     }
 
     // generate query URL
     const url = `https://api-pub.bitfinex.com/v2/tickers?symbols=${pairList}`
-    console.log(new Date(), "get", url)
-
-    // eslint-disable-next-line no-await-in-loop
     const response = await fetcher(url)
-    for (let i = 0; i < response.json.length; i += 1) {
-      const apiPairName = response.json[i][0]
-      const base = pairLookup[apiPairName].base
-      const target = pairLookup[apiPairName].target
-      const pair = `${base}/${target}`
-      const p = response.json[i][7]
-      const price = scientificToDecimal(p).toString()
-      const priceInt = Web3.utils.toWei(price, "ether")
-      const timestamp = Math.floor(Date.parse(response.date) / 1000)
-      const td = {
-        base,
-        target,
-        pair,
-        price,
-        priceInt,
-        timestamp,
-      }
-      final.push(td)
-    }
-    return final
-  } catch (err) {
-    console.error(err)
-    return []
-  }
-}
+    for (let i = 0; i < filter.length; i += 1) {
+      const pair = filter[i]
+      const pairData = getPairData(pair)
+      const d = _.find(response.json, function (o) {
+        return o[0] === pairData.apiPairName
+      })
 
-const getPrices = async () => {
-  await orgExchangeData()
+      if (d) {
+        const base = pairData.base
+        const target = pairData.target
+        const price = scientificToDecimal(d[7]).toString()
+        const priceInt = Web3.utils.toWei(price, "ether")
+        const timestamp = Math.floor(Date.parse(response.date) / 1000)
+        const td = {
+          base,
+          target,
+          pair,
+          price,
+          priceInt,
+          timestamp,
+        }
+        final.push(td)
+      }
+    }
+  } catch (error) {
+    console.error(new Date(), "ERROR:")
+    console.error(error)
+  }
+  return final
 }
 
 module.exports = {

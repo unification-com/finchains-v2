@@ -1,6 +1,6 @@
 require("dotenv").config()
 const Web3 = require("web3")
-const { scientificToDecimal, fetcher } = require("../utils")
+const { scientificToDecimal, fetcher, sleepFor } = require("../../utils")
 
 const filter = [
   "ADA/BTC",
@@ -45,51 +45,40 @@ const getPairData = (pair) => {
 }
 
 // get data
-const orgExchangeData = async () => {
+const getPrices = async () => {
+  const final = []
   try {
-    const final = []
-    const pairList = []
-    const pairLookup = {}
-    for (let i = 0; i < filter.length; i += 1) {
-      const pairData = getPairData(filter[i])
-      pairList.push(pairData.apiPairName)
-      pairLookup[pairData.apiPairName] = pairData
-    }
     // Iterate through filter array of pairs
     for (let i = 0; i < filter.length; i += 1) {
-   
-      const url = `https://api.huobi.pro/market/trade?symbol=${pairList[i]}`
+      const pair = filter[i]
+      const pairData = getPairData(pair)
+      const base = pairData.base
+      const target = pairData.target
+      const url = `https://api.huobi.pro/market/trade?symbol=${pairData.apiPairName}`
+
       // eslint-disable-next-line no-await-in-loop
       const response = await fetcher(url)
 
-      console.log(new Date(), "get", url)
-
-      const base = pairLookup[pairList[i]].base
-      const target = pairLookup[pairList[i]].target
       const price = scientificToDecimal(response.json.tick.data[0].price).toString()
       const priceInt = Web3.utils.toWei(price, "ether")
       const timestamp = response.json.tick.data[0].ts
       const td = {
         base,
         target,
-        pair: `${base}/${target}`,
+        pair,
         price,
         priceInt,
         timestamp,
       }
       final.push(td)
+      await sleepFor(200)
     }
-    return final
   } catch (err) {
     console.error(err)
   }
+  return final
 }
 
-const getPrices = async () => {
-  await orgExchangeData()
-}
-
-getPrices()
 module.exports = {
   getPrices,
 }

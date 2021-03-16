@@ -1,21 +1,16 @@
-require("dotenv").config()
-const fs = require("fs")
-const path = require("path")
+const { exchangeApis: exchangeApisV1 } = require("./v1.legacy")
+const { exchangeApis: exchangeApisV2 } = require("./v2")
 
-const basename = path.basename(__filename)
-
-const exchangeApis = {}
-
-fs.readdirSync(__dirname)
-  .filter((file) => {
-    return file.indexOf(".") !== 0 && file !== basename && file.slice(-3) === ".js"
-  })
-  .forEach((file) => {
-    const api = require(path.join(__dirname, file))
-    const name = file.replace(file.slice(-3), "")
-    exchangeApis[name] = api
-  })
+const exchangeApiLoader = (v) => {
+  switch (v) {
+    case "v1.legacy":
+      return exchangeApisV1
+    case "v2":
+    default:
+      return exchangeApisV2
+  }
+}
 
 module.exports = {
-  exchangeApis,
+  exchangeApiLoader,
 }

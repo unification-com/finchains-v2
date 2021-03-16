@@ -1,6 +1,6 @@
 require("dotenv").config()
 const Web3 = require("web3")
-const { scientificToDecimal, fetcher } = require("../utils")
+const { scientificToDecimal, fetcher, sleepFor } = require("../../utils")
 
 const filter = [
   "ATOM/USDT",
@@ -46,45 +46,37 @@ const getPairData = (pair) => {
   return { apiPairName, pair, base, target }
 }
 
-const orgExchangeData = async () => {
-  try {
-    const final = []
-    const pairList = []
-    const pairLookup = {}
-    for (let i = 0; i < filter.length; i += 1) {
-      const pairData = getPairData(filter[i])
-      pairList.push(pairData.apiPairName)
-      pairLookup[pairData.apiPairName] = pairData
-    }
-    for (let i = 0; i < filter.length; i += 1) {
-      const url = `https://openapi.bitmart.com/v2/ticker?symbol=${pairList[i]}`
-      console.log(new Date(), "get", url)
+const getPrices = async () => {
+  const final = []
+
+  for (let i = 0; i < filter.length; i += 1) {
+    const pair = filter[i]
+    const pairData = getPairData(pair)
+    try {
+      const url = `https://openapi.bitmart.com/v2/ticker?symbol=${pairData.apiPairName}`
 
       // eslint-disable-next-line no-await-in-loop
       const response = await fetcher(url)
-      const base = pairLookup[pairList[i]].base
-      const target = pairLookup[pairList[i]].target
+      const base = pairData.base
+      const target = pairData.target
       const price = scientificToDecimal(response.json.current_price).toString()
       const priceInt = Web3.utils.toWei(price, "ether")
       const timestamp = Math.floor(Date.parse(response.date) / 1000)
       const td = {
         base,
         target,
-        pair: `${base}/${target}`,
+        pair,
         price,
         priceInt,
         timestamp,
       }
       final.push(td)
+    } catch (err) {
+      console.error(err)
     }
-    return final
-  } catch (err) {
-    console.error(err)
+    await sleepFor(200)
   }
-}
-
-const getPrices = async () => {
-  await orgExchangeData()
+  return final
 }
 
 module.exports = {
