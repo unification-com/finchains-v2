@@ -1,6 +1,6 @@
 require("dotenv").config()
 const Web3 = require("web3")
-const { scientificToDecimal, fetcher } = require("../utils")
+const { scientificToDecimal, fetcher } = require("../../utils")
 
 const filter = [
   "BCH/BTC",

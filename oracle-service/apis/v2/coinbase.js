@@ -1,6 +1,6 @@
 require("dotenv").config()
 const Web3 = require("web3")
-const { scientificToDecimal, fetcher, sleepFor } = require("../utils")
+const { scientificToDecimal, fetcher, sleepFor } = require("../../utils")
 
 const filter = [
   "ATOM/BTC",
