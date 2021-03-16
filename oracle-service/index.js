@@ -1,8 +1,13 @@
 require("dotenv").config()
 const Web3 = require("web3")
 const { addOracle, getLastSubmitTime, setThreshold, submitPrice } = require("../common/ethereum")
-const { exchangeApis } = require("./apis/v2")
+
+const { exchangeApiLoader } = require("./apis")
 const { currencies } = require("./config")
+
+const API_V = process.env.EXCHANGE_API_V || "v2"
+console.log(new Date(), "using exchange API", API_V)
+const exchangeApis = exchangeApiLoader(API_V)
 
 const sleepFor = (ms) => {
   return new Promise((resolve) => setTimeout(resolve, ms))
