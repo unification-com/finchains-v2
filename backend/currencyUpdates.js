@@ -93,7 +93,7 @@ const processCurrencyUpdate = async (event) => {
       )
 
       if (cuCreated) {
-        console.log(new Date(), "inserted currency update - archive", cu.id)
+        console.log(new Date(), "inserted currency update", cu.id)
       }
     }
 
