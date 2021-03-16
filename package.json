@@ -34,6 +34,7 @@
     "classnames": "^2.2.6",
     "dotenv": "^8.2.0",
     "isomorphic-unfetch": "^3.1.0",
+    "lodash": "^4.17.21",
     "next": "^10.0.1",
     "next-connect": "^0.9.1",
     "peirce-criterion": "^1.1.0",
