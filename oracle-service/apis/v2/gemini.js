@@ -1,6 +1,6 @@
 require("dotenv").config()
 const Web3 = require("web3")
-const { scientificToDecimal, fetcher } = require("../utils")
+const { scientificToDecimal, fetcher, sleepFor } = require("../utils")
 
 const filter = [
   "BCH/BTC",
@@ -27,47 +27,38 @@ const getPairData = (pair) => {
   return { apiPairName, pair, base, target }
 }
 
-const orgExchangeData = async () => {
+const getPrices = async () => {
+  const final = []
   try {
-    const final = []
-    const pairList = []
-    const pairLookup = {}
     for (let i = 0; i < filter.length; i += 1) {
-      const pairData = getPairData(filter[i])
-      pairList.push(pairData.apiPairName)
-      pairLookup[pairData.apiPairName] = pairData
-    }
-    for (let i = 0; i < filter.length; i += 1) {
-      const url = `https://api.gemini.com/v1/pubticker/${pairList[i]}`
+      const pair = filter[i]
+      const pairData = getPairData(pair)
+      const base = pairData.base
+      const target = pairData.target
+      const url = `https://api.gemini.com/v1/pubticker/${pairData.apiPairName}`
       // eslint-disable-next-line no-await-in-loop
       const response = await fetcher(url)
 
-      console.log(new Date(), "get", url)
-
-      const base = pairLookup[pairList[i]].base
-      const target = pairLookup[pairList[i]].target
       const price = scientificToDecimal(response.json.last).toString()
       const priceInt = Web3.utils.toWei(price, "ether")
       const timestamp = response.json.volume.timestamp
       const td = {
         base,
         target,
-        pair: `${base}/${target}`,
+        pair,
         price,
         priceInt,
         timestamp,
       }
       final.push(td)
+      await sleepFor(200)
     }
-    return final
   } catch (err) {
     console.error(err)
   }
+  return final
 }
 
-const getPrices = async () => {
-  console.log(await orgExchangeData())
-}
 
 module.exports = {
   getPrices,

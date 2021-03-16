@@ -3,16 +3,35 @@ const Web3 = require("web3")
 const { scientificToDecimal, fetcher } = require("../utils")
 
 const filter = [
-  'BCH/BTC',  'BCH/USD',   'BTC/EUR',
-  'BTC/PAX',  'BTC/USD',   'BTC/USDC',
-  'BTC/USDT', 'EOS/BTC',   'EOS/ETH',
-  'EOS/USDT', 'ETC/BTC',   'ETC/ETH',
-  'ETH/BTC',  'ETH/EUR',   'ETH/USD',
-  'ETH/USDC', 'ETH/USDT',  'LINK/BTC',
-  'LINK/ETH', 'LINK/USDT', 'LTC/BTC',
-  'LTC/ETH',  'LTC/USD',   'LTC/USDT',
-  'TRX/BTC',  'TRX/ETH',   'TRX/USDT',
-  'XLM/BTC',  'XRP/BTC'
+  "BCH/BTC",
+  "BCH/USD",
+  "BTC/EUR",
+  "BTC/PAX",
+  "BTC/USD",
+  "BTC/USDC",
+  "BTC/USDT",
+  "EOS/BTC",
+  "EOS/ETH",
+  "EOS/USDT",
+  "ETC/BTC",
+  "ETC/ETH",
+  "ETH/BTC",
+  "ETH/EUR",
+  "ETH/USD",
+  "ETH/USDC",
+  "ETH/USDT",
+  "LINK/BTC",
+  "LINK/ETH",
+  "LINK/USDT",
+  "LTC/BTC",
+  "LTC/ETH",
+  "LTC/USD",
+  "LTC/USDT",
+  "TRX/BTC",
+  "TRX/ETH",
+  "TRX/USDT",
+  "XLM/BTC",
+  "XRP/BTC",
 ]
 
 const getPairData = (pair) => {
@@ -22,26 +41,23 @@ const getPairData = (pair) => {
   return { apiPairName, pair, base, target }
 }
 
-const orgExchangeData = async () => {
+const getPrices = async () => {
+  const final = []
   try {
-    const final = []
-    const pairList = []
-    const pairLookup = {}
-    for (let i = 0; i < filter.length; i += 1) {
-      const pairData = getPairData(filter[i])
-      pairList.push(pairData.apiPairName)
-      pairLookup[pairData.apiPairName] = pairData
-    }
     const url = "https://coinsbit.io/api/v1/public/tickers"
     // eslint-disable-next-line no-await-in-loop
     const response = await fetcher(url)
-    console.log(new Date(), "get", url)
+
     const res_arr = response.json.result
+
     for (let i = 0; i < filter.length; i += 1) {
-      const selection = res_arr[pairList[i]]
-      if (selection != null) {
-        const base = pairLookup[pairList[i]].base
-        const target = pairLookup[pairList[i]].target
+      const pair = filter[i]
+      const pairData = getPairData(pair)
+      const base = pairData.base
+      const target = pairData.target
+
+      if (res_arr[pairData.apiPairName]) {
+        const selection = res_arr[pairData.apiPairName]
         const price = scientificToDecimal(selection.ticker.last).toString()
         const priceInt = Web3.utils.toWei(price, "ether")
         // time already returned in unix epoch format
@@ -50,7 +66,7 @@ const orgExchangeData = async () => {
         const td = {
           base,
           target,
-          pair: `${base}/${target}`,
+          pair,
           price,
           priceInt,
           timestamp,
@@ -58,14 +74,10 @@ const orgExchangeData = async () => {
         final.push(td)
       }
     }
-    return final
   } catch (err) {
     console.error(err)
   }
-}
-
-const getPrices = async () => {
-  await orgExchangeData()
+  return final
 }
 
 module.exports = {

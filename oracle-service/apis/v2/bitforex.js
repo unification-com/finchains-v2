@@ -1,6 +1,6 @@
 require("dotenv").config()
 const Web3 = require("web3")
-const { scientificToDecimal, fetcher } = require("../utils")
+const { scientificToDecimal, fetcher, sleepFor } = require("../utils")
 
 const filter = [
   "ADA/USDT",
@@ -36,45 +36,38 @@ const getPairData = (pair) => {
 
 // Example "coin-usdt-ada",
 
-const orgExchangeData = async () => {
-  try {
-    const final = []
-    const pairList = []
-    const pairLookup = {}
-    for (let i = 0; i < filter.length; i += 1) {
-      const pairData = getPairData(filter[i])
-      pairList.push(pairData.apiPairName)
-      pairLookup[pairData.apiPairName] = pairData
-    }
-    for (let i = 0; i < filter.length; i += 1) {
-      const url = `https://api.bitforex.com/api/v1/market/ticker?symbol=${pairList[i]}`
-      console.log(new Date(), "get", url)
-      // eslint-disable-next-line no-await-in-loop
+const getPrices = async () => {
+  const final = []
+  for (let i = 0; i < filter.length; i += 1) {
+    const pair = filter[i]
+    const pairData = getPairData(pair)
+    const url = `https://api.bitforex.com/api/v1/market/ticker?symbol=${pairData.apiPairName}`
+    try {
       const response = await fetcher(url)
-      const base = pairLookup[pairList[i]].base
-      const target = pairLookup[pairList[i]].target
+      const base = pairData.base
+      const target = pairData.target
       const price = scientificToDecimal(response.json.data.last).toString()
       const priceInt = Web3.utils.toWei(price, "ether")
       const timestamp = response.json.time
       const td = {
         base,
         target,
-        pair: `${base}/${target}`,
+        pair,
         price,
         priceInt,
         timestamp,
       }
       final.push(td)
+    } catch (error) {
+      console.error(new Date(), "ERROR:")
+      console.error(error)
     }
-    return final
-  } catch (err) {
-    console.error(err)
+    await sleepFor(200)
   }
+
+  return final
 }
 
-const getPrices = async () => {
-  console.log(await orgExchangeData())
-}
 module.exports = {
   getPrices,
 }

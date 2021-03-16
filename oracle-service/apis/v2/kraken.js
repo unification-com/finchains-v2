@@ -1,6 +1,6 @@
 require("dotenv").config()
 const Web3 = require("web3")
-const { scientificToDecimal, fetcher } = require("../utils")
+const { scientificToDecimal, fetcher, sleepFor } = require("../utils")
 
 const filter = [
   "ADA/USDT",
@@ -49,45 +49,37 @@ const getPairData = (pair) => {
 }
 
 // standardised function to get prices from an exchange's API
-const orgExchangeData = async () => {
+const getPrices = async () => {
+  const final = []
   try {
-    const final = []
-    const pairList = []
-    const pairLookup = {}
     for (let i = 0; i < filter.length; i += 1) {
-      const pairData = getPairData(filter[i])
-      pairList.push(pairData.apiPairName)
-      pairLookup[pairData.apiPairName] = pairData
-    }
-    for (let i = 0; i < filter.length; i += 1) {
-      const url = `https://api.kraken.com/0/public/Ticker?pair=${pairList[i]}`
+      const pair = filter[i]
+      const pairData = getPairData(pair)
+      const base = pairData.base
+      const target = pairData.target
+      const url = `https://api.kraken.com/0/public/Ticker?pair=${pairData.apiPairName}`
+
       // eslint-disable-next-line no-await-in-loop
       const response = await fetcher(url)
       const res_pair = Object.keys(response.json.result)
-      const base = pairLookup[pairList[i]].base
-      const target = pairLookup[pairList[i]].target
-      const price = scientificToDecimal(response.json.result[`${res_pair}`].c[0]).toString()
+      const price = scientificToDecimal(response.json.result[res_pair].c[0]).toString()
       const priceInt = Web3.utils.toWei(price, "ether")
       const timestamp = Math.floor(Date.parse(response.date) / 1000)
       const td = {
         base,
         target,
-        pair: `${base}/${target}`,
+        pair,
         price,
         priceInt,
         timestamp,
       }
       final.push(td)
-      console.log(final)
+      await sleepFor(200)
     }
-    return final
   } catch (error) {
     console.error(error)
   }
-}
-
-const getPrices = async () => {
-  await orgExchangeData()
+  return final
 }
 
 module.exports = {
