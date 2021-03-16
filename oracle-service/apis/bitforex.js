@@ -1,73 +1,80 @@
 require("dotenv").config()
 const Web3 = require("web3")
-const fetch = require("isomorphic-unfetch")
-const { scientificToDecimal } = require("../utils")
-const { currencies } = require("../config")
+const { scientificToDecimal, fetcher } = require("../utils")
 
-// standardised function to get prices from an exchange's API
-const getPrices = () => {
-  return new Promise((resolve, reject) => {
-    const bases = []
-    const targets = {}
-    // load desired bases and targets from config.js
-    // ToDo - only load pairs supported by the exchange API. No point querying unsupported pairs
-    // filter can be hard-coded per exchange API.
-    for (let i = 0; i < currencies.length; i += 1) {
-      const c = currencies[i]
-      bases.push(c.base)
-      targets[c.sybmol] = c.targets
-    }
+const filter = [
+  "ADA/USDT",
+  "ATOM/USDT",
+  "BCH/BTC",
+  "BCH/USDT",
+  "BTC/USDT",
+  "DOT/USDT",
+  "EOS/BTC",
+  "EOS/USDT",
+  "ETH/BTC",
+  "ETH/USDT",
+  "FUND/BTC",
+  "FUND/ETH",
+  "FUND/USDT",
+  "LINK/BTC",
+  "LINK/ETH",
+  "LTC/USDT",
+  "NEO/USDT",
+  "TRX/BTC",
+  "TRX/USDT",
+  "XLM/USDT",
+  "XRP/BTC",
+  "XRP/USDT",
+]
 
-    // generate query URL
-    const basesStr = bases.join(",")
-    const URL = `https://api.coingecko.com/api/v3/exchanges/bitforex/tickers?coin_ids=${basesStr}`
-    console.log(new Date(), "get", URL)
-
-    // get data
-    fetch(URL)
-      .then((r) => r.json())
-      .then((data) => {
-        // process results
-        const results = []
-
-        for (let i = 0; i < data.tickers.length; i += 1) {
-          const d = data.tickers[i]
-          // only include configured bases
-          if (targets[d.base]) {
-            // only include configured targets
-            if (targets[d.base].includes(d.target)) {
-              // ensure prices are not in "e" format
-              const price = scientificToDecimal(d.last).toString()
-
-              // standardise all prices to 10^18 for int calculations in smart contract
-              const priceInt = Web3.utils.toWei(price, "ether")
-
-              // convert returned time to unix epoch
-              const timestamp = Math.floor(Date.parse(d.timestamp) / 1000)
-
-              // generate standardised return data object
-              const td = {
-                base: d.base,
-                target: d.target,
-                pair: `${d.base}/${d.target}`,
-                price,
-                priceInt,
-                timestamp,
-              }
-              results.push(td)
-            }
-          }
-        }
-        // return the results to the caller
-        resolve(results)
-      })
-      .catch((err) => {
-        // return error to the caller
-        reject(err)
-      })
-  })
+const getPairData = (pair) => {
+  const base = pair.split("/", 1)[0]
+  const target = pair.split("/", 2)[1]
+  const apiPairName = `coin-${target.toLowerCase()}-${base.toLowerCase()}`
+  return { apiPairName, pair, base, target }
 }
 
+// Example "coin-usdt-ada",
+
+const orgExchangeData = async () => {
+  try {
+    const final = []
+    const pairList = []
+    const pairLookup = {}
+    for (let i = 0; i < filter.length; i += 1) {
+      const pairData = getPairData(filter[i])
+      pairList.push(pairData.apiPairName)
+      pairLookup[pairData.apiPairName] = pairData
+    }
+    for (let i = 0; i < filter.length; i += 1) {
+      const url = `https://api.bitforex.com/api/v1/market/ticker?symbol=${pairList[i]}`
+      console.log(new Date(), "get", url)
+      // eslint-disable-next-line no-await-in-loop
+      const response = await fetcher(url)
+      const base = pairLookup[pairList[i]].base
+      const target = pairLookup[pairList[i]].target
+      const price = scientificToDecimal(response.json.data.last).toString()
+      const priceInt = Web3.utils.toWei(price, "ether")
+      const timestamp = response.json.time
+      const td = {
+        base,
+        target,
+        pair: `${base}/${target}`,
+        price,
+        priceInt,
+        timestamp,
+      }
+      final.push(td)
+    }
+    return final
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+const getPrices = async () => {
+  console.log(await orgExchangeData())
+}
 module.exports = {
   getPrices,
 }
