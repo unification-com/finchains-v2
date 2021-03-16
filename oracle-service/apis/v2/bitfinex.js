@@ -6,8 +6,6 @@ const { scientificToDecimal, fetcher } = require("../../utils")
 const filter = [
   "ADA/UST",
   "ADA/BTC",
-  "BCHABC/USD",
-  "BCHN/USD",
   "BTC/UST",
   "BTC/USD",
   "EOS/UST",
