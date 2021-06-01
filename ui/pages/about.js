@@ -38,14 +38,6 @@ export default function About() {
                     Request Asset Addition
                   </a>
                 </p>
-
-                <p>
-                  Crypto data{" "}
-                  <a href="https://www.coingecko.com/api" rel="noreferrer" target="_blank">
-                    Powered by CoinGecko
-                  </a>
-                  .
-                </p>
               </Card.Body>
             </Card>
           </Col>
