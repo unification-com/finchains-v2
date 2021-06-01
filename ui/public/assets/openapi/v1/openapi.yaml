@@ -1,0 +1,997 @@
+openapi: 3.0.1
+info:
+  title: Finchains REST API
+  description: API specification for Finchains [https://crypto.finchains.io](https://crypto.finchains.io)
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+externalDocs:
+  description: Find out more about Finchains
+  url: http://docs.finchains.io
+servers:
+- url: https://api.finchains.io/v1
+tags:
+- name: pairs
+  description: Information regarding supported pairs
+- name: exchange
+  description: Information regarding exchanges used to source price data
+- name: currency
+  description: Price data for currency pairs
+- name: discrepancy
+  description: Discrepancy data for currency pairs
+paths:
+  /pairs:
+    get:
+      tags:
+      - pairs
+      summary: List supported currency pairs
+      description: Returns full list of currently supported currency base/target pairs
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pair'
+        500:
+          description: Server error
+          content: {}
+  /pairs/bases:
+    get:
+      tags:
+      - pairs
+      summary: List supported currency bases
+      description: Returns a list of currently supported base currencies, which can
+        be used in other endpoints
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                example:
+                - ETH
+                - BTC
+                items:
+                  type: string
+        500:
+          description: Server error
+          content: {}
+  /pairs/{base}:
+    get:
+      tags:
+      - pairs
+      summary: List supported targets
+      description: Returns a list of supported target currencies for given base currency
+      parameters:
+      - name: base
+        in: path
+        description: Base currency to query, e.g. ETH, BTC
+        required: true
+        schema:
+          type: string
+          example: BTC
+          
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                example:
+                - GBP
+                - USD
+                items:
+                  type: string
+        404:
+          description: Base not found
+          content: {}
+  /pairs/{base}/{target}/exchanges:
+    get:
+      tags:
+      - pairs
+      summary: get exchanges from which pair data is currently sourced
+      description: Returns an object with pair info
+      parameters:
+      - name: base
+        in: path
+        description: Base currency to query, e.g. ETH
+        required: true
+        schema:
+          type: string
+          example: BTC
+      - name: target
+        in: path
+        description: Target currency to query, e.g. GBP
+        required: true
+        schema:
+          type: string
+          example: GBP
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exchange'
+        404:
+          description: Base not found
+          content: {}
+  /exchange:
+    get:
+      tags:
+      - exchange
+      summary: get all exchanges
+      description: Returns all exchanges from which price data is currently sourced
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Exchange'
+  /exchange/{exchange}/pairs:
+    get:
+      tags:
+      - exchange
+      summary: currency pairs supported by exchange oracle
+      description: Returns a list of currency pairs currently monitored by this exchange's
+        oracle. These can be used when querying an exchange oracle's price data
+      parameters:
+      - name: exchange
+        in: path
+        description: exchange ID, e.g. binance
+        required: true
+        schema:
+          type: string
+          example: binance
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pair'
+  /exchange/{exchange}/bases:
+    get:
+      tags:
+      - exchange
+      summary: base currencies supported by exchange oracle
+      description: Returns a list of base currencies currently monitored by this exchange's
+        oracle. These can be used when querying an exchange oracle's price data
+      parameters:
+      - name: exchange
+        in: path
+        description: exchange ID, e.g. binance
+        required: true
+        schema:
+          type: string
+          example: binance
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                example:
+                - ETH
+                - BTC
+                items:
+                  type: string
+  /exchange/{exchange}/{base}/targets:
+    get:
+      tags:
+      - exchange
+      summary: tarrget currencies supported by exchange oracle
+      description: Returns a list of targets currencies currently monitored by this
+        exchange's oracle for the given base currency. These can be used when querying
+        an exchange oracle's price data
+      parameters:
+      - name: exchange
+        in: path
+        description: exchange ID, e.g. binance
+        required: true
+        schema:
+          type: string
+          example: binance
+      - name: base
+        in: path
+        description: base currency, e.g. BTC
+        required: true
+        schema:
+          type: string
+          example: BTC
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                example:
+                - GBP
+                - USD
+                items:
+                  type: string
+  /exchange/{exchange}/{base}/{target}:
+    get:
+      tags:
+      - exchange
+      summary: paginated pair price data
+      description: Returns a paginated list of data submitted to Finchains by the
+        exchange oracle, for the given exchange and currency pair
+      parameters:
+      - name: exchange
+        in: path
+        description: exchange ID, e.g. binance
+        required: true
+        schema:
+          type: string
+          example: binance
+      - name: base
+        in: path
+        description: base currency, e.g. BTC
+        required: true
+        schema:
+          type: string
+          example: BTC
+      - name: target
+        in: path
+        description: target currency, e.g. GBP
+        required: true
+        schema:
+          type: string
+          example: EUR
+      - name: page
+        in: query
+        schema:
+          type: integer
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalItems:
+                    type: integer
+                    example: 1234
+                  totalPages:
+                    type: integer
+                    example: 10
+                  currentPage:
+                    type: integer
+                    example: 2
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Price'
+  /exchange/{exchange}/{base}/{target}/discrepancy:
+    get:
+      tags:
+      - exchange
+      summary: paginated discrepancy data
+      description: Returns a paginated list of discrepancies and differences for prices
+        submitted by oracles within a similar timespan, for the given exchange and
+        currency pair
+      parameters:
+      - name: exchange
+        in: path
+        description: exchange ID, e.g. binance
+        required: true
+        schema:
+          type: string
+          example: binance
+      - name: base
+        in: path
+        description: base currency, e.g. BTC
+        required: true
+        schema:
+          type: string
+          example: BTC
+      - name: target
+        in: path
+        description: target currency, e.g. GBP
+        required: true
+        schema:
+          type: string
+          example: EUR
+      - name: page
+        in: query
+        schema:
+          type: integer
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalItems:
+                    type: integer
+                    example: 1234
+                  totalPages:
+                    type: integer
+                    example: 10
+                  currentPage:
+                    type: integer
+                    example: 2
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Discrepancy'
+  /currency/{base}/{target}:
+    get:
+      tags:
+      - currency
+      summary: paginated price data
+      description: Returns a paginated list of prices for the given currency pair,
+        with the most recent prices first
+      parameters:
+      - name: base
+        in: path
+        description: base currency, e.g. BTC
+        required: true
+        schema:
+          type: string
+          example: BTC
+      - name: target
+        in: path
+        description: target currency, e.g. GBP
+        required: true
+        schema:
+          type: string
+          example: GBP
+      - name: page
+        in: query
+        schema:
+          type: integer
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalItems:
+                    type: integer
+                    example: 1234
+                  totalPages:
+                    type: integer
+                    example: 10
+                  currentPage:
+                    type: integer
+                    example: 2
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Price'
+  /currency/{base}/{target}/latest:
+    get:
+      tags:
+      - currency
+      summary: latest price data
+      description: Returns a list of each oracles' latest price for the given currency
+        pair. One result per oracle returned. Data returned is dependent on which
+        oracles are watching the given pair
+      parameters:
+      - name: base
+        in: path
+        description: base currency, e.g. BTC
+        required: true
+        schema:
+          type: string
+          example: BTC
+      - name: target
+        in: path
+        description: target currency, e.g. GBP
+        required: true
+        schema:
+          type: string
+          example: GBP
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Price'
+  /currency/{base}/{target}/avg:
+    get:
+      tags:
+      - currency
+      summary: average price data
+      description: Returns average price over the past hour for the given pair. Statistical
+        outliers are not removed
+      parameters:
+      - name: base
+        in: path
+        description: base currency, e.g. BTC
+        required: true
+        schema:
+          type: string
+          example: BTC
+      - name: target
+        in: path
+        description: target currency, e.g. GBP
+        required: true
+        schema:
+          type: string
+          example: GBP
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Average'
+  /currency/{base}/{target}/avg/{time}:
+    get:
+      tags:
+      - currency
+      summary: average price data
+      description: Returns average price for the given pair over the given timespan.
+        Statistical outliers are not removed
+      parameters:
+      - name: base
+        in: path
+        description: base currency, e.g. BTC
+        required: true
+        schema:
+          type: string
+          example: BTC
+      - name: target
+        in: path
+        description: target currency, e.g. GBP
+        required: true
+        schema:
+          type: string
+          example: GBP
+      - name: time
+        in: path
+        description: timespan used to calculate average, e.g. 24H
+        required: true
+        schema:
+          type: string
+          enum:
+          - 5M
+          - 10M
+          - 30M
+          - 1H
+          - 2H
+          - 6H
+          - 12H
+          - 24H
+          - 48H
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Average'
+  /currency/{base}/{target}/avg/chauvenet:
+    get:
+      tags:
+      - currency
+      summary: average price data
+      description: Returns average price over the past hour for the given pair. Statistical
+        outliers are removed using the [Chauvenet criterion](https://en.wikipedia.org/wiki/Chauvenet%27s_criterion)
+      parameters:
+      - name: base
+        in: path
+        description: base currency, e.g. BTC
+        required: true
+        schema:
+          type: string
+          example: BTC
+      - name: target
+        in: path
+        description: target currency, e.g. GBP
+        required: true
+        schema:
+          type: string
+          example: GBP
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Average'
+  /currency/{base}/{target}/avg/chauvenet/{time}:
+    get:
+      tags:
+      - currency
+      summary: average price data
+      description: Returns average price over the given timespan for the given pair.
+        Statistical outliers are removed using the [Chauvenet criterion](https://en.wikipedia.org/wiki/Chauvenet%27s_criterion)
+      parameters:
+      - name: base
+        in: path
+        description: base currency, e.g. BTC
+        required: true
+        schema:
+          type: string
+          example: BTC
+      - name: target
+        in: path
+        description: target currency, e.g. GBP
+        required: true
+        schema:
+          type: string
+          example: GBP
+      - name: time
+        in: path
+        description: timespan used to calculate average, e.g. 24H
+        required: true
+        schema:
+          type: string
+          enum:
+          - 5M
+          - 10M
+          - 30M
+          - 1H
+          - 2H
+          - 6H
+          - 12H
+          - 24H
+          - 48H
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Average'
+  /currency/{base}/{target}/avg/chauvenet/{time}/{dmax}:
+    get:
+      tags:
+      - currency
+      summary: average price data
+      description: Returns average price over the given timespan for the given pair,
+        using the given maximum allowable deviation. Statistical outliers are removed
+        using the [Chauvenet criterion](https://en.wikipedia.org/wiki/Chauvenet%27s_criterion)
+      parameters:
+      - name: base
+        in: path
+        description: base currency, e.g. BTC
+        required: true
+        schema:
+          type: string
+          example: BTC
+      - name: target
+        in: path
+        description: target currency, e.g. GBP
+        required: true
+        schema:
+          type: string
+          example: GBP
+      - name: time
+        in: path
+        description: timespan used to calculate average, e.g. 24H
+        required: true
+        schema:
+          type: string
+          enum:
+          - 5M
+          - 10M
+          - 30M
+          - 1H
+          - 2H
+          - 6H
+          - 12H
+          - 24H
+          - 48H
+      - name: dmax
+        in: path
+        description: maximum allowable deviation, e.g. 2
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Average'
+  /currency/{base}/{target}/avg/iqd:
+    get:
+      tags:
+      - currency
+      summary: average price data
+      description: Returns average price over the past hour for the given pair. Statistical
+        outliers are removed using the [Median and Interquartile Deviation Method](http://www.mathwords.com/o/outlier.htm)
+      parameters:
+      - name: base
+        in: path
+        description: base currency, e.g. BTC
+        required: true
+        schema:
+          type: string
+          example: BTC
+      - name: target
+        in: path
+        description: target currency, e.g. GBP
+        required: true
+        schema:
+          type: string
+          example: GBP
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Average'
+  /currency/{base}/{target}/avg/iqd/{time}:
+    get:
+      tags:
+      - currency
+      summary: average price data
+      description: Returns average price over the given timespan for the given pair.
+        Statistical outliers are removed using the [Median and Interquartile Deviation
+        Method](http://www.mathwords.com/o/outlier.htm)
+      parameters:
+      - name: base
+        in: path
+        description: base currency, e.g. BTC
+        required: true
+        schema:
+          type: string
+          example: BTC
+      - name: target
+        in: path
+        description: target currency, e.g. GBP
+        required: true
+        schema:
+          type: string
+          example: GBP
+      - name: time
+        in: path
+        description: timespan used to calculate average, e.g. 24H
+        required: true
+        schema:
+          type: string
+          enum:
+          - 5M
+          - 10M
+          - 30M
+          - 1H
+          - 2H
+          - 6H
+          - 12H
+          - 24H
+          - 48H
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Average'
+  /currency/{base}/{target}/avg/peirce:
+    get:
+      tags:
+      - currency
+      summary: average price data
+      description: Returns average price over the past hour for the given pair. Statistical
+        outliers are removed using [Peirce's criterion](https://en.wikipedia.org/wiki/Peirce%27s_criterion)
+      parameters:
+      - name: base
+        in: path
+        description: base currency, e.g. BTC
+        required: true
+        schema:
+          type: string
+          example: BTC
+      - name: target
+        in: path
+        description: target currency, e.g. GBP
+        required: true
+        schema:
+          type: string
+          example: GBP
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Average'
+  /currency/{base}/{target}/avg/peirce/{time}:
+    get:
+      tags:
+      - currency
+      summary: average price data
+      description: Returns average price over the given timespan for the given pair.
+        Statistical outliers are removed using [Peirce's criterion](https://en.wikipedia.org/wiki/Peirce%27s_criterion)
+      parameters:
+      - name: base
+        in: path
+        description: base currency, e.g. BTC
+        required: true
+        schema:
+          type: string
+          example: BTC
+      - name: target
+        in: path
+        description: target currency, e.g. GBP
+        required: true
+        schema:
+          type: string
+          example: GBP
+      - name: time
+        in: path
+        description: timespan used to calculate average, e.g. 24H
+        required: true
+        schema:
+          type: string
+          enum:
+          - 5M
+          - 10M
+          - 30M
+          - 1H
+          - 2H
+          - 6H
+          - 12H
+          - 24H
+          - 48H
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Average'
+  /discrepancy/{base}/{target}:
+    get:
+      tags:
+      - discrepancy
+      summary: paginated discrepancy data
+      description: Returns a paginated list of discrepancies and differences for prices
+        submitted by oracles within a similar timespan, for the given currency pair
+      parameters:
+      - name: base
+        in: path
+        description: base currency, e.g. BTC
+        required: true
+        schema:
+          type: string
+          example: BTC
+      - name: target
+        in: path
+        description: target currency, e.g. GBP
+        required: true
+        schema:
+          type: string
+          example: GBP
+      - name: page
+        in: query
+        schema:
+          type: integer
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalItems:
+                    type: integer
+                    example: 1234
+                  totalPages:
+                    type: integer
+                    example: 10
+                  currentPage:
+                    type: integer
+                    example: 2
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Discrepancy'
+components:
+  schemas:
+    Average:
+      required:
+      - base
+      - outlierMethod
+      - pair
+      - price
+      - priceRaw
+      - target
+      - time
+      type: object
+      properties:
+        pair:
+          type: string
+          description: Pair name
+          example: BTC/USD
+        base:
+          type: string
+          description: Base currency
+          example: BTC
+        target:
+          type: string
+          description: Target currency
+          example: USD
+        time:
+          type: string
+          description: Timespan for which average was calculated
+          example: 1H
+        outlierMethod:
+          type: string
+          description: Statistical method used to remove outliers
+          example: iqd
+        price:
+          type: string
+          description: BigInt value, multiplied 10^18
+          example: "36593630000000000000000"
+        priceRaw:
+          type: number
+          description: Actual price
+          example: 36593.63
+        dMax:
+          type: integer
+          description: maximum allowable deviation used in Chauvenet criterion to
+            remove outliers
+          example: 3
+    Pair:
+      required:
+      - base
+      - name
+      - target
+      type: object
+      properties:
+        name:
+          type: string
+          description: Pair name
+          example: ETH/GBP
+        base:
+          type: string
+          description: Base currency
+          example: ETH
+        target:
+          type: string
+          description: Target currency
+          example: GBP
+    Exchange:
+      required:
+      - address
+      - exchange
+      - name
+      - tla
+      type: object
+      properties:
+        exchange:
+          type: string
+          description: Oracle name
+          example: binance
+        address:
+          type: string
+          description: Address of exchange oracle submitting to Finchains contract
+          example: 0x6b058D9c1ff569e3221d1DCb259077961DB4DD57
+        tla:
+          type: string
+          description: Three letter abbreviation for exchange
+          example: BNC
+        name:
+          type: string
+          description: Human readable name for exchange
+          example: Binance
+    Price:
+      type: object
+      properties:
+        price:
+          type: string
+          description: BigInt value, multiplied 10^18
+          example: "36593630000000000000000"
+        priceRaw:
+          type: string
+          description: Actual price
+          example: "36593.63"
+        timestamp:
+          type: string
+          description: Unix epoch of price submission by Oracle to Finchains
+          example: "1622547184"
+        Pair.name:
+          type: string
+          description: pair name
+          example: BTC/USD
+        Pair.base:
+          type: string
+          description: base currency name
+          example: BTC
+        Pair.target:
+          type: string
+          description: target currency name
+          example: USD
+        ExchangeOracle.exchange:
+          type: string
+          description: exchange oracle ID
+          example: gdax
+        ExchangeOracle.address:
+          type: string
+          description: exchange oracle's wallet address on Finchains
+          example: 0x08266a71F9964b326886ed9cc4f7CC9A847a29Eb
+        TxHash.txHash:
+          type: string
+          description: Finchains Tx hash in which prices was submitted to Finchains
+          example: 0x23c362127918fae9685183c03df95a12313dcc83f080991013aab69552a9d09a
+    Discrepancy:
+      type: object
+      properties:
+        price1:
+          type: string
+          description: BigInt value of price for Oracle 1, multiplied 10^18
+          example: "36727350000000000000000"
+        price2:
+          type: string
+          description: BigInt value of price for Oracle 2, multiplied 10^18
+          example: "36601480000000000000000"
+        diff:
+          type: string
+          description: BigInt diff between price1 and price2, multiplied 10^18
+          example: "79180000000000000000"
+        timestamp1:
+          type: string
+          description: Unix epoch of price submission by Oracle 1 to Finchains
+          example: "1622547542"
+        timestamp2:
+          type: string
+          description: Unix epoch of price submission by Oracle 2 to Finchains
+          example: "1622547427"
+        threshold:
+          type: string
+          description: BigInt value of threshold for which discrepancy event is emitted,
+            multiplied 10^18
+          example: "62266358832000000000"
+        Pair.name:
+          type: string
+          description: pair name
+          example: BTC/USD
+        Pair.base:
+          type: string
+          description: base currency name
+          example: BTC
+        Pair.target:
+          type: string
+          description: target currency name
+          example: USD
+        ExchangeOracle1.exchange:
+          type: string
+          description: exchange oracle 1 ID
+          example: gdax
+        ExchangeOracle1.address:
+          type: string
+          description: exchange oracle 1's wallet address on Finchains
+          example: 0x08266a71F9964b326886ed9cc4f7CC9A847a29Eb
+        ExchangeOracle2.exchange:
+          type: string
+          description: exchange oracle 2 ID
+          example: coinsbit
+        ExchangeOracle2.address:
+          type: string
+          description: exchange oracle2 's wallet address on Finchains
+          example: 0xaEd1013272eeb52fB6b04E768Ae868b8D47C0F68
+        TxHash.txHash:
+          type: string
+          description: Finchains Tx hash in which discrepancy was triggered
+          example: 0x23c362127918fae9685183c03df95a12313dcc83f080991013aab69552a9d09a

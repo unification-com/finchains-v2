@@ -16,7 +16,7 @@ export default function LatestPrices({ latestPrices }) {
             <Card.Header>
               <Card.Title>
                 <img
-                  src={`/img/${item["ExchangeOracle.exchange"]}.webp`}
+                  src={`/assets/img/${item["ExchangeOracle.exchange"]}.webp`}
                   alt={exchangeLookup(item["ExchangeOracle.exchange"])}
                   width={"20"}
                 />{" "}

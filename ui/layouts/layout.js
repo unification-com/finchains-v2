@@ -14,7 +14,7 @@ export default function Layout({ children }) {
         <meta property="og:title" content={siteTitle} key="title" />
         <meta name="keywords" content="Finchains, Crypto, Dashboard, Unification" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="shortcut icon" href="/img/favicon.ico" alt="tab-logo" />
+        <link rel="shortcut icon" href="/assets/img/favicon.ico" alt="tab-logo" />
         <meta name="description" content={siteTitle} />
         <title>{siteTitle}</title>
       </Head>

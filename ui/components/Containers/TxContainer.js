@@ -122,7 +122,7 @@ export default class TxContainer extends React.Component {
                       ) : (
                         <h3>
                           <Link href={`/exchange/${exchange}/${pair}`} as={`/exchange/${exchange}/${pair}`}>
-                            <img src={`/img/${exchange}.webp`} alt={exchangeLookup(exchange)} width={"30"} />
+                            <img src={`/assets/img/${exchange}.webp`} alt={exchangeLookup(exchange)} width={"30"} />
                           </Link>{" "}
                           <Link href={`/exchange/${exchange}/${pair}`} as={`/exchange/${exchange}/${pair}`}>
                             {exchangeLookup(exchange)}
@@ -177,7 +177,7 @@ export default class TxContainer extends React.Component {
                           <tr key={item["TxHash.txHash"]}>
                             <td>
                               <img
-                                src={`/img/${item["ExchangeOracle2.exchange"]}.webp`}
+                                src={`/assets/img/${item["ExchangeOracle2.exchange"]}.webp`}
                                 alt={exchangeLookup(item["ExchangeOracle2.exchange"])}
                                 width={"15"}
                               />{" "}

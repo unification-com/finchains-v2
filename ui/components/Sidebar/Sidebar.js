@@ -31,7 +31,7 @@ export default class Sidebar extends React.Component {
       <Link href={"/"}>
         <a>
           <div className="logo-img">
-            <img src="/img/finchains_logo3.png" alt="Finchains" />
+            <img src="/assets/img/finchains_logo3.png" alt="Finchains" />
           </div>
         </a>
       </Link>
@@ -94,7 +94,7 @@ export default class Sidebar extends React.Component {
               <li className={styles.powered_by}>
                 <NavLink to="https://unification.com" href="https://unification.com" target="_blank">
                   <img
-                    src="/img/POWERED_BY_UNIFICATION.png"
+                    src="/assets/img/POWERED_BY_UNIFICATION.png"
                     title={"Powered by Unification"}
                     alt={"Powered by Unification"}
                   />

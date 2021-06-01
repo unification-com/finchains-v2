@@ -178,7 +178,7 @@ export default class DashboardContainer extends React.Component {
                 ) : (
                   <h4>
                     <img
-                      src={`/img/${lastUpdate["ExchangeOracle.exchange"]}.webp`}
+                      src={`/assets/img/${lastUpdate["ExchangeOracle.exchange"]}.webp`}
                       alt={exchangeLookup(lastUpdate["ExchangeOracle.exchange"])}
                       width={"15"}
                     />{" "}
@@ -210,7 +210,7 @@ export default class DashboardContainer extends React.Component {
                 ) : (
                   <h5>
                     <img
-                      src={`/img/${lastDiscrepancy["ExchangeOracle1.exchange"]}.webp`}
+                      src={`/assets/img/${lastDiscrepancy["ExchangeOracle1.exchange"]}.webp`}
                       alt={exchangeLookup(lastDiscrepancy["ExchangeOracle1.exchange"])}
                       width={"15"}
                     />{" "}
@@ -224,7 +224,7 @@ export default class DashboardContainer extends React.Component {
                     />
                     <br />
                     <img
-                      src={`/img/${lastDiscrepancy["ExchangeOracle2.exchange"]}.webp`}
+                      src={`/assets/img/${lastDiscrepancy["ExchangeOracle2.exchange"]}.webp`}
                       alt={exchangeLookup(lastDiscrepancy["ExchangeOracle2.exchange"])}
                       width={"15"}
                     />{" "}
@@ -238,13 +238,13 @@ export default class DashboardContainer extends React.Component {
                     />
                     <br />
                     <img
-                      src={`/img/${lastDiscrepancy["ExchangeOracle1.exchange"]}.webp`}
+                      src={`/assets/img/${lastDiscrepancy["ExchangeOracle1.exchange"]}.webp`}
                       alt={exchangeLookup(lastDiscrepancy["ExchangeOracle1.exchange"])}
                       width={"15"}
                     />
                     {" / "}
                     <img
-                      src={`/img/${lastDiscrepancy["ExchangeOracle2.exchange"]}.webp`}
+                      src={`/assets/img/${lastDiscrepancy["ExchangeOracle2.exchange"]}.webp`}
                       alt={exchangeLookup(lastDiscrepancy["ExchangeOracle2.exchange"])}
                       width={"15"}
                     />{" "}
@@ -297,7 +297,7 @@ export default class DashboardContainer extends React.Component {
                                 as={`/exchange/${item["ExchangeOracle.exchange"]}/${item["Pair.name"]}`}
                               >
                                 <img
-                                  src={`/img/${item["ExchangeOracle.exchange"]}.webp`}
+                                  src={`/assets/img/${item["ExchangeOracle.exchange"]}.webp`}
                                   alt={exchangeLookup(item["ExchangeOracle.exchange"])}
                                   width={"15"}
                                 />
