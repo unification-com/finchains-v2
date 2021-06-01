@@ -79,7 +79,7 @@ export default class CurrencyUpdateTable extends React.Component {
                   </td>
                   <td>
                     <img
-                      src={`/img/${item["ExchangeOracle.exchange"]}.webp`}
+                      src={`/assets/img/${item["ExchangeOracle.exchange"]}.webp`}
                       alt={exchangeLookup(item["ExchangeOracle.exchange"])}
                       width={"15"}
                     />{" "}

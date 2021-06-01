@@ -191,7 +191,7 @@ export default class ExchangeContainer extends React.Component {
                         <h4>Loading</h4>
                       ) : (
                         <h4>
-                          <img src={`/img/${exchange}.webp`} alt={exchangeLookup(exchange)} width={"40"} />{" "}
+                          <img src={`/assets/img/${exchange}.webp`} alt={exchangeLookup(exchange)} width={"40"} />{" "}
                           <ExchangeSelect
                             url={"/exchange/"}
                             exchanges={exchanges}

@@ -83,7 +83,7 @@ export default class DiscrepancyTable extends React.Component {
                 <tr key={item["TxHash.txHash"]}>
                   <td>
                     <img
-                      src={`/img/${item["ExchangeOracle1.exchange"]}.webp`}
+                      src={`/assets/img/${item["ExchangeOracle1.exchange"]}.webp`}
                       alt={exchangeLookup(item["ExchangeOracle1.exchange"])}
                       width={"15"}
                     />{" "}
@@ -94,7 +94,7 @@ export default class DiscrepancyTable extends React.Component {
                   </td>
                   <td>
                     <img
-                      src={`/img/${item["ExchangeOracle2.exchange"]}.webp`}
+                      src={`/assets/img/${item["ExchangeOracle2.exchange"]}.webp`}
                       alt={exchangeLookup(item["ExchangeOracle2.exchange"])}
                       width={"15"}
                     />{" "}
