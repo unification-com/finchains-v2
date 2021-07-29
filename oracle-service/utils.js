@@ -1,5 +1,4 @@
 const fetch = require("isomorphic-unfetch")
-const { currencies } = require("./config")
 
 const scientificToDecimal = function (_num) {
   const nsign = Math.sign(_num)
@@ -57,6 +56,35 @@ const fetcher = (url) => {
   })
 }
 
+const trimDecimals = function (p) {
+  const pA = p.split(".")
+  let pDec = pA[1]
+  if (pDec.length > 18) {
+    pDec = pDec.substr(0, 18)
+  }
+  const pConv = `${pA[0]}.${pDec}`
+  return pConv
+}
+
+const unwrapToken = function (wrapped) {
+  let unwrapped
+  switch (wrapped) {
+    case "WETH":
+      unwrapped = "ETH"
+      break
+    case "WBTC":
+      unwrapped = "BTC"
+      break
+    case "WBNB":
+      unwrapped = "BNB"
+      break
+    default:
+      unwrapped = wrapped
+      break
+  }
+  return unwrapped
+}
+
 const sleepFor = (ms) => {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
@@ -65,4 +93,6 @@ module.exports = {
   scientificToDecimal,
   fetcher,
   sleepFor,
+  trimDecimals,
+  unwrapToken,
 }
