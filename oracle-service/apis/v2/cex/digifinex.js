@@ -1,67 +1,80 @@
 require("dotenv").config()
+const _ = require("lodash/core")
 const Web3 = require("web3")
-const { scientificToDecimal, fetcher } = require("../../utils")
+const { scientificToDecimal, fetcher } = require("../../../utils")
 
 const filter = [
+  "ADA/USDT",
+  "ATOM/BTC",
+  "ATOM/USDT",
   "BCH/BTC",
-  "BCH/USD",
-  "BTC/EUR",
-  "BTC/PAX",
-  "BTC/USD",
-  "BTC/USDC",
+  "BCH/USDT",
   "BTC/USDT",
+  "DOT/USDT",
   "EOS/BTC",
   "EOS/ETH",
   "EOS/USDT",
   "ETC/BTC",
   "ETC/ETH",
+  "ETC/USDT",
   "ETH/BTC",
-  "ETH/EUR",
-  "ETH/USD",
-  "ETH/USDC",
   "ETH/USDT",
-  "LINK/BTC",
-  "LINK/ETH",
+  "FUND/BTC",
+  "FUND/ETH",
+  "FUND/USDT",
   "LINK/USDT",
   "LTC/BTC",
-  "LTC/ETH",
-  "LTC/USD",
   "LTC/USDT",
+  "NEO/BTC",
+  "NEO/ETH",
+  "NEO/USDT",
   "TRX/BTC",
   "TRX/ETH",
   "TRX/USDT",
-  "XLM/BTC",
+  "XLM/USDT",
+  "XMR/BTC",
+  "XMR/USDT",
   "XRP/BTC",
+  "XRP/ETH",
+  "XRP/USDT",
 ]
 
 const getPairData = (pair) => {
   const base = pair.split("/", 1)[0]
   const target = pair.split("/", 2)[1]
-  const apiPairName = `${base}_${target}`
+  const apiPairName = `${base.toLowerCase()}_${target.toLowerCase()}`
   return { apiPairName, pair, base, target }
 }
 
 const getPrices = async () => {
   const final = []
   try {
-    const url = "https://coinsbit.io/api/v1/public/tickers"
-    // eslint-disable-next-line no-await-in-loop
+    const pairList = []
+    const pairLookup = {}
+    for (let i = 0; i < filter.length; i += 1) {
+      const pairData = getPairData(filter[i])
+      pairList.push(pairData.apiPairName)
+      pairLookup[pairData.apiPairName] = pairData
+    }
+
+    const url = "https://openapi.digifinex.com/v3/ticker"
+
     const response = await fetcher(url)
 
-    const res_arr = response.json.result
-
+    const timestamp = response.json.date
     for (let i = 0; i < filter.length; i += 1) {
       const pair = filter[i]
       const pairData = getPairData(pair)
       const base = pairData.base
       const target = pairData.target
 
-      if (res_arr[pairData.apiPairName]) {
-        const selection = res_arr[pairData.apiPairName]
-        const price = scientificToDecimal(selection.ticker.last).toString()
+      const d = _.find(Object.entries(response.json.ticker), function (o) {
+        return o[1].symbol === pairData.apiPairName
+      })
+
+      if (d) {
+        const price = scientificToDecimal(d[1].last).toString()
         const priceInt = Web3.utils.toWei(price, "ether")
-        // time already returned in unix epoch format
-        const timestamp = selection.at
 
         const td = {
           base,

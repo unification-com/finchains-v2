@@ -1,29 +1,28 @@
 require("dotenv").config()
 const _ = require("lodash/core")
 const Web3 = require("web3")
-const { scientificToDecimal, fetcher } = require("../../utils")
+const { scientificToDecimal, fetcher } = require("../../../utils")
 
 const filter = [
+  "ADA/BTC",
+  "ADA/USDT",
+  "ATOM/BTC",
   "ATOM/USDT",
   "BCH/BTC",
   "BCH/USDT",
+  "BTC/USDC",
   "BTC/USDT",
+  "DOT/USDT",
   "EOS/BTC",
-  "EOS/ETH",
   "EOS/USDT",
-  "ETC/BTC",
-  "ETC/USDT",
   "ETH/BTC",
   "ETH/USDT",
-  "FUND/BTC",
   "LINK/BTC",
   "LINK/USDT",
   "LTC/BTC",
   "LTC/USDT",
   "NEO/BTC",
   "NEO/USDT",
-  "TRX/BTC",
-  "TRX/USDT",
   "XLM/BTC",
   "XLM/USDT",
   "XRP/BTC",
@@ -33,39 +32,35 @@ const filter = [
 const getPairData = (pair) => {
   const base = pair.split("/", 1)[0]
   const target = pair.split("/", 2)[1]
-  const apiPairName = `${base}-${target}`
+  const apiPairName = `${base}_${target}`
   return { apiPairName, pair, base, target }
 }
 
 const getPrices = async () => {
   const final = []
   try {
-    const pairList = []
-    for (let i = 0; i < filter.length; i += 1) {
-      const pairData = getPairData(filter[i])
-      pairList.push(pairData.apiPairName)
-    }
-    const url = `https://api.probit.com/api/exchange/v1/ticker?market_ids=${pairList}`
-    // eslint-disable-next-line no-await-in-loop
+    const url = "https://uat-api.3ona.co/v2/public/get-ticker"
+
     const response = await fetcher(url)
+
     for (let i = 0; i < filter.length; i += 1) {
       const pair = filter[i]
       const pairData = getPairData(pair)
       const base = pairData.base
       const target = pairData.target
 
-      const d = _.find(Object.entries(response.json.data), function (o) {
-        return o[1].market_id === pairData.apiPairName
+      const d = _.find(Object.entries(response.json.result.data), function (o) {
+        return o[1].i === pairData.apiPairName
       })
 
       if (d) {
-        const price = scientificToDecimal(d[1].last).toString()
+        const price = scientificToDecimal(d[1].a).toString()
         const priceInt = Web3.utils.toWei(price, "ether")
-        const timestamp = Math.floor(Date.parse(d[1].time) / 1000)
+        const timestamp = Math.floor(parseInt(d[1].t, 10) / 1000)
         const td = {
           base,
           target,
-          pair: `${base}/${target}`,
+          pair,
           price,
           priceInt,
           timestamp,

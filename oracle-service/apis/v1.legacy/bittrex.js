@@ -2,7 +2,7 @@ require("dotenv").config()
 const Web3 = require("web3")
 const fetch = require("isomorphic-unfetch")
 const { scientificToDecimal } = require("../../utils")
-const { currencies } = require("../../config")
+const { currencies } = require("./config")
 
 // standardised function to get prices from an exchange's API
 const getPrices = () => {
