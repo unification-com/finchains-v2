@@ -73,6 +73,7 @@ const unwrapToken = function (wrapped) {
       unwrapped = "ETH"
       break
     case "WBTC":
+    case "BTCB":
       unwrapped = "BTC"
       break
     case "WBNB":

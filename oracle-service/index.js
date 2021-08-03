@@ -85,6 +85,7 @@ const runOracle = async () => {
 
 const testOracle = async (args) => {
   const exchanges = args[1]
+  const niceFormat = args[2]
   let exchangesArr
   const tasks = []
 
@@ -108,7 +109,11 @@ const testOracle = async (args) => {
             const price = data[j].price
             const priceInt = data[j].priceInt
             const ts = data[j].timestamp
-            console.log(pair, base, target, ts, price, priceInt)
+            if (niceFormat === "y") {
+              console.log(`${pair}: 1 ${base} = ${price} ${target}`)
+            } else {
+              console.log(pair, base, target, ts, price, priceInt)
+            }
           }
           console.log("-----", exchange, "done")
         })

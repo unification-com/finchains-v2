@@ -9,7 +9,8 @@ const TOKEN_1_PRICE = "token1Price"
 
 // DEXs use pair contract address in place of SYMBOL pairs
 const PAIRS = [
-  "0xc736ca3d9b1e90af4230bd8f9626528b3d4e0ee0", // WBNB/BabyDoge
+  "0xd171b26e4484402de70e3ea256be5a2630d7e88d", // WBTC/WETH
+  "0x16afc4f2ad82986bbe2a4525601f8199ab9c832d", // SUSHI/WETH
 ]
 
 // For each pair contract, this will return two reciprocal price objects
