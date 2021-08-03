@@ -1,70 +1,67 @@
 require("dotenv").config()
 const Web3 = require("web3")
-const { scientificToDecimal, fetcher, sleepFor } = require("../../utils")
+const { scientificToDecimal, fetcher, sleepFor } = require("../../../utils")
 
 const filter = [
+  "ADA/BTC",
   "ADA/USDT",
-  "BCH/EUR",
-  "BCH/GBP",
-  "BCH/USD",
+  "ATOM/BTC",
+  "ATOM/USDT",
+  "BCH/BTC",
   "BCH/USDT",
-  "BTC/EUR",
-  "BTC/GBP",
-  "BTC/USD",
-  "BTC/USDC",
   "BTC/USDT",
   "DOT/USDT",
+  "EOS/BTC",
   "EOS/ETH",
   "EOS/USDT",
-  "ETC/ETH",
-  "ETH/EUR",
-  "ETH/GBP",
-  "ETH/USD",
-  "ETH/USDC",
+  "ETC/BTC",
+  "ETC/USDT",
+  "ETH/BTC",
   "ETH/USDT",
+  "LINK/BTC",
   "LINK/ETH",
-  "LINK/EUR",
-  "LINK/USD",
   "LINK/USDT",
-  "LTC/ETH",
-  "LTC/EUR",
-  "LTC/GBP",
-  "LTC/USD",
+  "LTC/BTC",
   "LTC/USDT",
+  "NEO/BTC",
+  "NEO/USDT",
+  "TRX/BTC",
   "TRX/ETH",
-  "XLM/EUR",
-  "XLM/USD",
-  "XRP/ETH",
-  "XRP/EUR",
-  "XRP/GBP",
-  "XRP/USD",
+  "TRX/USDT",
+  "XLM/BTC",
+  "XLM/ETH",
+  "XLM/USDT",
+  "XMR/BTC",
+  "XMR/USDT",
+  "XRP/BTC",
   "XRP/USDT",
 ]
 
 const getPairData = (pair) => {
   const base = pair.split("/", 1)[0]
   const target = pair.split("/", 2)[1]
-  const apiPairName = `${base}${target}`
+  const apiPairName = `${base.toLowerCase()}${target.toLowerCase()}`
   return { apiPairName, pair, base, target }
 }
 
-// standardised function to get prices from an exchange's API
+// get data
 const getPrices = async () => {
   const final = []
   try {
+    // Iterate through filter array of pairs
     for (let i = 0; i < filter.length; i += 1) {
       const pair = filter[i]
       const pairData = getPairData(pair)
       const base = pairData.base
       const target = pairData.target
-      const url = `https://api.kraken.com/0/public/Ticker?pair=${pairData.apiPairName}`
+      const url = `https://api.huobi.pro/market/trade?symbol=${pairData.apiPairName}`
 
       // eslint-disable-next-line no-await-in-loop
       const response = await fetcher(url)
-      const res_pair = Object.keys(response.json.result)
-      const price = scientificToDecimal(response.json.result[res_pair].c[0]).toString()
+
+      const price = scientificToDecimal(response.json.tick.data[0].price).toString()
       const priceInt = Web3.utils.toWei(price, "ether")
-      const timestamp = Math.floor(Date.parse(response.date) / 1000)
+      const timestamp = Math.floor(parseInt(response.json.tick.data[0].ts, 10) / 1000)
       const td = {
         base,
         target,
@@ -76,8 +73,8 @@ const getPrices = async () => {
       final.push(td)
       await sleepFor(200)
     }
-  } catch (error) {
-    console.error(error)
+  } catch (err) {
+    console.error(err)
   }
   return final
 }

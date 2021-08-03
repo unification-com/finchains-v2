@@ -3,7 +3,6 @@ const Web3 = require("web3")
 const { addOracle, getLastSubmitTime, setThreshold, submitPrice } = require("../common/ethereum")
 
 const { exchangeApiLoader } = require("./apis")
-const { currencies } = require("./config")
 
 const API_V = process.env.EXCHANGE_API_V || "v2"
 console.log(new Date(), "using exchange API", API_V)
@@ -53,6 +52,10 @@ const runAddOracle = async (args) => {
 
 const runOracle = async () => {
   const { EXCHANGE, WALLET_ADDRESS } = process.env
+  if (exchangeApis[EXCHANGE] === undefined) {
+    console.log("exchange", `"${EXCHANGE}"`, "not supported in API", API_V)
+    process.exit(0)
+  }
   await exchangeApis[EXCHANGE].getPrices()
     .then(async (data) => {
       for (let i = 0; i < data.length; i += 1) {
@@ -82,6 +85,7 @@ const runOracle = async () => {
 
 const testOracle = async (args) => {
   const exchanges = args[1]
+  const niceFormat = args[2]
   let exchangesArr
   const tasks = []
 
@@ -93,24 +97,34 @@ const testOracle = async (args) => {
 
   for (let i = 0; i < exchangesArr.length; i += 1) {
     const exchange = exchangesArr[i]
-    const t = exchangeApis[exchange]
-      .getPrices()
-      .then(async (data) => {
-        for (let j = 0; j < data.length; j += 1) {
-          const pair = data[j].pair
-          const base = data[j].base
-          const target = data[j].target
-          const price = data[j].price
-          const ts = data[j].timestamp
-          console.log(exchange, pair, base, target, ts, price)
-        }
-        console.log(exchange, "done")
-      })
-      .catch((err) => {
-        console.error(new Date(), "ERROR:")
-        console.error(err)
-      })
-    tasks.push(t)
+    if (exchangeApis[exchange]) {
+      const t = exchangeApis[exchange]
+        .getPrices()
+        .then(async (data) => {
+          console.log("-----", exchange)
+          for (let j = 0; j < data.length; j += 1) {
+            const pair = data[j].pair
+            const base = data[j].base
+            const target = data[j].target
+            const price = data[j].price
+            const priceInt = data[j].priceInt
+            const ts = data[j].timestamp
+            if (niceFormat === "y") {
+              console.log(`${pair}: 1 ${base} = ${price} ${target}`)
+            } else {
+              console.log(pair, base, target, ts, price, priceInt)
+            }
+          }
+          console.log("-----", exchange, "done")
+        })
+        .catch((err) => {
+          console.error(new Date(), "ERROR:")
+          console.error(err)
+        })
+      tasks.push(t)
+    } else {
+      console.log("exchange", `"${exchange}"`, "not supported in API", API_V)
+    }
   }
 
   await Promise.all(tasks)
@@ -121,14 +135,6 @@ const listExchanges = () => {
   Object.keys(exchangeApis).forEach((exchange) => {
     console.log(exchange)
   })
-}
-
-const listWantedPairs = () => {
-  for (let i = 0; i < currencies.length; i += 1) {
-    for (let j = 0; j < currencies[i].targets.length; j += 1) {
-      console.log(`${currencies[i].sybmol}/${currencies[i].targets[j]}`)
-    }
-  }
 }
 
 const run = async () => {
@@ -150,9 +156,6 @@ const run = async () => {
       break
     case "list-exchanges":
       listExchanges()
-      break
-    case "list-pairs":
-      listWantedPairs()
       break
     default:
       console.log(new Date(), "nothing to do")

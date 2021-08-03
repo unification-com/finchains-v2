@@ -10,6 +10,18 @@ const exchangeLookup = (exchange) => {
       return "KuCoin"
     case "crypto_com":
       return "Crypto.com"
+    case "pancakeswap":
+      return "PancakeSwap"
+    case "quickswap":
+      return "QuickSwap"
+    case "shibaswap":
+      return "Shibaswap"
+    case "sushiswap":
+      return "SushiSwap"
+    case "uniswapv2":
+      return "Uniswap v2"
+    case "uniswapv3":
+      return "Uniswap v3"
     default:
       return exchange ? exchange.charAt(0).toUpperCase() + exchange.slice(1) : ""
   }
@@ -75,6 +87,30 @@ const exchageTlaLookup = [
   {
     exchange: "probit",
     tla: "PRB",
+  },
+  {
+    exchange: "pancakeswap",
+    tla: "PNK",
+  },
+  {
+    exchange: "quickswap",
+    tla: "QWK",
+  },
+  {
+    exchange: "shibaswap",
+    tla: "SHB",
+  },
+  {
+    exchange: "sushiswap",
+    tla: "SHS",
+  },
+  {
+    exchange: "uniswapv2",
+    tla: "UN2",
+  },
+  {
+    exchange: "uniswapv3",
+    tla: "UN3",
   },
 ]
 

@@ -1,7 +1,7 @@
 require("dotenv").config()
 const _ = require("lodash/core")
 const Web3 = require("web3")
-const { scientificToDecimal, fetcher } = require("../../utils")
+const { scientificToDecimal, fetcher } = require("../../../utils")
 
 const filter = [
   "ADA/BTC",
@@ -9,54 +9,60 @@ const filter = [
   "ATOM/BTC",
   "ATOM/USDT",
   "BCH/BTC",
+  "BCH/USDC",
   "BCH/USDT",
-  "BTC/USDC",
-  "BTC/USDT",
   "DOT/USDT",
   "EOS/BTC",
+  "EOS/ETH",
   "EOS/USDT",
+  "ETC/BTC",
+  "ETC/ETH",
+  "ETC/USDT",
   "ETH/BTC",
+  "ETH/USDC",
   "ETH/USDT",
   "LINK/BTC",
+  "LINK/ETH",
   "LINK/USDT",
   "LTC/BTC",
+  "LTC/ETH",
   "LTC/USDT",
   "NEO/BTC",
+  "NEO/ETH",
   "NEO/USDT",
+  "TRX/BTC",
+  "TRX/ETH",
+  "TRX/USDT",
   "XLM/BTC",
+  "XLM/ETH",
   "XLM/USDT",
+  "XMR/BTC",
+  "XMR/USDT",
   "XRP/BTC",
+  "XRP/ETH",
   "XRP/USDT",
 ]
-
-const getPairData = (pair) => {
-  const base = pair.split("/", 1)[0]
-  const target = pair.split("/", 2)[1]
-  const apiPairName = `${base}_${target}`
-  return { apiPairName, pair, base, target }
-}
 
 const getPrices = async () => {
   const final = []
   try {
-    const url = "https://uat-api.3ona.co/v2/public/get-ticker"
-
+    const url = `https://api.binance.com/api/v3/ticker/price`
     const response = await fetcher(url)
 
     for (let i = 0; i < filter.length; i += 1) {
       const pair = filter[i]
-      const pairData = getPairData(pair)
-      const base = pairData.base
-      const target = pairData.target
+      const pA = pair.split("/")
+      const base = pA[0]
+      const target = pA[1]
 
-      const d = _.find(Object.entries(response.json.result.data), function (o) {
-        return o[1].i === pairData.apiPairName
+      const d = _.find(Object.entries(response.json), function (o) {
+        return o[1].symbol === `${base}${target}`
       })
 
       if (d) {
-        const price = scientificToDecimal(d[1].a).toString()
+        const price = scientificToDecimal(d[1].price).toString()
         const priceInt = Web3.utils.toWei(price, "ether")
-        const timestamp = Math.floor(parseInt(d[1].t, 10) / 1000)
+        const timestamp = Math.floor(Date.parse(response.date) / 1000)
         const td = {
           base,
           target,
@@ -68,8 +74,9 @@ const getPrices = async () => {
         final.push(td)
       }
     }
-  } catch (err) {
-    console.error(err)
+  } catch (error) {
+    console.error(new Date(), "ERROR:")
+    console.error(error)
   }
   return final
 }
