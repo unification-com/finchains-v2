@@ -20,10 +20,10 @@ class DexSubgraph {
     })
   }
 
-  setGqlQuery(pairAddress) {
+  setGqlQuery(pairs) {
     this.query = gql`
 {
- ${this.queryEndpoint}(id: "${pairAddress}"){
+ ${this.queryEndpoint}(where: { id_in: ${JSON.stringify(pairs)} }){
      ${this.token0} {
        symbol
      }
@@ -37,16 +37,11 @@ class DexSubgraph {
 `
   }
 
-  extractData(baseKey, targetKey, priceKey) {
-    if (!this.retData) {
-      return null
-    }
-    const base = unwrapToken(this.retData.data[this.queryEndpoint][baseKey].symbol)
-    const target = unwrapToken(this.retData.data[this.queryEndpoint][targetKey].symbol)
+  static extractData(pairData, baseKey, targetKey, priceKey) {
+    const base = unwrapToken(pairData[baseKey].symbol)
+    const target = unwrapToken(pairData[targetKey].symbol)
     const pair = `${base}/${target}`
-    const price = trimDecimals(
-      scientificToDecimal(this.retData.data[this.queryEndpoint][priceKey]).toString(),
-    )
+    const price = trimDecimals(scientificToDecimal(pairData[priceKey]).toString())
     const priceInt = Web3.utils.toWei(price, "ether")
     const timestamp = Math.floor(new Date() / 1000)
 
@@ -60,53 +55,29 @@ class DexSubgraph {
     }
   }
 
-  async getData(pairAddress) {
-    const self = this
-    self.setGqlQuery(pairAddress)
-    self.retData = await self.client.query({ query: self.query, fetchPolicy: "no-cache" })
+  async getData(pairsToQuery) {
+    const pairs = []
+    this.setGqlQuery(pairsToQuery)
+    const retData = await this.client.query({ query: this.query, fetchPolicy: "no-cache" })
+
+    for (let i = 0; i < retData.data[this.queryEndpoint].length; i += 1) {
+      const pairData = retData.data[this.queryEndpoint][i]
+      const td0 = DexSubgraph.extractData(pairData, this.token0, this.token1, this.token1Price)
+      const td1 = DexSubgraph.extractData(pairData, this.token1, this.token0, this.token0Price)
+      pairs.push(td0)
+      pairs.push(td1)
+    }
+
     return new Promise((resolve, reject) => {
-      const td0 = self.extractData(self.token0, self.token1, self.token1Price)
-      const td1 = self.extractData(self.token1, self.token0, self.token0Price)
-      if (td0 && td1) {
-        resolve({ td0, td1 })
+      if (pairs.length > 0) {
+        resolve(pairs)
       } else {
-        reject(Error(`no data found for ${pairAddress}`))
+        reject(Error(`no data found for ${JSON.stringify(pairsToQuery)}`))
       }
     })
   }
 }
 
-const getDexPrices = async (pairs, queryUrl, queryEndpoint, token0, token0Price, token1, token1Price) => {
-  const awaitRes = []
-  const subql = new DexSubgraph(queryUrl, queryEndpoint, token0, token0Price, token1, token1Price)
-
-  for (let i = 0; i < pairs.length; i += 1) {
-    awaitRes.push(subql.getData(pairs[i]))
-  }
-
-  return new Promise((resolve, reject) => {
-    const final = []
-    Promise.all(awaitRes)
-      .then((response) => {
-        for (let i = 0; i < response.length; i += 1) {
-          const { td0, td1 } = response[i]
-          if (td0) {
-            final.push(td0)
-          }
-
-          if (td1) {
-            final.push(td1)
-          }
-        }
-        resolve(final)
-      })
-      .catch((error) => {
-        reject(error)
-      })
-  })
-}
-
 module.exports = {
   DexSubgraph,
-  getDexPrices,
 }
