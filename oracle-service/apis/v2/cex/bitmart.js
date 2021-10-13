@@ -8,13 +8,10 @@ const filter = [
   "BCH/BTC",
   "BCH/USDT",
   "BTC/USDT",
-  "BTC/PAX",
   "BTC/USDC",
   "EOS/USDT",
   "EOS/BTC",
   "ETC/USDT",
-  "ETC/BTC",
-  "ETC/ETH",
   "EOS/ETH",
   "DOT/USDT",
   "ETH/BTC",
@@ -34,9 +31,7 @@ const filter = [
   "XLM/USDT",
   "XLM/BTC",
   "XLM/ETH",
-  "XRP/BTC",
-  "XRP/USDT",
-  "XRP/ETH",
+  "SHIB/USDT",
 ]
 
 const getPairData = (pair) => {
