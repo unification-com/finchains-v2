@@ -41,6 +41,7 @@ const filter = [
   "XRP/BTC",
   "XRP/ETH",
   "XRP/USDT",
+  "SHIB/USDT",
 ]
 
 const getPrices = async () => {
