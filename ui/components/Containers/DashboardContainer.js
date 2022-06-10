@@ -217,11 +217,13 @@ export default class DashboardContainer extends React.Component {
                     {exchangeLookup(lastDiscrepancy["ExchangeOracle1.exchange"])}
                     {": "}
                     {lastDiscrepancy["Pair.name"]}{" "}
-                    <Currency
-                      currency={lastDiscrepancy["Pair.target"]}
-                      price={Web3.utils.fromWei(lastDiscrepancy.price1)}
-                      displaySymbol
-                    />
+                    {lastDiscrepancy.price1 && (
+                      <Currency
+                        currency={lastDiscrepancy["Pair.target"]}
+                        price={Web3.utils.fromWei(lastDiscrepancy.price1)}
+                        displaySymbol
+                      />
+                    )}
                     <br />
                     <img
                       src={`/assets/img/${lastDiscrepancy["ExchangeOracle2.exchange"]}.webp`}
@@ -231,11 +233,13 @@ export default class DashboardContainer extends React.Component {
                     {exchangeLookup(lastDiscrepancy["ExchangeOracle2.exchange"])}
                     {": "}
                     {lastDiscrepancy["Pair.name"]}{" "}
-                    <Currency
-                      currency={lastDiscrepancy["Pair.target"]}
-                      price={Web3.utils.fromWei(lastDiscrepancy.price2)}
-                      displaySymbol
-                    />
+                    {lastDiscrepancy.price2 && (
+                      <Currency
+                        currency={lastDiscrepancy["Pair.target"]}
+                        price={Web3.utils.fromWei(lastDiscrepancy.price2)}
+                        displaySymbol
+                      />
+                    )}
                     <br />
                     <img
                       src={`/assets/img/${lastDiscrepancy["ExchangeOracle1.exchange"]}.webp`}
@@ -249,11 +253,13 @@ export default class DashboardContainer extends React.Component {
                       width={"15"}
                     />{" "}
                     Diff:{" "}
-                    <Currency
-                      currency={lastDiscrepancy["Pair.target"]}
-                      price={Web3.utils.fromWei(lastDiscrepancy.diff)}
-                      displaySymbol
-                    />
+                    {lastDiscrepancy.diff && (
+                      <Currency
+                        currency={lastDiscrepancy["Pair.target"]}
+                        price={Web3.utils.fromWei(lastDiscrepancy.diff)}
+                        displaySymbol
+                      />
+                    )}
                   </h5>
                 )}
               </Card.Header>
