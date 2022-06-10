@@ -18,6 +18,7 @@ const PAIRS = [
   "0xce84867c3c02b05dc570d0135103d3fb9cc19433", // SUSHI/WETH
   "0xd3d2e2692501a5c9ca623199d38826e513033a17", // UNI/WETH
   "0x874376be8231dad99aabf9ef0767b3cc054c60ee", // LEASH/WETH
+  "0xdfc14d2af169b0d36c4eff567ada9b2e0cae044f", // AAVE/WETH
 ]
 // For each pair contract, this will return two reciprocal price objects
 // e.g. xFUND/WETH and WETH/xFUND
