@@ -31,11 +31,11 @@ const processWrkchainBlock = async (data) => {
     console.log(new Date(), "submit WRKChain hashes")
     try {
       const wrkchainInfo = await getWrkChainInfo()
-      if ("result" in wrkchainInfo) {
+      if ("wrkchain" in wrkchainInfo) {
         if (
-          parseInt(wrkchainInfo.result.wrkchain_id, 10) === parseInt(WRKCHAIN_ID, 10) &&
-          (blockHeight > parseInt(wrkchainInfo.result.lastblock, 10) ||
-            parseInt(wrkchainInfo.result.num_blocks, 10) === 0)
+          parseInt(wrkchainInfo.wrkchain.wrkchain_id, 10) === parseInt(WRKCHAIN_ID, 10) &&
+          (blockHeight > parseInt(wrkchainInfo.wrkchain.lastblock, 10) ||
+            parseInt(wrkchainInfo.wrkchain.num_blocks, 10) === 0)
         ) {
           console.log(new Date(), "height", blockHeight, "hash", hash, "parentHash", parentHash)
           const now = new Date()
