@@ -36,9 +36,12 @@ const submitWrkChainHash = async (height, blockHash, parentHash) => {
       250000,
     )
 
-    if (subRes.status === 200) {
-      return subRes.result.txhash
+    if (subRes.tx_response) {
+      if(parseInt(subRes.tx_response.code, 10) === 0) {
+        return subRes.tx_response.txhash
+      }
     }
+    
     console.log("WRKCHAIN ERROR")
     console.log(subRes)
     return ""
