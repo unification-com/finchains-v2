@@ -32,6 +32,7 @@ const filter = [
   "XLM/BTC",
   "XLM/ETH",
   "SHIB/USDT",
+  "BONE/USDT",
 ]
 
 const getPairData = (pair) => {
