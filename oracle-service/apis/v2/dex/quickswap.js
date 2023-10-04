@@ -1,6 +1,6 @@
 const { DexSubgraph } = require("./dexsubgraph")
 
-const QL_URL = "https://api.thegraph.com/subgraphs/name/sameepsi/quickswap05"
+const QL_URL = "https://api.thegraph.com/subgraphs/name/sameepsi/quickswap06"
 const QL_ENDPOINT = "pairs"
 const TOKEN_0 = "token0"
 const TOKEN_0_PRICE = "token0Price"
