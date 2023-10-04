@@ -19,6 +19,7 @@ const PAIRS = [
   "0x9d406c4067a53f65de1a8a9273d55bfea5870a75", // UNI/WETH
   "0x57654ae132413e81459ad2ae70c2570a9b89fb53", // LEASH/WETH
   "0x98c2b0681d8bf07767826ea8bd3b11b0ca421631", // SHIB/USDT
+  "0xefb47fcfcad4f96c83d4ca676842fb03ef20a477", // BONE/WETH
 ]
 
 // For each pair contract, this will return two reciprocal price objects

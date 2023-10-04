@@ -36,6 +36,7 @@ const filter = [
   "XRP/BTC",
   "XRP/USDT",
   "SHIB/USDT",
+  "BONE/USDT",
 ]
 
 const getPairData = (pair) => {
