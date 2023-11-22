@@ -10,9 +10,7 @@ const filter = [
   "BTC/USDT",
   "BTC/USDC",
   "EOS/USDT",
-  "EOS/BTC",
   "ETC/USDT",
-  "EOS/ETH",
   "DOT/USDT",
   "ETH/BTC",
   "ETH/USDT",
@@ -23,7 +21,6 @@ const filter = [
   "LTC/BTC",
   "LTC/ETH",
   "NEO/USDT",
-  "NEO/BTC",
   "NEO/ETH",
   "TRX/BTC",
   "TRX/USDT",
@@ -49,15 +46,15 @@ const getPrices = async () => {
     const pair = filter[i]
     const pairData = getPairData(pair)
     try {
-      const url = `https://openapi.bitmart.com/v2/ticker?symbol=${pairData.apiPairName}`
+      const url = `https://api-cloud.bitmart.com/spot/quotation/v3/ticker?symbol=${pairData.apiPairName}`
 
       // eslint-disable-next-line no-await-in-loop
       const response = await fetcher(url)
       const base = pairData.base
       const target = pairData.target
-      const price = scientificToDecimal(response.json.current_price).toString()
+      const price = scientificToDecimal(response.json.data.last).toString()
       const priceInt = Web3.utils.toWei(price, "ether")
-      const timestamp = Math.floor(Date.parse(response.date) / 1000)
+      const timestamp = parseInt(response.json.data.ts, 10)
       const td = {
         base,
         target,
@@ -70,7 +67,7 @@ const getPrices = async () => {
     } catch (err) {
       console.error(err)
     }
-    await sleepFor(200)
+    await sleepFor(300)
   }
   return final
 }
