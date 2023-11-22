@@ -28,6 +28,7 @@ const filter = [
   "XRP/BTC",
   "XRP/USDT",
   "BONE/USDT",
+  "BONE/USD",
 ]
 
 const getPairData = (pair) => {
@@ -40,7 +41,7 @@ const getPairData = (pair) => {
 const getPrices = async () => {
   const final = []
   try {
-    const url = "https://uat-api.3ona.co/v2/public/get-ticker"
+    const url = "https://api.crypto.com/v2/public/get-ticker"
 
     const response = await fetcher(url)
 
