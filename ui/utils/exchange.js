@@ -28,6 +28,8 @@ const exchangeLookup = (exchange) => {
       return "Bitget"
     case "biconomy":
       return "Biconomy"
+    case "okc":
+      return "OKX"
     default:
       return exchange ? exchange.charAt(0).toUpperCase() + exchange.slice(1) : ""
   }
@@ -129,6 +131,10 @@ const exchageTlaLookup = [
   {
     exchange: "biconomy",
     tla: "BIC",
+  },
+  {
+    exchange: "okx",
+    tla: "OKX",
   },
 ]
 
