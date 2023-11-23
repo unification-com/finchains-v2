@@ -22,6 +22,10 @@ const exchangeLookup = (exchange) => {
       return "Uniswap v2"
     case "uniswapv3":
       return "Uniswap v3"
+    case "mexc":
+      return "MEXC"
+    case "bitget":
+      return "Bitget"
     default:
       return exchange ? exchange.charAt(0).toUpperCase() + exchange.slice(1) : ""
   }
@@ -111,6 +115,14 @@ const exchageTlaLookup = [
   {
     exchange: "uniswapv3",
     tla: "UN3",
+  },
+  {
+    exchange: "mexc",
+    tla: "MEX",
+  },
+  {
+    exchange: "bitget",
+    tla: "BTG",
   },
 ]
 
