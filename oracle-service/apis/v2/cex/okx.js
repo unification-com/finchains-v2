@@ -17,13 +17,14 @@ const filter = [
   "TRX/USDT",
   "SHIB/USDT",
   "BONE/USDT",
+  "LEASH/USDT",
   "ADA/USDT",
 ]
 
 const getPairData = (pair) => {
   const base = pair.split("/", 1)[0]
   const target = pair.split("/", 2)[1]
-  const apiPairName = `${base}_${target}`
+  const apiPairName = `${base}-${target}`
   return { apiPairName, pair, base, target }
 }
 
@@ -37,14 +38,14 @@ const getPrices = async () => {
     }
 
     // generate query URL
-    const url = `https://www.biconomy.com/api/v1/tickers`
+    const url = `https://www.okx.com/api/v5/market/tickers?instType=SPOT`
     const response = await fetcher(url)
 
     for (let i = 0; i < filter.length; i += 1) {
       const pair = filter[i]
       const pairData = getPairData(pair)
-      const d = _.find(response.json.ticker, function (o) {
-        return o.symbol === pairData.apiPairName
+      const d = _.find(response.json.data, function (o) {
+        return o.instId === pairData.apiPairName
       })
 
       if (d) {
@@ -52,7 +53,7 @@ const getPrices = async () => {
         const target = pairData.target
         const price = scientificToDecimal(d.last).toString()
         const priceInt = Web3.utils.toWei(price, "ether")
-        const timestamp = Math.floor(parseInt(response.json.timestamp, 10) / 1000)
+        const timestamp = Math.floor(parseInt(d.ts, 10) / 1000)
         const td = {
           base,
           target,
