@@ -68,7 +68,10 @@ handler.get(async (req, res) => {
       }
       req.dbModels.CurrencyUpdates.findAll({
         attributes: ["priceRaw"],
-        include: [{ model: req.dbModels.Pairs, attributes: ["name"], where: { base, target } }],
+        include: [
+          { model: req.dbModels.Pairs, attributes: ["name"], where: { base, target } },
+          { model: req.dbModels.ExchangeOracles, attributes: ["exchange"] },
+        ],
         where: {
           timestamp: {
             [Op.gte]: tsQuery,
@@ -80,20 +83,26 @@ handler.get(async (req, res) => {
         order: [["timestamp", "DESC"]],
       })
         .then(function (cData) {
+          const exchangesUsed = []
+
           const dataRet = {
             base,
             target,
             time,
             pair: `${base}/${target}`,
-            exchanges,
             exchange_type: "cex",
           }
 
           const dataSet = []
           for (let i = 0; i < cData.length; i += 1) {
             dataSet.push(Number(cData[i].priceRaw))
+
+            if (!exchangesUsed.includes(cData[i].ExchangeOracle.exchange)) {
+              exchangesUsed.push(cData[i].ExchangeOracle.exchange)
+            }
           }
           dataRet.prices = dataSet
+          dataRet.exchanges = exchangesUsed
           res.json(dataRet)
         })
         .catch((err) => {
