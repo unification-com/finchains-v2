@@ -11,6 +11,8 @@ handler.get(async (req, res) => {
     query: { base, target, time },
   } = req
 
+  const exchanges = req.exchanges.cexs.concat(req.exchanges.dexs)
+
   const d = new Date()
   const ts = Math.floor(d / 1000)
 
@@ -61,16 +63,19 @@ handler.get(async (req, res) => {
     },
     order: [["timestamp", "DESC"]],
   })
-    .then(function (data) {
+    .then(function (cData) {
       const dataRet = {
         base,
         target,
-        time: "1H",
+        time,
         pair: `${base}/${target}`,
+        exchanges,
+        exchange_type: "both",
       }
+
       const dataSet = []
-      for (let i = 0; i < data.length; i += 1) {
-        dataSet.push(Number(data[i].priceRaw))
+      for (let i = 0; i < cData.length; i += 1) {
+        dataSet.push(Number(cData[i].priceRaw))
       }
       dataRet.prices = dataSet
       res.json(dataRet)
