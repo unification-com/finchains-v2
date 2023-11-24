@@ -11,6 +11,8 @@ const WrkchainBlocks = require("../../common/db/models/wrkchainblocks")(sequeliz
 const ExchangePairs = require("../../common/db/models/exchangepairs")(sequelize, Sequelize.DataTypes)
 const TxHashes = require("../../common/db/models/txhashes")(sequelize, Sequelize.DataTypes)
 
+const { cexExchanges, dexExchanges } = require("../../common/exchanges")
+
 const dbModels = {
   CurrencyUpdates,
   Discrepancies,
@@ -33,8 +35,14 @@ async function db(req, res, next) {
   return next()
 }
 
+async function exchanges(req, res, next) {
+  req.exchanges = { cexs: cexExchanges, dexs: dexExchanges }
+  return next()
+}
+
 const middleware = nextConnect()
 
 middleware.use(db)
+middleware.use(exchanges)
 
 export default middleware
