@@ -19,6 +19,7 @@ const cexExchanges = [
   "bitfinex",
   "binance",
   "poloniex",
+  "xt_com",
 ]
 
 const dexExchanges = ["uniswapv3", "uniswapv2", "sushiswap", "shibaswap", "quickswap", "pancakeswap"]

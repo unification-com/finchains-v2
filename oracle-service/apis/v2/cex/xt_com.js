@@ -4,7 +4,6 @@ const Web3 = require("web3")
 const { scientificToDecimal, fetcher } = require("../../../utils")
 
 const filter = [
-  "ADA/BTC",
   "ADA/USDT",
   "ATOM/BTC",
   "ATOM/USDT",
@@ -28,7 +27,6 @@ const filter = [
   "XRP/BTC",
   "XRP/USDT",
   "BONE/USDT",
-  "SHIB/USDC",
   "SHIB/USDT",
   "FUND/USDT",
 ]
@@ -36,14 +34,14 @@ const filter = [
 const getPairData = (pair) => {
   const base = pair.split("/", 1)[0]
   const target = pair.split("/", 2)[1]
-  const apiPairName = `${base}${target}`
+  const apiPairName = `${base.toLowerCase()}_${target.toLowerCase()}`
   return { apiPairName, pair, base, target }
 }
 
 const getPrices = async () => {
   const final = []
   try {
-    const url = "https://api.mexc.com/api/v3/ticker/24hr"
+    const url = "https://sapi.xt.com/v4/public/ticker/price"
 
     const response = await fetcher(url)
 
@@ -53,14 +51,14 @@ const getPrices = async () => {
       const base = pairData.base
       const target = pairData.target
 
-      const d = _.find(response.json, function (o) {
-        return o.symbol === pairData.apiPairName
+      const d = _.find(response.json.result, function (o) {
+        return o.s === pairData.apiPairName
       })
 
       if (d) {
-        const price = scientificToDecimal(d.lastPrice).toString()
+        const price = scientificToDecimal(d.p).toString()
         const priceInt = Web3.utils.toWei(price, "ether")
-        const timestamp = Math.floor(Date.now() / 1000)
+        const timestamp = Math.floor(d.t / 1000)
         const td = {
           base,
           target,
