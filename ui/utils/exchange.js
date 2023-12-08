@@ -32,6 +32,8 @@ const exchangeLookup = (exchange) => {
       return "OKX"
     case "poloniex":
       return "Poloniex"
+    case "xt_com":
+      return "XT.com"
     default:
       return exchange ? exchange.charAt(0).toUpperCase() + exchange.slice(1) : ""
   }
@@ -141,6 +143,10 @@ const exchageTlaLookup = [
   {
     exchange: "poloniex",
     tla: "PLX",
+  },
+  {
+    exchange: "xt_com",
+    tla: "XTC",
   },
 ]
 
