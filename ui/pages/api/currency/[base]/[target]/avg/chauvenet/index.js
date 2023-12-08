@@ -16,6 +16,7 @@ handler.get(async (req, res) => {
 
   const d = new Date()
   const ts = Math.floor(d / 1000)
+  const dMax = 2 // default to 2
 
   const tsQuery = ts - 3600
 
@@ -34,7 +35,7 @@ handler.get(async (req, res) => {
         target,
         time: "1H",
         pair: `${base}/${target}`,
-        dMax: 3,
+        dMax,
         outlierMethod: "chauvenet",
       }
       const dataSet = []
@@ -42,7 +43,7 @@ handler.get(async (req, res) => {
         for (let i = 0; i < data.length; i += 1) {
           dataSet.push(Number(data[i].priceRaw))
         }
-        const outliersRemoved = removeOutliersChauvenet(dataSet)
+        const outliersRemoved = removeOutliersChauvenet(dataSet, dMax)
         const stats = getStats(outliersRemoved)
         const mean = cleanseForBn(stats.mean)
         dataRet.price = Web3.utils.toWei(String(mean), "ether")
